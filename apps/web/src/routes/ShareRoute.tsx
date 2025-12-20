@@ -16,6 +16,7 @@ export default function ShareRoute() {
   const [error, setError] = useState<string | null>(null);
   const [graphTitle, setGraphTitle] = useState<string>("Shared graph");
   const [payload, setPayload] = useState<GraphPayload | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(
     null
   );
@@ -31,14 +32,44 @@ export default function ShareRoute() {
       try {
         const shared = await getSharedGraph(token);
         if (!shared || ignore) {
+          setDebugInfo(
+            JSON.stringify(
+              { token, shared, message: "RPC returned no rows" },
+              null,
+              2
+            )
+          );
           setError("This share link is invalid or expired.");
           return;
         }
         const data = shared.data as GraphPayload | undefined;
         setGraphTitle(shared.title || "Shared graph");
         setPayload({ nodes: data?.nodes ?? [], edges: data?.edges ?? [] });
+        setDebugInfo(
+          JSON.stringify(
+            {
+              token,
+              id: shared.id,
+              title: shared.title,
+              nodes: data?.nodes?.length ?? 0,
+              edges: data?.edges?.length ?? 0,
+            },
+            null,
+            2
+          )
+        );
       } catch (err) {
         if (!ignore) {
+          setDebugInfo(
+            JSON.stringify(
+              {
+                token,
+                error: err instanceof Error ? err.message : err,
+              },
+              null,
+              2
+            )
+          );
           setError(err instanceof Error ? err.message : "Unable to load share link");
         }
       } finally {
@@ -107,6 +138,11 @@ export default function ShareRoute() {
             ) : null}
           </div>
         )}
+        {debugInfo ? (
+          <pre className="mt-4 overflow-auto rounded-lg border border-slate-200 bg-white p-4 text-xs text-slate-600">
+            {debugInfo}
+          </pre>
+        ) : null}
       </div>
     </div>
   );
