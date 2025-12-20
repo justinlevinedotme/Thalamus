@@ -1,0 +1,23 @@
+#!/bin/sh
+
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Types and scopes must match commitlint.config.js
+types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix"
+scopes="deps|config|ui|backend|frontend|docs|build|ci|tests|release"
+
+# Branch naming pattern: type/scope/description or type/description (scope optional)
+# Examples: feat/ui/add-button, fix/auth-bug, chore/update-deps
+pattern="^($types)/($scopes)/[a-z0-9-]+$|^($types)/[a-z0-9-]+$|^(main|master|develop)$"
+
+if ! echo "$branch" | grep -qE "$pattern"; then
+  echo "❌ Branch name '$branch' doesn't match the required pattern."
+  echo ""
+  echo "Valid formats:"
+  echo "  type/scope/description  →  feat/ui/add-button"
+  echo "  type/description        →  fix/auth-bug"
+  echo ""
+  echo "Types:  $types"
+  echo "Scopes: $scopes (optional)"
+  exit 1
+fi
