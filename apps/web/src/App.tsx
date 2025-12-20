@@ -1,11 +1,26 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import EditorRoute from "./routes/EditorRoute";
+import DocsRoute from "./routes/DocsRoute";
+import LoginRoute from "./routes/LoginRoute";
+import SignupRoute from "./routes/SignupRoute";
+import { useAuthStore } from "./store/authStore";
 
 export default function App() {
+  const initialize = useAuthStore((state) => state.initialize);
+
+  useEffect(() => {
+    void initialize();
+  }, [initialize]);
+
   return (
     <Routes>
-      <Route path="/" element={<EditorRoute />} />
+      <Route path="/" element={<Navigate to="/docs" replace />} />
+      <Route path="/docs" element={<DocsRoute />} />
+      <Route path="/docs/:graphId" element={<EditorRoute />} />
+      <Route path="/login" element={<LoginRoute />} />
+      <Route path="/signup" element={<SignupRoute />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

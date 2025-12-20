@@ -1,11 +1,24 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import { Input } from "../../components/ui/input";
 import { exportGraphPdf, exportGraphPng } from "../../lib/exportImage";
 import { exportGraphJson } from "../../lib/exportJson";
 import { useGraphStore } from "../../store/graphStore";
 
-export default function EditorToolbar() {
+type EditorToolbarProps = {
+  canSave: boolean;
+  onSave: () => Promise<void>;
+  onShare: () => void;
+  saveStatus?: "idle" | "saving" | "saved" | "error";
+};
+
+export default function EditorToolbar({
+  canSave,
+  onSave,
+  onShare,
+  saveStatus = "idle",
+}: EditorToolbarProps) {
   const { graphTitle, setGraphTitle, nodes, edges } = useGraphStore();
   const [exporting, setExporting] = useState<"png" | "pdf" | null>(null);
 
@@ -64,15 +77,24 @@ export default function EditorToolbar() {
         <button
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50"
           type="button"
+          onClick={onSave}
+          disabled={!canSave || saveStatus === "saving"}
         >
-          Save
+          {saveStatus === "saving" ? "Saving..." : "Save"}
         </button>
         <button
-          className="rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white transition hover:bg-slate-800"
+          className="rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
           type="button"
+          onClick={onShare}
+          disabled={!canSave}
         >
           Share
         </button>
+        {!canSave ? (
+          <Link className="text-xs text-slate-500 underline" to="/login">
+            Sign in to save
+          </Link>
+        ) : null}
       </div>
     </header>
   );
