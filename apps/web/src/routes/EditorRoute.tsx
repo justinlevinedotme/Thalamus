@@ -6,6 +6,7 @@ import GraphCanvas from "../features/editor/GraphCanvas";
 import RelationshipInspector from "../features/editor/RelationshipInspector";
 import NodeSearch from "../features/search/NodeSearch";
 import { getGraph, updateGraph, createGraph } from "../features/cloud/graphApi";
+import ShareDialog from "../features/share/ShareDialog";
 import { useAuthStore } from "../store/authStore";
 import { useGraphStore } from "../store/graphStore";
 
@@ -18,6 +19,8 @@ export default function EditorRoute() {
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const canSave = Boolean(user);
@@ -72,12 +75,25 @@ export default function EditorRoute() {
     }
   };
 
+  const handleShare = () => {
+    if (!user) {
+      setShareMessage("Sign in to share this graph.");
+      return;
+    }
+    if (!graphId) {
+      setShareMessage("Save the graph before creating a share link.");
+      return;
+    }
+    setShareMessage(null);
+    setShareOpen(true);
+  };
+
   return (
     <div className="flex h-screen flex-col bg-slate-50">
       <EditorToolbar
         canSave={canSave}
         onSave={handleSave}
-        onShare={() => {}}
+        onShare={handleShare}
         saveStatus={saveStatus}
       />
       <div className="flex flex-1 gap-4 overflow-hidden p-4">
@@ -100,8 +116,18 @@ export default function EditorRoute() {
               {loadError}
             </div>
           ) : null}
+          {shareMessage ? (
+            <div className="rounded-lg border border-amber-200 bg-white p-4 text-sm text-amber-700">
+              {shareMessage}
+            </div>
+          ) : null}
         </aside>
       </div>
+      <ShareDialog
+        open={shareOpen}
+        graphId={graphId}
+        onClose={() => setShareOpen(false)}
+      />
     </div>
   );
 }
