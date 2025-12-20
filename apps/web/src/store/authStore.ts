@@ -15,6 +15,7 @@ type AuthState = {
   signInWithProvider: (provider: Provider) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  setError: (message?: string) => void;
 };
 
 let initialized = false;
@@ -96,4 +97,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await supabase.auth.signOut();
     set({ session: null, user: null, status: "unauthenticated" });
   },
+  setError: (message) => set({ error: message }),
 }));

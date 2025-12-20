@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { Input } from "../components/ui/input";
 import { useAuthStore } from "../store/authStore";
 
 export default function SignupRoute() {
-  const { signUp, signInWithProvider, status, error } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { signUp, signInWithProvider, status, error, setError } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -15,6 +17,16 @@ export default function SignupRoute() {
     await signUp(email, password);
     setSubmitted(true);
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const oauthError =
+      params.get("error_description") ?? params.get("error");
+    if (oauthError) {
+      setError(oauthError.replace(/\+/g, " "));
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.pathname, location.search, navigate, setError]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
