@@ -28,11 +28,20 @@ export async function getSharedGraph(token: string) {
     throw new Error(error.message);
   }
 
-  if (!data || data.length === 0) {
+  if (!data) {
     return null;
   }
 
-  return data[0] as {
+  if (Array.isArray(data)) {
+    return (data[0] ?? null) as {
+      id: string;
+      title: string;
+      data: unknown;
+      updated_at: string;
+    } | null;
+  }
+
+  return data as {
     id: string;
     title: string;
     data: unknown;
