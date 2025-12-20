@@ -18,6 +18,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/docs" replace />} />
       <Route path="/docs" element={<DocsRoute />} />
+      <Route path="/editor" element={<EditorRoute />} />
       <Route path="/docs/:graphId" element={<EditorRoute />} />
       <Route path="/login" element={<LoginRoute />} />
       <Route path="/signup" element={<SignupRoute />} />
