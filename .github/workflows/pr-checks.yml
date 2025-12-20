@@ -1,3 +1,6 @@
+# .github/workflows/pr-checks.yml
+# GitHub Actions workflow to enforce commit message and branch naming conventions on pull requests.
+# This workflow runs on pull requests targeting the main, master, or develop branches.
 name: PR Checks
 
 on:
@@ -31,18 +34,15 @@ jobs:
         run: |
           branch="${{ github.head_ref }}"
           types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix"
-          scopes="deps|config|ui|backend|frontend|docs|build|ci|tests|release"
-          pattern="^($types)/($scopes)/[a-z0-9-]+$|^($types)/[a-z0-9-]+$"
+          pattern="^($types)/[a-z0-9-]+$"
 
           if ! echo "$branch" | grep -qE "$pattern"; then
             echo "❌ Branch name '$branch' doesn't match the required pattern."
             echo ""
-            echo "Valid formats:"
-            echo "  type/scope/description  →  feat/ui/add-button"
-            echo "  type/description        →  fix/auth-bug"
+            echo "Valid format:"
+            echo "  type/description  →  feat/add-button, fix/auth-bug"
             echo ""
-            echo "Types:  $types"
-            echo "Scopes: $scopes (optional)"
+            echo "Types: $types"
             exit 1
           fi
           echo "✓ Branch name '$branch' is valid"
