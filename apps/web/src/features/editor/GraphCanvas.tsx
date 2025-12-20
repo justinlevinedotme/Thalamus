@@ -102,7 +102,7 @@ export default function GraphCanvas() {
   }, [nodes, reactFlowInstance, selectedNodeId]);
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full" id="graph-canvas">
       <ReactFlow
         nodes={displayNodes}
         edges={displayEdges}
