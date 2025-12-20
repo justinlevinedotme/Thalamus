@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import ReactFlow, { Background, Controls } from "reactflow";
+import ReactFlow, {
+  Background,
+  Controls,
+  type ReactFlowInstance,
+} from "reactflow";
 import "reactflow/dist/style.css";
 
 import { getSharedGraph } from "../features/share/shareApi";
@@ -12,6 +16,9 @@ export default function ShareRoute() {
   const [error, setError] = useState<string | null>(null);
   const [graphTitle, setGraphTitle] = useState<string>("Shared graph");
   const [payload, setPayload] = useState<GraphPayload | null>(null);
+  const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(
+    null
+  );
 
   useEffect(() => {
     if (!token) {
@@ -46,6 +53,13 @@ export default function ShareRoute() {
     };
   }, [token]);
 
+  useEffect(() => {
+    if (!flowInstance || !payload?.nodes?.length) {
+      return;
+    }
+    flowInstance.fitView({ padding: 0.2, duration: 300 });
+  }, [flowInstance, payload]);
+
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
@@ -68,20 +82,29 @@ export default function ShareRoute() {
             {error}
           </div>
         ) : (
-          <div className="h-[calc(100vh-6rem)] rounded-lg border border-slate-200 bg-white">
-            <ReactFlow
-              nodes={payload?.nodes ?? []}
-              edges={payload?.edges ?? []}
-              nodesDraggable={false}
-              nodesConnectable={false}
-              elementsSelectable={false}
-              zoomOnScroll
-              panOnScroll
-              fitView
-            >
-              <Background gap={24} size={1} />
-              <Controls showInteractive={false} />
-            </ReactFlow>
+          <div className="relative h-[calc(100vh-6rem)] rounded-lg border border-slate-200 bg-white">
+            <div className="h-full w-full">
+              <ReactFlow
+                className="h-full w-full"
+                nodes={payload?.nodes ?? []}
+                edges={payload?.edges ?? []}
+                nodesDraggable={false}
+                nodesConnectable={false}
+                elementsSelectable={false}
+                zoomOnScroll
+                panOnScroll
+                fitView
+                onInit={setFlowInstance}
+              >
+                <Background gap={24} size={1} />
+                <Controls showInteractive={false} />
+              </ReactFlow>
+            </div>
+            {payload?.nodes?.length === 0 ? (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-slate-400">
+                No nodes yet
+              </div>
+            ) : null}
           </div>
         )}
       </div>
