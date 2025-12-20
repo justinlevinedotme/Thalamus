@@ -1,6 +1,7 @@
 import EditorToolbar from "../features/editor/EditorToolbar";
 import GraphCanvas from "../features/editor/GraphCanvas";
 import RelationshipInspector from "../features/editor/RelationshipInspector";
+import NodeSearch from "../features/search/NodeSearch";
 
 export default function EditorRoute() {
   return (
@@ -10,7 +11,8 @@ export default function EditorRoute() {
         <section className="flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white">
           <GraphCanvas />
         </section>
-        <aside className="w-80 shrink-0">
+        <aside className="w-80 shrink-0 space-y-4">
+          <NodeSearch />
           <RelationshipInspector />
         </aside>
       </div>

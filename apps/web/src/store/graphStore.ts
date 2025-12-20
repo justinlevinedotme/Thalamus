@@ -19,18 +19,28 @@ export type RelationshipData = {
   direction?: RelationshipDirection;
 };
 
+type GraphNodeData = {
+  label: string;
+};
+
 type GraphState = {
-  nodes: Node[];
+  nodes: Node<GraphNodeData>[];
   edges: Edge<RelationshipData>[];
   graphTitle: string;
   selectedEdgeId?: string;
-  setNodes: (nodes: Node[]) => void;
+  selectedNodeId?: string;
+  isFocusMode: boolean;
+  focusNodeId?: string;
+  setNodes: (nodes: Node<GraphNodeData>[]) => void;
   setEdges: (edges: Edge<RelationshipData>[]) => void;
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
   setGraphTitle: (title: string) => void;
   selectEdge: (edgeId?: string) => void;
+  selectNode: (nodeId?: string) => void;
+  setFocusNode: (nodeId?: string) => void;
+  clearFocus: () => void;
   updateEdgeLabel: (edgeId: string, label: string) => void;
   updateEdgeData: (edgeId: string, data: RelationshipData) => void;
   addNode: (position?: { x: number; y: number }) => void;
@@ -59,6 +69,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   edges: [],
   graphTitle: "Untitled Graph",
   selectedEdgeId: undefined,
+  selectedNodeId: undefined,
+  isFocusMode: false,
+  focusNodeId: undefined,
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
   onNodesChange: (changes) =>
@@ -79,6 +92,13 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     }),
   setGraphTitle: (graphTitle) => set({ graphTitle }),
   selectEdge: (edgeId) => set({ selectedEdgeId: edgeId }),
+  selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
+  setFocusNode: (nodeId) =>
+    set({
+      focusNodeId: nodeId,
+      isFocusMode: Boolean(nodeId),
+    }),
+  clearFocus: () => set({ focusNodeId: undefined, isFocusMode: false }),
   updateEdgeLabel: (edgeId, label) =>
     set({
       edges: get().edges.map((edge) =>
@@ -101,7 +121,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     }),
   addNode: (position) => {
     const id = crypto.randomUUID();
-    const nextNode: Node = {
+    const nextNode: Node<GraphNodeData> = {
       id,
       position: position ?? { x: 0, y: 0 },
       data: { label: "New node" },
