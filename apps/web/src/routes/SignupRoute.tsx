@@ -5,7 +5,7 @@ import { Input } from "../components/ui/input";
 import { useAuthStore } from "../store/authStore";
 
 export default function SignupRoute() {
-  const { signUp, status, error } = useAuthStore();
+  const { signUp, signInWithProvider, status, error } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -49,6 +49,14 @@ export default function SignupRoute() {
         {error ? (
           <p className="text-sm text-red-600">{error}</p>
         ) : null}
+        <button
+          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+          type="button"
+          onClick={() => signInWithProvider("github")}
+          disabled={status === "loading"}
+        >
+          Continue with GitHub
+        </button>
         {submitted && !error ? (
           <p className="text-sm text-emerald-600">
             Check your inbox to confirm your email.

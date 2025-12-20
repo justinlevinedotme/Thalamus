@@ -6,7 +6,7 @@ import { useAuthStore } from "../store/authStore";
 
 export default function LoginRoute() {
   const navigate = useNavigate();
-  const { signIn, status, error } = useAuthStore();
+  const { signIn, signInWithProvider, status, error } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -52,6 +52,14 @@ export default function LoginRoute() {
         {error ? (
           <p className="text-sm text-red-600">{error}</p>
         ) : null}
+        <button
+          className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+          type="button"
+          onClick={() => signInWithProvider("github")}
+          disabled={status === "loading"}
+        >
+          Continue with GitHub
+        </button>
         <button
           className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
           type="submit"

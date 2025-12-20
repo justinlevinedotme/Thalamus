@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Session, User } from "@supabase/supabase-js";
+import type { Provider, Session, User } from "@supabase/supabase-js";
 
 import { supabase } from "../lib/supabaseClient";
 
@@ -12,11 +12,13 @@ type AuthState = {
   error?: string;
   initialize: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithProvider: (provider: Provider) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
 let initialized = false;
+const siteUrl = import.meta.env.VITE_SITE_URL;
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
@@ -67,6 +69,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       status: data.session ? "authenticated" : "unauthenticated",
       error: undefined,
     });
+  },
+  signInWithProvider: async (provider) => {
+    set({ status: "loading", error: undefined });
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: siteUrl ? { redirectTo: `${siteUrl}/docs` } : undefined,
+    });
+    if (error) {
+      set({ status: "unauthenticated", error: error.message });
+    }
   },
   signUp: async (email, password) => {
     set({ status: "loading", error: undefined });
