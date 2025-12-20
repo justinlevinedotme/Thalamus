@@ -31,7 +31,10 @@ export default function ShareRoute() {
     const load = async () => {
       try {
         const shared = await getSharedGraph(token);
-        if (!shared || ignore) {
+        if (ignore) {
+          return;
+        }
+        if (!shared) {
           setDebugInfo(
             JSON.stringify(
               { token, shared, message: "RPC returned no rows" },
@@ -45,6 +48,7 @@ export default function ShareRoute() {
         const data = shared.data as GraphPayload | undefined;
         setGraphTitle(shared.title || "Shared graph");
         setPayload({ nodes: data?.nodes ?? [], edges: data?.edges ?? [] });
+        setError(null);
         setDebugInfo(
           JSON.stringify(
             {
