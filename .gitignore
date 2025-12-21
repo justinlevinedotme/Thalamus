@@ -6,3 +6,5 @@ node_modules/
 .claude/
 .devserver.log
 supabase/.temp/cli-latest
+.turbo/cookies/1.cookie
+.turbo/daemon/db227ed4dad67883-turbo.log.2025-12-21

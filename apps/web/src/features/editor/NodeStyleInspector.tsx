@@ -7,13 +7,11 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import {
-  type NodeKind,
   type NodeShape,
   type NodeSize,
   useGraphStore,
 } from "../../store/graphStore";
 
-const nodeKinds: NodeKind[] = ["idea", "question", "evidence", "goal"];
 const nodeShapes: NodeShape[] = ["rounded", "pill", "circle", "square"];
 const nodeSizes: NodeSize[] = ["sm", "md", "lg"];
 
@@ -21,7 +19,6 @@ export default function NodeStyleInspector() {
   const {
     nodes,
     selectedNodeId,
-    setNodeKind,
     updateNodeStyle,
   } = useGraphStore();
 
@@ -37,27 +34,6 @@ export default function NodeStyleInspector() {
 
   return (
     <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">
-      <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase text-slate-500">
-          Node type
-        </label>
-        <Select
-          value={selectedNode.data.kind}
-          onValueChange={(value) => setNodeKind(selectedNode.id, value as NodeKind)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            {nodeKinds.map((kind) => (
-              <SelectItem key={kind} value={kind}>
-                {kind}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase text-slate-500">
           Color

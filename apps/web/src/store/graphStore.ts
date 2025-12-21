@@ -12,7 +12,7 @@ import {
   type ReactFlowInstance,
 } from "reactflow";
 
-export type RelationshipDirection = "forward" | "backward" | "none";
+export type RelationshipDirection = "forward" | "backward" | "both" | "none";
 export type RelationshipType = "causes" | "supports" | "contradicts" | "related";
 export type NodeKind = "idea" | "question" | "evidence" | "goal";
 
@@ -174,16 +174,28 @@ const markerForDirection = (
   direction: RelationshipDirection,
   color: string
 ): {
-  markerStart?: { type: MarkerType; color?: string };
-  markerEnd?: { type: MarkerType; color?: string };
+  markerStart?: { type: MarkerType; color?: string } | undefined;
+  markerEnd?: { type: MarkerType; color?: string } | undefined;
 } => {
   if (direction === "backward") {
-    return { markerStart: { type: MarkerType.ArrowClosed, color } };
+    return {
+      markerStart: { type: MarkerType.ArrowClosed, color },
+      markerEnd: undefined,
+    };
+  }
+  if (direction === "both") {
+    return {
+      markerStart: { type: MarkerType.ArrowClosed, color },
+      markerEnd: { type: MarkerType.ArrowClosed, color },
+    };
   }
   if (direction === "none") {
-    return {};
+    return { markerStart: undefined, markerEnd: undefined };
   }
-  return { markerEnd: { type: MarkerType.ArrowClosed, color } };
+  return {
+    markerStart: undefined,
+    markerEnd: { type: MarkerType.ArrowClosed, color },
+  };
 };
 
 export const useGraphStore = create<GraphState>((set, get) => ({

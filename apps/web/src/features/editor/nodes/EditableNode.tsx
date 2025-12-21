@@ -120,9 +120,6 @@ export default function EditableNode({
       ) : (
         <div className="font-medium text-slate-800">{data.label}</div>
       )}
-      <div className="mt-1 text-[10px] uppercase tracking-wide text-slate-400">
-        {data.kind}
-      </div>
       <Handle type="source" position={Position.Right} />
     </div>
   );
