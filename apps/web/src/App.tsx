@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 
 import EditorRoute from "./routes/EditorRoute";
 import DocsRoute from "./routes/DocsRoute";
+import BillingRoute from "./routes/BillingRoute";
 import LoginRoute from "./routes/LoginRoute";
 import ShareRoute from "./routes/ShareRoute";
 import SignupRoute from "./routes/SignupRoute";
@@ -22,6 +23,7 @@ export default function App() {
       <Route path="/editor" element={<EditorRoute />} />
       <Route path="/docs/:graphId" element={<EditorRoute />} />
       <Route path="/share/:token" element={<ShareRoute />} />
+      <Route path="/billing" element={<BillingRoute />} />
       <Route path="/login" element={<LoginRoute />} />
       <Route path="/signup" element={<SignupRoute />} />
       <Route path="*" element={<Navigate to="/" replace />} />
