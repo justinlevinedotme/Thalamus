@@ -41,21 +41,29 @@ export default function SignupRoute() {
           </p>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">Email</label>
+          <label className="text-sm font-medium text-slate-700" htmlFor="signup-email">
+            Email
+          </label>
           <Input
+            id="signup-email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            autoComplete="email"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">Password</label>
+          <label className="text-sm font-medium text-slate-700" htmlFor="signup-password">
+            Password
+          </label>
           <Input
+            id="signup-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
+            autoComplete="new-password"
           />
         </div>
         {error ? (

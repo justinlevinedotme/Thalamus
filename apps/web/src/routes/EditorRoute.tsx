@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
+import Footer from "../components/Footer";
 import EditorToolbar from "../features/editor/EditorToolbar";
 import GraphCanvas from "../features/editor/GraphCanvas";
 import RelationshipInspector from "../features/editor/RelationshipInspector";
@@ -89,7 +90,7 @@ export default function EditorRoute() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50">
       <EditorToolbar
         canSave={canSave}
         onSave={handleSave}
@@ -123,6 +124,7 @@ export default function EditorRoute() {
           ) : null}
         </aside>
       </div>
+      <Footer />
       <ShareDialog
         open={shareOpen}
         graphId={graphId}

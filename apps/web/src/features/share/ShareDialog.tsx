@@ -74,6 +74,7 @@ export default function ShareDialog({ open, graphId, onClose }: ShareDialogProps
             className="text-sm text-slate-500 hover:text-slate-700"
             type="button"
             onClick={onClose}
+            aria-label="Close share dialog"
           >
             Close
           </button>
@@ -107,6 +108,7 @@ export default function ShareDialog({ open, graphId, onClose }: ShareDialogProps
               type="button"
               onClick={handleGenerate}
               disabled={status === "loading"}
+              aria-label="Generate share link"
             >
               {status === "loading" ? "Generating..." : "Generate share link"}
             </button>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import Footer from "../components/Footer";
 import {
   createGraph,
   deleteGraph,
@@ -60,8 +61,9 @@ export default function DocsRoute() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8">
-      <div className="mx-auto max-w-4xl space-y-6">
+    <div className="flex min-h-screen flex-col bg-slate-50">
+      <div className="flex-1 px-6 py-8">
+        <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-slate-900">
@@ -149,7 +151,9 @@ export default function DocsRoute() {
             You can sketch ideas immediately, then export when you are ready.
           </div>
         )}
+        </div>
       </div>
+      <Footer />
     </div>
   );
 }

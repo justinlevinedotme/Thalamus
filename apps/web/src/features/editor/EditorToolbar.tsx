@@ -55,6 +55,7 @@ export default function EditorToolbar({
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50"
           type="button"
           onClick={handleExportJson}
+          aria-label="Export graph as JSON"
         >
           Export JSON
         </button>
@@ -63,6 +64,7 @@ export default function EditorToolbar({
           type="button"
           onClick={() => handleExportImage("png")}
           disabled={exporting === "png"}
+          aria-label="Export graph as PNG"
         >
           {exporting === "png" ? "Exporting..." : "Export PNG"}
         </button>
@@ -71,6 +73,7 @@ export default function EditorToolbar({
           type="button"
           onClick={() => handleExportImage("pdf")}
           disabled={exporting === "pdf"}
+          aria-label="Export graph as PDF"
         >
           {exporting === "pdf" ? "Exporting..." : "Export PDF"}
         </button>
@@ -79,6 +82,7 @@ export default function EditorToolbar({
           type="button"
           onClick={onSave}
           disabled={!canSave || saveStatus === "saving"}
+          aria-label="Save graph"
         >
           {saveStatus === "saving" ? "Saving..." : "Save"}
         </button>
@@ -87,6 +91,7 @@ export default function EditorToolbar({
           type="button"
           onClick={onShare}
           disabled={!canSave}
+          aria-label="Share graph"
         >
           Share
         </button>

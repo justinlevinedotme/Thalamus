@@ -62,6 +62,7 @@ export default function NodeSearch() {
           type="button"
           onClick={handleFocusToggle}
           disabled={!selectedNodeId && !isFocusMode}
+          aria-label={isFocusMode ? "Exit focus mode" : "Focus on selected node"}
         >
           {isFocusMode ? "Exit focus" : "Focus"}
         </button>
@@ -87,6 +88,7 @@ export default function NodeSearch() {
               className="flex w-full items-center justify-between rounded-md px-2 py-1 text-left text-xs text-slate-600 transition hover:bg-slate-50"
               type="button"
               onClick={() => handleSelect(node.id)}
+              aria-label={`Select ${getNodeLabel(node)}`}
             >
               <span className="truncate">{getNodeLabel(node)}</span>
               {node.id === selectedNodeId ? (

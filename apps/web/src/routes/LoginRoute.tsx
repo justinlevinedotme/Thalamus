@@ -43,21 +43,29 @@ export default function LoginRoute() {
           </p>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">Email</label>
+          <label className="text-sm font-medium text-slate-700" htmlFor="login-email">
+            Email
+          </label>
           <Input
+            id="login-email"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             required
+            autoComplete="email"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium text-slate-700">Password</label>
+          <label className="text-sm font-medium text-slate-700" htmlFor="login-password">
+            Password
+          </label>
           <Input
+            id="login-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
+            autoComplete="current-password"
           />
         </div>
         {error ? (
