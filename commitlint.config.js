@@ -1,7 +1,6 @@
 // commitlint.config.js
 // adapted from https://dev.to/amankrsahu/tired-of-confusing-commits-heres-how-to-fix-them-with-commitlint-3lfj
-// good format example: feat(ui): add new button component,
-// or feat: added new button component (when scope is omitted)
+// good format example: feat: add new button component
 
 module.exports = {
   extends: ["@commitlint/config-conventional"],
@@ -25,23 +24,7 @@ module.exports = {
         "hotfix", // urgent fixes
       ],
     ],
-    "scope-empty": [0, "never"], // scope is optional
-    "scope-enum": [
-      2,
-      "when",
-      [
-        "deps", // dependencies
-        "config", // configuration files
-        "ui", // user interface related changes
-        "backend", // backend related changes
-        "frontend", // frontend related changes
-        "docs", // documentation related changes
-        "build", // build system changes
-        "ci", // continuous integration changes
-        "tests", // testing related changes
-        "release", // release related changes
-      ],
-    ],
+    "scope-empty": [2, "always"], // no scope allowed
     "subject-case": [2, "always", "lower-case"],
     "header-max-length": [2, "always", 72],
     "footer-max-line-length": [2, "always", 100],
