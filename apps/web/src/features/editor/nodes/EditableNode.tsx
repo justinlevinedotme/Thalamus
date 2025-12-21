@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 
-import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
+import {
+  type NodeHandle,
+  type NodeKind,
+  type NodeStyle,
+  useGraphStore,
+} from "../../../store/graphStore";
 
 export default function EditableNode({
   id,
@@ -12,6 +17,8 @@ export default function EditableNode({
   body?: string;
   kind: NodeKind;
   style?: NodeStyle;
+  sourceHandles?: NodeHandle[];
+  targetHandles?: NodeHandle[];
 }>) {
   const {
     editingNodeId,
@@ -126,9 +133,12 @@ export default function EditableNode({
 
   const hasBody = isExpanded || Boolean(data.body);
 
+  const targetHandles = data.targetHandles ?? [{ id: "target" }];
+  const sourceHandles = data.sourceHandles ?? [{ id: "source" }];
+
   return (
     <div
-      className={`min-w-[120px] max-w-[300px] border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
+      className={`relative min-w-[120px] max-w-[300px] border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
         selected ? "border-slate-500" : "border-slate-200"
       }`}
       onDoubleClick={handleDoubleClick}
@@ -137,7 +147,18 @@ export default function EditableNode({
       aria-label={`Node ${data.label}`}
       style={nodeStyle}
     >
-      <Handle type="target" position={Position.Left} />
+      {/* Target handles (left side) */}
+      {targetHandles.map((handle, index) => (
+        <Handle
+          key={handle.id}
+          id={handle.id}
+          type="target"
+          position={Position.Left}
+          style={{
+            top: `${((index + 1) / (targetHandles.length + 1)) * 100}%`,
+          }}
+        />
+      ))}
 
       {/* Title */}
       {isEditing ? (
@@ -179,7 +200,18 @@ export default function EditableNode({
         </button>
       ) : null}
 
-      <Handle type="source" position={Position.Right} />
+      {/* Source handles (right side) */}
+      {sourceHandles.map((handle, index) => (
+        <Handle
+          key={handle.id}
+          id={handle.id}
+          type="source"
+          position={Position.Right}
+          style={{
+            top: `${((index + 1) / (sourceHandles.length + 1)) * 100}%`,
+          }}
+        />
+      ))}
     </div>
   );
 }

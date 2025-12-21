@@ -1,14 +1,17 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ChevronDown, Download, Redo2, Undo2 } from "lucide-react";
+import { Redo2, Undo2 } from "lucide-react";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
+import Header from "../../components/Header";
 import { Input } from "../../components/ui/input";
+import {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarShortcut,
+  MenubarTrigger,
+} from "../../components/ui/menubar";
 import { exportGraphPdf, exportGraphPng } from "../../lib/exportImage";
 import { exportGraphJson } from "../../lib/exportJson";
 import { useGraphStore } from "../../store/graphStore";
@@ -38,6 +41,10 @@ export default function EditorToolbar({
   } = useGraphStore();
   const [exporting, setExporting] = useState<"png" | "pdf" | null>(null);
 
+  const isMac =
+    typeof navigator !== "undefined" &&
+    navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+
   const handleExportJson = () => {
     exportGraphJson(graphTitle, nodes, edges);
   };
@@ -58,88 +65,116 @@ export default function EditorToolbar({
   };
 
   return (
-    <header className="flex flex-wrap items-center gap-3 border-b border-slate-200 bg-white px-4 py-3">
-      <div className="min-w-[220px] flex-1">
-        <Input
-          value={graphTitle}
-          onChange={(event) => setGraphTitle(event.target.value)}
-          placeholder="Untitled Graph"
-        />
-      </div>
-      <div className="flex items-center gap-2">
-        {/* Undo/Redo button group */}
-        <div className="flex overflow-hidden rounded-md border border-slate-200">
+    <div className="border-b border-slate-200 bg-white">
+      {/* Top nav bar - consistent with other pages */}
+      <Header>
+        <div className="ml-4 min-w-[200px] max-w-md flex-1">
+          <Input
+            value={graphTitle}
+            onChange={(event) => setGraphTitle(event.target.value)}
+            placeholder="Untitled Graph"
+            className="h-8 text-sm"
+          />
+        </div>
+      </Header>
+
+      {/* Menubar - Google Docs style */}
+      <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-1">
+        <Menubar className="h-auto border-0 bg-transparent p-0">
+          <MenubarMenu>
+            <MenubarTrigger className="px-2 py-1 text-sm font-normal">
+              File
+            </MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem
+                onClick={onSave}
+                disabled={!canSave || saveStatus === "saving"}
+              >
+                {saveStatus === "saving" ? "Saving..." : "Save"}
+                <MenubarShortcut>{isMac ? "⌘S" : "Ctrl+S"}</MenubarShortcut>
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem onClick={handleExportJson} disabled={exporting !== null}>
+                Export as JSON
+              </MenubarItem>
+              <MenubarItem
+                onClick={() => handleExportImage("png")}
+                disabled={exporting !== null}
+              >
+                Export as PNG
+              </MenubarItem>
+              <MenubarItem
+                onClick={() => handleExportImage("pdf")}
+                disabled={exporting !== null}
+              >
+                Export as PDF
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem onClick={onShare} disabled={!canSave}>
+                Share
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          <MenubarMenu>
+            <MenubarTrigger className="px-2 py-1 text-sm font-normal">
+              Edit
+            </MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem onClick={undo} disabled={!canUndo}>
+                Undo
+                <MenubarShortcut>{isMac ? "⌘Z" : "Ctrl+Z"}</MenubarShortcut>
+              </MenubarItem>
+              <MenubarItem onClick={redo} disabled={!canRedo}>
+                Redo
+                <MenubarShortcut>{isMac ? "⌘⇧Z" : "Ctrl+Y"}</MenubarShortcut>
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          <MenubarMenu>
+            <MenubarTrigger className="px-2 py-1 text-sm font-normal">
+              View
+            </MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem disabled>Zoom In</MenubarItem>
+              <MenubarItem disabled>Zoom Out</MenubarItem>
+              <MenubarItem disabled>Fit to Screen</MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+
+          <MenubarMenu>
+            <MenubarTrigger className="px-2 py-1 text-sm font-normal">
+              Help
+            </MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem disabled>Keyboard Shortcuts</MenubarItem>
+              <MenubarItem disabled>Documentation</MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        </Menubar>
+
+        <div className="ml-auto flex items-center gap-1">
           <button
-            className="flex h-8 w-8 items-center justify-center border-r border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+            className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
             type="button"
             onClick={undo}
             disabled={!canUndo}
-            aria-label="Undo last change"
+            aria-label="Undo"
           >
             <Undo2 className="h-4 w-4" />
           </button>
           <button
-            className="flex h-8 w-8 items-center justify-center text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+            className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
             type="button"
             onClick={redo}
             disabled={!canRedo}
-            aria-label="Redo last change"
+            aria-label="Redo"
           >
             <Redo2 className="h-4 w-4" />
           </button>
         </div>
-
-        {/* Export dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-              type="button"
-              disabled={exporting !== null}
-              aria-label="Export graph"
-            >
-              <Download className="h-4 w-4" />
-              {exporting ? "Exporting..." : "Export"}
-              <ChevronDown className="h-3 w-3" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleExportJson}>
-              Export as JSON
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExportImage("png")}>
-              Export as PNG
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExportImage("pdf")}>
-              Export as PDF
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <button
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50"
-          type="button"
-          onClick={onSave}
-          disabled={!canSave || saveStatus === "saving"}
-          aria-label="Save graph"
-        >
-          {saveStatus === "saving" ? "Saving..." : "Save"}
-        </button>
-        <button
-          className="rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
-          type="button"
-          onClick={onShare}
-          disabled={!canSave}
-          aria-label="Share graph"
-        >
-          Share
-        </button>
-        {!canSave ? (
-          <Link className="text-xs text-slate-500 underline" to="/login">
-            Sign in to save
-          </Link>
-        ) : null}
       </div>
-    </header>
+    </div>
   );
 }

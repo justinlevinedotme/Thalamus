@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import Footer from "../components/Footer";
+import Header from "../components/Header";
 import {
   createGraph,
   deleteGraph,
@@ -62,6 +63,7 @@ export default function DocsRoute() {
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50">
+      <Header />
       <div className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-4xl space-y-6">
         <div className="flex items-center justify-between">

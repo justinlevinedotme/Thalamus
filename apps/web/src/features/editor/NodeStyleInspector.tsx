@@ -70,9 +70,13 @@ export default function NodeStyleInspector() {
     nodes,
     selectedNodeId,
     updateNodeStyle,
+    updateNodeHandles,
   } = useGraphStore();
 
   const selectedNode = nodes.find((node) => node.id === selectedNodeId);
+
+  const sourceHandleCount = selectedNode?.data?.sourceHandles?.length ?? 1;
+  const targetHandleCount = selectedNode?.data?.targetHandles?.length ?? 1;
 
   if (!selectedNode) {
     return (
@@ -86,6 +90,87 @@ export default function NodeStyleInspector() {
     <TooltipProvider delayDuration={300}>
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
         <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">Node Style</h2>
+
+        {/* Handles - always visible */}
+        <div className="space-y-3 px-3 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">Inputs</label>
+            <div className="flex items-center gap-1">
+              <button
+                className="flex h-7 w-7 items-center justify-center rounded-l-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                type="button"
+                onClick={() =>
+                  updateNodeHandles(
+                    selectedNode.id,
+                    sourceHandleCount,
+                    Math.max(1, targetHandleCount - 1)
+                  )
+                }
+                disabled={targetHandleCount <= 1}
+                aria-label="Decrease input handles"
+              >
+                −
+              </button>
+              <span className="flex h-7 w-8 items-center justify-center border-y border-slate-200 bg-white text-xs text-slate-700">
+                {targetHandleCount}
+              </span>
+              <button
+                className="flex h-7 w-7 items-center justify-center rounded-r-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                type="button"
+                onClick={() =>
+                  updateNodeHandles(
+                    selectedNode.id,
+                    sourceHandleCount,
+                    Math.min(8, targetHandleCount + 1)
+                  )
+                }
+                disabled={targetHandleCount >= 8}
+                aria-label="Increase input handles"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">Outputs</label>
+            <div className="flex items-center gap-1">
+              <button
+                className="flex h-7 w-7 items-center justify-center rounded-l-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                type="button"
+                onClick={() =>
+                  updateNodeHandles(
+                    selectedNode.id,
+                    Math.max(1, sourceHandleCount - 1),
+                    targetHandleCount
+                  )
+                }
+                disabled={sourceHandleCount <= 1}
+                aria-label="Decrease output handles"
+              >
+                −
+              </button>
+              <span className="flex h-7 w-8 items-center justify-center border-y border-slate-200 bg-white text-xs text-slate-700">
+                {sourceHandleCount}
+              </span>
+              <button
+                className="flex h-7 w-7 items-center justify-center rounded-r-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                type="button"
+                onClick={() =>
+                  updateNodeHandles(
+                    selectedNode.id,
+                    Math.min(8, sourceHandleCount + 1),
+                    targetHandleCount
+                  )
+                }
+                disabled={sourceHandleCount >= 8}
+                aria-label="Increase output handles"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
 
         <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
           <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">

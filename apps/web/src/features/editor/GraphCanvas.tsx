@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
+  type Connection,
   type Edge,
   type Node,
   type NodeDragHandler,
@@ -38,18 +39,19 @@ export default function GraphCanvas() {
     isFocusMode,
     focusNodeId,
     connectNodes,
+    reconnectEdge,
   } = useGraphStore();
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
   const lastCenteredNodeId = useRef<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
   const [proximityTarget, setProximityTarget] = useState<{
-    sourceId: string;
-    targetId: string;
-    sourcePosition: { x: number; y: number };
-    targetPosition: { x: number; y: number };
+    sourceNodeId: string;
+    targetNodeId: string;
+    sourceHandlePosition: { x: number; y: number };
+    targetHandlePosition: { x: number; y: number };
   } | null>(null);
-  const PROXIMITY_THRESHOLD = 100;
+  const PROXIMITY_THRESHOLD = 80;
 
   const handleInit = useCallback(
     (instance: ReactFlowInstance) => {
@@ -134,6 +136,8 @@ export default function GraphCanvas() {
           body: node.data?.body,
           kind: (node.data?.kind ?? "idea") as NodeKind,
           style: node.data?.style,
+          sourceHandles: node.data?.sourceHandles,
+          targetHandles: node.data?.targetHandles,
         },
         selected: node.id === selectedNodeId,
       })),
@@ -267,54 +271,73 @@ export default function GraphCanvas() {
 
   const handleNodeDrag: NodeDragHandler = useCallback(
     (_event, draggedNode) => {
-      const draggedCenter = {
-        x: draggedNode.position.x + (draggedNode.width ?? 150) / 2,
-        y: draggedNode.position.y + (draggedNode.height ?? 50) / 2,
-      };
+      const draggedWidth = draggedNode.width ?? 150;
+      const draggedHeight = draggedNode.height ?? 50;
 
-      let closestNode: Node | null = null;
-      let closestDistance = PROXIMITY_THRESHOLD;
+      // Calculate the dragged node's target handle positions (left side)
+      const draggedTargetHandles = draggedNode.data?.targetHandles ?? [{ id: "target" }];
+      const draggedTargetPositions = draggedTargetHandles.map((_: unknown, index: number) => ({
+        x: draggedNode.position.x,
+        y: draggedNode.position.y + ((index + 1) / (draggedTargetHandles.length + 1)) * draggedHeight,
+      }));
+
+      let closestMatch: {
+        sourceNode: Node;
+        sourceHandlePos: { x: number; y: number };
+        targetHandlePos: { x: number; y: number };
+        distance: number;
+      } | null = null;
 
       for (const node of nodes) {
         if (node.id === draggedNode.id) {
           continue;
         }
-        // Check if edge already exists
+
+        // Check if edge already exists between these nodes
         const edgeExists = edges.some(
           (e) =>
-            (e.source === draggedNode.id && e.target === node.id) ||
-            (e.source === node.id && e.target === draggedNode.id)
+            (e.source === node.id && e.target === draggedNode.id) ||
+            (e.source === draggedNode.id && e.target === node.id)
         );
         if (edgeExists) {
           continue;
         }
 
-        const nodeCenter = {
-          x: node.position.x + (node.width ?? 150) / 2,
-          y: node.position.y + (node.height ?? 50) / 2,
-        };
-        const distance = Math.sqrt(
-          Math.pow(draggedCenter.x - nodeCenter.x, 2) +
-            Math.pow(draggedCenter.y - nodeCenter.y, 2)
-        );
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestNode = node;
+        const nodeWidth = node.width ?? 150;
+        const nodeHeight = node.height ?? 50;
+
+        // Calculate this node's source handle positions (right side)
+        const sourceHandles = node.data?.sourceHandles ?? [{ id: "source" }];
+        const sourcePositions = sourceHandles.map((_, index) => ({
+          x: node.position.x + nodeWidth,
+          y: node.position.y + ((index + 1) / (sourceHandles.length + 1)) * nodeHeight,
+        }));
+
+        // Find the closest source handle to any of the dragged node's target handles
+        for (const sourcePos of sourcePositions) {
+          for (const targetPos of draggedTargetPositions) {
+            const distance = Math.sqrt(
+              Math.pow(sourcePos.x - targetPos.x, 2) +
+                Math.pow(sourcePos.y - targetPos.y, 2)
+            );
+            if (distance < PROXIMITY_THRESHOLD && (!closestMatch || distance < closestMatch.distance)) {
+              closestMatch = {
+                sourceNode: node,
+                sourceHandlePos: sourcePos,
+                targetHandlePos: targetPos,
+                distance,
+              };
+            }
+          }
         }
       }
 
-      if (closestNode) {
+      if (closestMatch) {
         setProximityTarget({
-          sourceId: draggedNode.id,
-          targetId: closestNode.id,
-          sourcePosition: {
-            x: draggedNode.position.x + (draggedNode.width ?? 150) / 2,
-            y: draggedNode.position.y + (draggedNode.height ?? 50) / 2,
-          },
-          targetPosition: {
-            x: closestNode.position.x + (closestNode.width ?? 150) / 2,
-            y: closestNode.position.y + (closestNode.height ?? 50) / 2,
-          },
+          sourceNodeId: closestMatch.sourceNode.id,
+          targetNodeId: draggedNode.id,
+          sourceHandlePosition: closestMatch.sourceHandlePos,
+          targetHandlePosition: closestMatch.targetHandlePos,
         });
       } else {
         setProximityTarget(null);
@@ -326,11 +349,18 @@ export default function GraphCanvas() {
   const handleNodeDragStop: NodeDragHandler = useCallback(
     (_event, _node) => {
       if (proximityTarget) {
-        connectNodes(proximityTarget.sourceId, proximityTarget.targetId);
+        connectNodes(proximityTarget.sourceNodeId, proximityTarget.targetNodeId);
         setProximityTarget(null);
       }
     },
     [connectNodes, proximityTarget]
+  );
+
+  const handleReconnect = useCallback(
+    (oldEdge: Edge<RelationshipData>, newConnection: Connection) => {
+      reconnectEdge(oldEdge, newConnection);
+    },
+    [reconnectEdge]
   );
 
   return (
@@ -341,6 +371,7 @@ export default function GraphCanvas() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onReconnect={handleReconnect}
         onEdgeClick={handleEdgeClick}
         onNodeClick={handleNodeClick}
         onPaneClick={handlePaneClick}
@@ -368,8 +399,8 @@ export default function GraphCanvas() {
       </ReactFlow>
       {/* Proximity Connect Indicator */}
       {proximityTarget && reactFlowInstance && (() => {
-        const sourceScreen = reactFlowInstance.flowToScreenPosition(proximityTarget.sourcePosition);
-        const targetScreen = reactFlowInstance.flowToScreenPosition(proximityTarget.targetPosition);
+        const sourceScreen = reactFlowInstance.flowToScreenPosition(proximityTarget.sourceHandlePosition);
+        const targetScreen = reactFlowInstance.flowToScreenPosition(proximityTarget.targetHandlePosition);
         const canvasBounds = document.getElementById("graph-canvas")?.getBoundingClientRect();
         if (!canvasBounds) return null;
         const x1 = sourceScreen.x - canvasBounds.left;
@@ -387,9 +418,12 @@ export default function GraphCanvas() {
               strokeWidth={2}
               strokeDasharray="6 4"
             />
-            <circle cx={x2} cy={y2} r={12} fill="#3B82F6" opacity={0.2} />
-            <circle cx={x2} cy={y2} r={6} fill="#3B82F6" opacity={0.4} />
-            <circle cx={x2} cy={y2} r={3} fill="#3B82F6" />
+            {/* Highlight at source handle */}
+            <circle cx={x1} cy={y1} r={8} fill="#3B82F6" opacity={0.2} />
+            <circle cx={x1} cy={y1} r={4} fill="#3B82F6" opacity={0.6} />
+            {/* Highlight at target handle */}
+            <circle cx={x2} cy={y2} r={8} fill="#3B82F6" opacity={0.2} />
+            <circle cx={x2} cy={y2} r={4} fill="#3B82F6" opacity={0.6} />
           </svg>
         );
       })()}

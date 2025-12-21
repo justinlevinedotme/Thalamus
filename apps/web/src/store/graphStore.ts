@@ -12,12 +12,18 @@ import {
   type ReactFlowInstance,
 } from "reactflow";
 
+import { getLayoutedElements, type LayoutOptions } from "../lib/autoLayout";
+
 export type RelationshipDirection = "forward" | "backward" | "both" | "none";
 export type RelationshipType = "causes" | "supports" | "contradicts" | "related";
 export type NodeKind = "idea" | "question" | "evidence" | "goal";
 
 export type NodeShape = "rounded" | "pill" | "circle" | "square";
 export type NodeSize = "sm" | "md" | "lg";
+
+export type NodeHandle = {
+  id: string;
+};
 
 export type NodeStyle = {
   color: string;
@@ -54,6 +60,8 @@ type GraphNodeData = {
   body?: string;
   kind: NodeKind;
   style?: NodeStyle;
+  sourceHandles?: NodeHandle[];
+  targetHandles?: NodeHandle[];
 };
 
 type GraphSnapshot = {
@@ -91,6 +99,11 @@ type GraphState = {
   updateNodeLabel: (nodeId: string, label: string) => void;
   updateNodeBody: (nodeId: string, body: string) => void;
   updateNodeStyle: (nodeId: string, style: Partial<NodeStyle>) => void;
+  updateNodeHandles: (
+    nodeId: string,
+    sourceCount: number,
+    targetCount: number
+  ) => void;
   setNodeKind: (nodeId: string, kind: NodeKind) => void;
   updateEdgeLabel: (edgeId: string, label: string) => void;
   updateEdgeData: (edgeId: string, data: Partial<RelationshipData>) => void;
@@ -104,9 +117,15 @@ type GraphState = {
   duplicateNode: (nodeId: string) => void;
   deleteNode: (nodeId: string) => void;
   deleteEdge: (edgeId: string) => void;
+  reconnectEdge: (
+    oldEdge: Edge<RelationshipData>,
+    newConnection: Connection
+  ) => void;
   connectNodes: (sourceId: string, targetId: string) => void;
   updateAllNodeStyles: (style: Partial<NodeStyle>) => void;
   updateAllEdgeStyles: (style: Partial<EdgeStyle>) => void;
+  clearAllEdgeLabels: () => void;
+  autoLayout: (options?: LayoutOptions) => Promise<void>;
   undo: () => void;
   redo: () => void;
 };
@@ -363,6 +382,37 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         ),
       };
     }),
+  updateNodeHandles: (nodeId, sourceCount, targetCount) =>
+    set((state) => {
+      const target = state.nodes.find((node) => node.id === nodeId);
+      if (!target) {
+        return {};
+      }
+      const sourceHandles = Array.from({ length: sourceCount }, (_, i) => ({
+        id: `${nodeId}-s-${i}`,
+      }));
+      const targetHandles = Array.from({ length: targetCount }, (_, i) => ({
+        id: `${nodeId}-t-${i}`,
+      }));
+      return {
+        nodes: state.nodes.map((node) =>
+          node.id === nodeId
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  sourceHandles: sourceCount > 1 ? sourceHandles : undefined,
+                  targetHandles: targetCount > 1 ? targetHandles : undefined,
+                },
+              }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
   setNodeKind: (nodeId, kind) =>
     set((state) => {
       const target = state.nodes.find((node) => node.id === nodeId);
@@ -571,6 +621,41 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         ),
       };
     }),
+  reconnectEdge: (oldEdge, newConnection) =>
+    set((state) => {
+      if (!newConnection.source || !newConnection.target) {
+        return {};
+      }
+      // Check if the new connection would create a duplicate edge
+      const wouldDuplicate = state.edges.some(
+        (e) =>
+          e.id !== oldEdge.id &&
+          ((e.source === newConnection.source && e.target === newConnection.target) ||
+            (e.source === newConnection.target && e.target === newConnection.source))
+      );
+      if (wouldDuplicate) {
+        return {};
+      }
+      return {
+        edges: state.edges.map((edge) => {
+          if (edge.id !== oldEdge.id) {
+            return edge;
+          }
+          return {
+            ...edge,
+            id: `${newConnection.source}-${newConnection.target}`,
+            source: newConnection.source,
+            target: newConnection.target,
+            sourceHandle: newConnection.sourceHandle ?? undefined,
+            targetHandle: newConnection.targetHandle ?? undefined,
+          };
+        }),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
   connectNodes: (sourceId, targetId) =>
     set((state) => {
       // Check if edge already exists between these nodes
@@ -658,6 +743,41 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         ),
       };
     }),
+  clearAllEdgeLabels: () =>
+    set((state) => {
+      const hasLabels = state.edges.some((edge) => edge.label);
+      if (!hasLabels) {
+        return {};
+      }
+      return {
+        edges: state.edges.map((edge) => ({
+          ...edge,
+          label: undefined,
+        })),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  autoLayout: async (options) => {
+    const state = get();
+    if (state.nodes.length === 0) {
+      return;
+    }
+    const { nodes: layoutedNodes } = await getLayoutedElements(
+      state.nodes,
+      state.edges,
+      options
+    );
+    set({
+      nodes: layoutedNodes,
+      ...setHistory(
+        [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+        []
+      ),
+    });
+  },
   undo: () =>
     set((state) => {
       if (state.historyPast.length === 0) {

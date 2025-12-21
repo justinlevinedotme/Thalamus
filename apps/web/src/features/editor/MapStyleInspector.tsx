@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
+import { Button } from "../../components/ui/button";
 import {
   type EdgeCurvature,
   type EdgeLineStyle,
@@ -97,7 +98,7 @@ const lineStyles: Array<{ value: EdgeLineStyle; label: string; icon: ReactNode }
 ];
 
 export default function MapStyleInspector() {
-  const { nodes, edges, updateAllNodeStyles, updateAllEdgeStyles } = useGraphStore();
+  const { nodes, edges, updateAllNodeStyles, updateAllEdgeStyles, clearAllEdgeLabels } = useGraphStore();
 
   const nodeCount = nodes.length;
   const edgeCount = edges.length;
@@ -293,6 +294,15 @@ export default function MapStyleInspector() {
               ))}
             </ToggleGroup>
           </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs"
+            onClick={clearAllEdgeLabels}
+          >
+            Delete all path labels
+          </Button>
         </div>
       </div>
     </TooltipProvider>
