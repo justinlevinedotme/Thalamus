@@ -69,7 +69,7 @@ export default function RelationshipInspector() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-3">
+      <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
       <h2 className="text-sm font-semibold text-slate-700">Path Style</h2>
 
       <div className="flex items-center justify-between gap-4">

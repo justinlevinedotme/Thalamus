@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
-  MiniMap,
   type Edge,
   type ReactFlowInstance,
 } from "reactflow";
@@ -216,7 +215,6 @@ export default function GraphCanvas() {
         fitView
       >
         <Background gap={24} size={1} />
-        <MiniMap className="bg-white" pannable zoomable />
         <Controls showInteractive={false} />
       </ReactFlow>
     </div>

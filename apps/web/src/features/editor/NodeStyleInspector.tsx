@@ -33,7 +33,7 @@ export default function NodeStyleInspector() {
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4">
+    <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase text-slate-500">
           Color
