@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ChevronDown, Download, Redo2, Undo2 } from "lucide-react";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
 import { Input } from "../../components/ui/input";
 import { exportGraphPdf, exportGraphPng } from "../../lib/exportImage";
 import { exportGraphJson } from "../../lib/exportJson";
@@ -60,50 +67,55 @@ export default function EditorToolbar({
         />
       </div>
       <div className="flex items-center gap-2">
-        <button
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-          type="button"
-          onClick={undo}
-          disabled={!canUndo}
-          aria-label="Undo last change"
-        >
-          Undo
-        </button>
-        <button
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-          type="button"
-          onClick={redo}
-          disabled={!canRedo}
-          aria-label="Redo last change"
-        >
-          Redo
-        </button>
-        <button
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50"
-          type="button"
-          onClick={handleExportJson}
-          aria-label="Export graph as JSON"
-        >
-          Export JSON
-        </button>
-        <button
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-          type="button"
-          onClick={() => handleExportImage("png")}
-          disabled={exporting === "png"}
-          aria-label="Export graph as PNG"
-        >
-          {exporting === "png" ? "Exporting..." : "Export PNG"}
-        </button>
-        <button
-          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-          type="button"
-          onClick={() => handleExportImage("pdf")}
-          disabled={exporting === "pdf"}
-          aria-label="Export graph as PDF"
-        >
-          {exporting === "pdf" ? "Exporting..." : "Export PDF"}
-        </button>
+        {/* Undo/Redo button group */}
+        <div className="flex overflow-hidden rounded-md border border-slate-200">
+          <button
+            className="flex h-8 w-8 items-center justify-center border-r border-slate-200 text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+            type="button"
+            onClick={undo}
+            disabled={!canUndo}
+            aria-label="Undo last change"
+          >
+            <Undo2 className="h-4 w-4" />
+          </button>
+          <button
+            className="flex h-8 w-8 items-center justify-center text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+            type="button"
+            onClick={redo}
+            disabled={!canRedo}
+            aria-label="Redo last change"
+          >
+            <Redo2 className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Export dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="flex items-center gap-1.5 rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+              type="button"
+              disabled={exporting !== null}
+              aria-label="Export graph"
+            >
+              <Download className="h-4 w-4" />
+              {exporting ? "Exporting..." : "Export"}
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleExportJson}>
+              Export as JSON
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExportImage("png")}>
+              Export as PNG
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleExportImage("pdf")}>
+              Export as PDF
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <button
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50"
           type="button"

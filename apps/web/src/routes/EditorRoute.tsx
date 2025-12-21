@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Focus, Plus, Search, X } from "lucide-react";
 
 import { Card } from "../components/ui/card";
 import {
@@ -42,6 +42,7 @@ export default function EditorRoute() {
     selectedEdgeId,
     isFocusMode,
     clearFocus,
+    setFocusNode,
   } = useGraphStore();
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -218,6 +219,22 @@ export default function EditorRoute() {
                     Search <Kbd className="ml-1.5">{modKeyLabel}K</Kbd>
                   </TooltipContent>
                 </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className="mt-1 flex h-10 w-10 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
+                      type="button"
+                      onClick={() => selectedNodeId && setFocusNode(selectedNodeId)}
+                      disabled={!selectedNodeId || isFocusMode}
+                      aria-label="Focus on selected node"
+                    >
+                      <Focus className="h-5 w-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    Focus on node
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <button
                 className="mt-2 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
@@ -271,10 +288,10 @@ export default function EditorRoute() {
           </div>
         ) : null}
 
-        {/* Search Dialog */}
+        {/* Search Dialog - Spotlight style */}
         <Dialog open={searchOpen} onOpenChange={setSearchOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
+          <DialogContent className="top-[20%] translate-y-0 sm:max-w-xl rounded-xl p-0 gap-0 overflow-hidden">
+            <DialogHeader className="sr-only">
               <DialogTitle>Search Nodes</DialogTitle>
             </DialogHeader>
             <NodeSearch />
