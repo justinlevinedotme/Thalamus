@@ -27,9 +27,26 @@ jobs:
         run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
   branch-naming:
-    name: Branch Name Check
+    name: Branch + PR Title Checks
     runs-on: ubuntu-latest
     steps:
+      - name: Validate PR title
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix"
+          pattern="^($types): [a-z0-9][a-z0-9 .,'/-]*$"
+
+          if ! echo "$title" | grep -qE "$pattern"; then
+            echo "❌ PR title '$title' doesn't match the required pattern."
+            echo ""
+            echo "Valid format:"
+            echo "  type: lower-case description  →  feat: add export tools"
+            echo ""
+            echo "Types: $types"
+            exit 1
+          fi
+          echo "✓ PR title '$title' is valid"
+
       - name: Validate branch name
         run: |
           branch="${{ github.head_ref }}"
