@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 
-import { Input } from "../../../components/ui/input";
 import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
 export default function EditableNode({
@@ -10,6 +9,7 @@ export default function EditableNode({
   selected,
 }: NodeProps<{
   label: string;
+  body?: string;
   kind: NodeKind;
   style?: NodeStyle;
 }>) {
@@ -18,17 +18,30 @@ export default function EditableNode({
     startEditingNode,
     stopEditingNode,
     updateNodeLabel,
+    updateNodeBody,
   } = useGraphStore();
   const isEditing = editingNodeId === id;
   const [draftLabel, setDraftLabel] = useState(data.label);
+  const [draftBody, setDraftBody] = useState(data.body ?? "");
+  const [isExpanded, setIsExpanded] = useState(Boolean(data.body));
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (isEditing) {
-      setDraftLabel(data.label);
-      return;
-    }
     setDraftLabel(data.label);
-  }, [data.label, isEditing]);
+  }, [data.label]);
+
+  useEffect(() => {
+    setDraftBody(data.body ?? "");
+    setIsExpanded(Boolean(data.body));
+  }, [data.body]);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (bodyRef.current) {
+      bodyRef.current.style.height = "auto";
+      bodyRef.current.style.height = `${bodyRef.current.scrollHeight}px`;
+    }
+  }, [draftBody, isExpanded]);
 
   const commitLabel = () => {
     const nextLabel = draftLabel.trim() || "Untitled";
@@ -36,8 +49,13 @@ export default function EditableNode({
     stopEditingNode();
   };
 
+  const commitBody = () => {
+    updateNodeBody(id, draftBody);
+  };
+
   const cancelEditing = () => {
     setDraftLabel(data.label);
+    setDraftBody(data.body ?? "");
     stopEditingNode();
   };
 
@@ -46,14 +64,26 @@ export default function EditableNode({
     startEditingNode(id);
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter") {
+  const handleLabelKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       commitLabel();
+      // Focus body if it exists
+      if (isExpanded && bodyRef.current) {
+        bodyRef.current.focus();
+      }
     }
     if (event.key === "Escape") {
       event.preventDefault();
       cancelEditing();
+    }
+  };
+
+  const handleBodyKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      commitBody();
+      stopEditingNode();
     }
   };
 
@@ -67,6 +97,15 @@ export default function EditableNode({
     }
   };
 
+  const toggleBody = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!isExpanded) {
+      setIsExpanded(true);
+      startEditingNode(id);
+      setTimeout(() => bodyRef.current?.focus(), 0);
+    }
+  };
+
   const shapeClass = (() => {
     switch (data.style?.shape) {
       case "circle":
@@ -76,18 +115,7 @@ export default function EditableNode({
       case "square":
         return "rounded-none";
       default:
-        return "rounded-md";
-    }
-  })();
-
-  const sizeClass = (() => {
-    switch (data.style?.size) {
-      case "sm":
-        return "min-w-[120px] min-h-[56px]";
-      case "lg":
-        return "min-w-[200px] min-h-[96px]";
-      default:
-        return "min-w-[150px] min-h-[72px]";
+        return "rounded-lg";
     }
   })();
 
@@ -96,9 +124,11 @@ export default function EditableNode({
     borderColor: selected ? undefined : data.style?.color,
   };
 
+  const hasBody = isExpanded || Boolean(data.body);
+
   return (
     <div
-      className={`max-w-[260px] border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${sizeClass} ${
+      className={`min-w-[120px] max-w-[300px] border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
         selected ? "border-slate-500" : "border-slate-200"
       }`}
       onDoubleClick={handleDoubleClick}
@@ -108,18 +138,47 @@ export default function EditableNode({
       style={nodeStyle}
     >
       <Handle type="target" position={Position.Left} />
+
+      {/* Title */}
       {isEditing ? (
-        <Input
+        <input
+          className="w-full bg-transparent font-medium text-slate-800 outline-none placeholder:text-slate-400"
           value={draftLabel}
           onChange={(event) => setDraftLabel(event.target.value)}
           onBlur={commitLabel}
-          onKeyDown={handleKeyDown}
+          onKeyDown={handleLabelKeyDown}
           autoFocus
+          placeholder="Node title"
           aria-label="Edit node label"
         />
       ) : (
         <div className="font-medium text-slate-800">{data.label}</div>
       )}
+
+      {/* Body text */}
+      {hasBody ? (
+        <textarea
+          ref={bodyRef}
+          className="mt-1 w-full resize-none bg-transparent text-xs text-slate-600 outline-none placeholder:text-slate-400"
+          value={draftBody}
+          onChange={(event) => setDraftBody(event.target.value)}
+          onBlur={commitBody}
+          onKeyDown={handleBodyKeyDown}
+          onFocus={() => startEditingNode(id)}
+          placeholder="Add notes..."
+          rows={1}
+          aria-label="Node body text"
+        />
+      ) : selected ? (
+        <button
+          className="mt-1 text-xs text-slate-400 hover:text-slate-600"
+          type="button"
+          onClick={toggleBody}
+        >
+          + Add notes
+        </button>
+      ) : null}
+
       <Handle type="source" position={Position.Right} />
     </div>
   );

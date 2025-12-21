@@ -1,0 +1,300 @@
+import type { ReactNode } from "react";
+
+import { BezierIcon } from "../../components/icons/BezierIcon";
+import { SmoothStepIcon } from "../../components/icons/SmoothStepIcon";
+import { StraightIcon } from "../../components/icons/StraightIcon";
+
+import { Input } from "../../components/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../components/ui/tooltip";
+import {
+  type EdgeCurvature,
+  type EdgeLineStyle,
+  type NodeShape,
+  useGraphStore,
+} from "../../store/graphStore";
+
+const nodeShapes: Array<{ value: NodeShape; label: string; icon: ReactNode }> = [
+  {
+    value: "rounded",
+    label: "Rounded",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="2" y="4" width="12" height="8" rx="2" />
+      </svg>
+    ),
+  },
+  {
+    value: "pill",
+    label: "Pill",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="2" y="4" width="12" height="8" rx="4" />
+      </svg>
+    ),
+  },
+  {
+    value: "circle",
+    label: "Circle",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="8" cy="8" r="5" />
+      </svg>
+    ),
+  },
+  {
+    value: "square",
+    label: "Square",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="3" y="4" width="10" height="8" />
+      </svg>
+    ),
+  },
+];
+
+const curvatures: Array<{
+  value: EdgeCurvature;
+  label: string;
+  icon: ReactNode;
+}> = [
+  { value: "smoothstep", label: "Smooth", icon: <SmoothStepIcon className="h-4 w-4" /> },
+  { value: "bezier", label: "Bezier", icon: <BezierIcon className="h-4 w-4" /> },
+  { value: "straight", label: "Straight", icon: <StraightIcon className="h-4 w-4" /> },
+];
+
+const thicknesses: Array<{ value: number; label: string }> = [
+  { value: 1, label: "Thin" },
+  { value: 2, label: "Regular" },
+  { value: 4, label: "Thick" },
+  { value: 6, label: "Bold" },
+];
+
+const lineStyles: Array<{ value: EdgeLineStyle; label: string; icon: ReactNode }> = [
+  {
+    value: "solid",
+    label: "Solid",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="2" y1="8" x2="14" y2="8" />
+      </svg>
+    ),
+  },
+  {
+    value: "dashed",
+    label: "Dashed",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 2">
+        <line x1="2" y1="8" x2="14" y2="8" />
+      </svg>
+    ),
+  },
+];
+
+export default function MapStyleInspector() {
+  const { nodes, edges, updateAllNodeStyles, updateAllEdgeStyles } = useGraphStore();
+
+  const nodeCount = nodes.length;
+  const edgeCount = edges.length;
+
+  return (
+    <TooltipProvider delayDuration={300}>
+      <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+        <h2 className="text-sm font-semibold text-slate-700">Map Style</h2>
+
+        {/* Node Styles Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-medium text-slate-600">
+              All Nodes ({nodeCount})
+            </h3>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Color
+            </label>
+            <Input
+              type="color"
+              className="h-8 w-36 cursor-pointer"
+              defaultValue="#E2E8F0"
+              onChange={(event) =>
+                updateAllNodeStyles({ color: event.target.value })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Shape
+            </label>
+            <ToggleGroup
+              type="single"
+              className="h-8 rounded-md border border-slate-200 bg-white"
+              onValueChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                updateAllNodeStyles({ shape: value as NodeShape });
+              }}
+              aria-label="Node shape"
+            >
+              {nodeShapes.map((shape) => (
+                <Tooltip key={shape.value}>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem
+                      value={shape.value}
+                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      variant="ghost"
+                    >
+                      {shape.icon}
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>{shape.label}</TooltipContent>
+                </Tooltip>
+              ))}
+            </ToggleGroup>
+          </div>
+        </div>
+
+        <hr className="border-slate-100" />
+
+        {/* Edge Styles Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-medium text-slate-600">
+              All Paths ({edgeCount})
+            </h3>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Color
+            </label>
+            <Input
+              type="color"
+              className="h-8 w-36 cursor-pointer"
+              defaultValue="#94A3B8"
+              onChange={(event) =>
+                updateAllEdgeStyles({ color: event.target.value })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Thickness
+            </label>
+            <ToggleGroup
+              type="single"
+              className="h-8 rounded-md border border-slate-200 bg-white"
+              onValueChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                updateAllEdgeStyles({ thickness: Number(value) });
+              }}
+              aria-label="Edge thickness"
+            >
+              {thicknesses.map((thickness) => (
+                <Tooltip key={thickness.value}>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem
+                      value={String(thickness.value)}
+                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      variant="ghost"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                      >
+                        <rect
+                          x="2"
+                          y={8 - thickness.value / 2}
+                          width="12"
+                          height={thickness.value}
+                          rx={thickness.value / 2}
+                        />
+                      </svg>
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>{thickness.label}</TooltipContent>
+                </Tooltip>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Style
+            </label>
+            <ToggleGroup
+              type="single"
+              className="h-8 rounded-md border border-slate-200 bg-white"
+              onValueChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                updateAllEdgeStyles({ lineStyle: value as EdgeLineStyle });
+              }}
+              aria-label="Line style"
+            >
+              {lineStyles.map((style) => (
+                <Tooltip key={style.value}>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem
+                      value={style.value}
+                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      variant="ghost"
+                    >
+                      {style.icon}
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>{style.label}</TooltipContent>
+                </Tooltip>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Curvature
+            </label>
+            <ToggleGroup
+              type="single"
+              className="h-8 rounded-md border border-slate-200 bg-white"
+              onValueChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                updateAllEdgeStyles({ curvature: value as EdgeCurvature });
+              }}
+              aria-label="Edge curvature"
+            >
+              {curvatures.map((curvature) => (
+                <Tooltip key={curvature.value}>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem
+                      value={curvature.value}
+                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      variant="ghost"
+                    >
+                      {curvature.icon}
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>{curvature.label}</TooltipContent>
+                </Tooltip>
+              ))}
+            </ToggleGroup>
+          </div>
+        </div>
+      </div>
+    </TooltipProvider>
+  );
+}

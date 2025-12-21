@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Focus, Plus, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Focus, Paintbrush, Plus, Search, X } from "lucide-react";
 
 import { Card } from "../components/ui/card";
 import {
@@ -18,6 +18,7 @@ import {
 } from "../components/ui/tooltip";
 import EditorToolbar from "../features/editor/EditorToolbar";
 import GraphCanvas from "../features/editor/GraphCanvas";
+import MapStyleInspector from "../features/editor/MapStyleInspector";
 import NodeStyleInspector from "../features/editor/NodeStyleInspector";
 import RelationshipInspector from "../features/editor/RelationshipInspector";
 import NodeSearch from "../features/search/NodeSearch";
@@ -53,6 +54,7 @@ export default function EditorRoute() {
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mapStyleOpen, setMapStyleOpen] = useState(false);
 
   const canSave = Boolean(user);
   const payload = useMemo(() => ({ nodes, edges }), [edges, nodes]);
@@ -235,6 +237,25 @@ export default function EditorRoute() {
                     Focus on node
                   </TooltipContent>
                 </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className={`mt-1 flex h-10 w-10 items-center justify-center rounded-md transition ${
+                        mapStyleOpen
+                          ? "bg-slate-100 text-slate-900"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                      type="button"
+                      onClick={() => setMapStyleOpen(!mapStyleOpen)}
+                      aria-label="Map style"
+                    >
+                      <Paintbrush className="h-5 w-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    Map Style
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <button
                 className="mt-2 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
@@ -256,6 +277,13 @@ export default function EditorRoute() {
             </button>
           )}
         </div>
+
+        {/* Map Style Inspector Panel */}
+        {mapStyleOpen ? (
+          <div className="absolute left-20 top-20 z-10 w-72">
+            <MapStyleInspector />
+          </div>
+        ) : null}
 
         {/* Right floating panel - Inspector */}
         {showRightPanel && (selectedNodeId || selectedEdgeId) ? (

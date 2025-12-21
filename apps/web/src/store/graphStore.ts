@@ -26,11 +26,21 @@ export type NodeStyle = {
 };
 
 export type EdgeCurvature = "bezier" | "smoothstep" | "straight";
+export type EdgeLineStyle = "solid" | "dashed";
+
+export type EdgeLabelStyle = {
+  backgroundColor: string;
+  textColor: string;
+  borderColor: string;
+  showBorder: boolean;
+};
 
 export type EdgeStyle = {
   color: string;
   thickness: number;
   curvature: EdgeCurvature;
+  lineStyle: EdgeLineStyle;
+  labelStyle?: EdgeLabelStyle;
 };
 
 export type RelationshipData = {
@@ -41,6 +51,7 @@ export type RelationshipData = {
 
 type GraphNodeData = {
   label: string;
+  body?: string;
   kind: NodeKind;
   style?: NodeStyle;
 };
@@ -78,6 +89,7 @@ type GraphState = {
   setFocusNode: (nodeId?: string) => void;
   clearFocus: () => void;
   updateNodeLabel: (nodeId: string, label: string) => void;
+  updateNodeBody: (nodeId: string, body: string) => void;
   updateNodeStyle: (nodeId: string, style: Partial<NodeStyle>) => void;
   setNodeKind: (nodeId: string, kind: NodeKind) => void;
   updateEdgeLabel: (edgeId: string, label: string) => void;
@@ -89,6 +101,12 @@ type GraphState = {
     kind?: NodeKind;
   }) => void;
   addNodeAtCenter: (kind?: NodeKind) => void;
+  duplicateNode: (nodeId: string) => void;
+  deleteNode: (nodeId: string) => void;
+  deleteEdge: (edgeId: string) => void;
+  connectNodes: (sourceId: string, targetId: string) => void;
+  updateAllNodeStyles: (style: Partial<NodeStyle>) => void;
+  updateAllEdgeStyles: (style: Partial<EdgeStyle>) => void;
   undo: () => void;
   redo: () => void;
 };
@@ -104,6 +122,7 @@ const defaultEdgeStyle: EdgeStyle = {
   color: "#94A3B8",
   thickness: 2,
   curvature: "smoothstep",
+  lineStyle: "solid",
 };
 
 const defaultEdgeData: RelationshipData = {
@@ -299,6 +318,28 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         ),
       };
     }),
+  updateNodeBody: (nodeId, body) =>
+    set((state) => {
+      const target = state.nodes.find((node) => node.id === nodeId);
+      if (!target) {
+        return {};
+      }
+      const normalizedBody = body.trim() || undefined;
+      if (target.data.body === normalizedBody) {
+        return {};
+      }
+      return {
+        nodes: state.nodes.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, body: normalizedBody } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
   updateNodeStyle: (nodeId, style) =>
     set((state) => {
       const target = state.nodes.find((node) => node.id === nodeId);
@@ -469,6 +510,154 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     });
     get().addNode({ kind, position });
   },
+  duplicateNode: (nodeId) => {
+    const state = get();
+    const node = state.nodes.find((n) => n.id === nodeId);
+    if (!node) {
+      return;
+    }
+    const newId = crypto.randomUUID();
+    const offset = 50;
+    const newNode: Node<GraphNodeData> = {
+      ...structuredClone(node),
+      id: newId,
+      position: {
+        x: node.position.x + offset,
+        y: node.position.y + offset,
+      },
+      selected: false,
+    };
+    set({
+      nodes: [...state.nodes, newNode],
+      selectedNodeId: newId,
+      ...setHistory(
+        [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+        []
+      ),
+    });
+  },
+  deleteNode: (nodeId) =>
+    set((state) => {
+      const nodeExists = state.nodes.some((n) => n.id === nodeId);
+      if (!nodeExists) {
+        return {};
+      }
+      return {
+        nodes: state.nodes.filter((n) => n.id !== nodeId),
+        edges: state.edges.filter(
+          (e) => e.source !== nodeId && e.target !== nodeId
+        ),
+        selectedNodeId:
+          state.selectedNodeId === nodeId ? undefined : state.selectedNodeId,
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  deleteEdge: (edgeId) =>
+    set((state) => {
+      const edgeExists = state.edges.some((e) => e.id === edgeId);
+      if (!edgeExists) {
+        return {};
+      }
+      return {
+        edges: state.edges.filter((e) => e.id !== edgeId),
+        selectedEdgeId:
+          state.selectedEdgeId === edgeId ? undefined : state.selectedEdgeId,
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  connectNodes: (sourceId, targetId) =>
+    set((state) => {
+      // Check if edge already exists between these nodes
+      const edgeExists = state.edges.some(
+        (e) =>
+          (e.source === sourceId && e.target === targetId) ||
+          (e.source === targetId && e.target === sourceId)
+      );
+      if (edgeExists) {
+        return {};
+      }
+      // Check both nodes exist
+      const sourceExists = state.nodes.some((n) => n.id === sourceId);
+      const targetExists = state.nodes.some((n) => n.id === targetId);
+      if (!sourceExists || !targetExists) {
+        return {};
+      }
+      const newEdge: Edge<RelationshipData> = {
+        id: `${sourceId}-${targetId}`,
+        source: sourceId,
+        target: targetId,
+        label: "relationship",
+        data: { ...defaultEdgeData, style: { ...defaultEdgeStyle } },
+        ...markerForDirection(
+          defaultEdgeData.direction ?? "forward",
+          defaultEdgeStyle.color
+        ),
+      };
+      return {
+        edges: [...state.edges, newEdge],
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  updateAllNodeStyles: (style) =>
+    set((state) => {
+      if (state.nodes.length === 0) {
+        return {};
+      }
+      return {
+        nodes: state.nodes.map((node) => ({
+          ...node,
+          data: {
+            ...node.data,
+            style: {
+              ...nodeStyleDefaults[node.data.kind],
+              ...node.data.style,
+              ...style,
+            },
+          },
+        })),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  updateAllEdgeStyles: (style) =>
+    set((state) => {
+      if (state.edges.length === 0) {
+        return {};
+      }
+      return {
+        edges: state.edges.map((edge) => {
+          const nextStyle = {
+            ...defaultEdgeStyle,
+            ...edge.data?.style,
+            ...style,
+          };
+          const nextData = { ...edge.data, style: nextStyle };
+          return {
+            ...edge,
+            data: nextData,
+            ...markerForDirection(
+              nextData.direction ?? "forward",
+              nextStyle.color
+            ),
+          };
+        }),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
   undo: () =>
     set((state) => {
       if (state.historyPast.length === 0) {

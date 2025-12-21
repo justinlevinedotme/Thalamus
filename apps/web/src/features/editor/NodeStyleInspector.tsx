@@ -1,19 +1,69 @@
-import { Input } from "../../components/ui/input";
+import type { ReactNode } from "react";
+
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../../components/ui/accordion";
+import { Input } from "../../components/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../../components/ui/tooltip";
 import {
   type NodeShape,
   type NodeSize,
   useGraphStore,
 } from "../../store/graphStore";
 
-const nodeShapes: NodeShape[] = ["rounded", "pill", "circle", "square"];
-const nodeSizes: NodeSize[] = ["sm", "md", "lg"];
+const nodeShapes: Array<{ value: NodeShape; label: string; icon: ReactNode }> = [
+  {
+    value: "rounded",
+    label: "Rounded",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="2" y="4" width="12" height="8" rx="2" />
+      </svg>
+    ),
+  },
+  {
+    value: "pill",
+    label: "Pill",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="2" y="4" width="12" height="8" rx="4" />
+      </svg>
+    ),
+  },
+  {
+    value: "circle",
+    label: "Circle",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <circle cx="8" cy="8" r="5" />
+      </svg>
+    ),
+  },
+  {
+    value: "square",
+    label: "Square",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="3" y="4" width="10" height="8" />
+      </svg>
+    ),
+  },
+];
+
+const nodeSizes: Array<{ value: NodeSize; label: string }> = [
+  { value: "sm", label: "Small" },
+  { value: "md", label: "Medium" },
+  { value: "lg", label: "Large" },
+];
 
 export default function NodeStyleInspector() {
   const {
@@ -33,65 +83,95 @@ export default function NodeStyleInspector() {
   }
 
   return (
-    <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase text-slate-500">
-          Color
-        </label>
-        <Input
-          type="color"
-          value={selectedNode.data.style?.color ?? "#E2E8F0"}
-          onChange={(event) =>
-            updateNodeStyle(selectedNode.id, { color: event.target.value })
-          }
-        />
-      </div>
+    <TooltipProvider delayDuration={300}>
+      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">Node Style</h2>
 
-      <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase text-slate-500">
-          Shape
-        </label>
-        <Select
-          value={selectedNode.data.style?.shape ?? "rounded"}
-          onValueChange={(value) =>
-            updateNodeStyle(selectedNode.id, { shape: value as NodeShape })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select shape" />
-          </SelectTrigger>
-          <SelectContent>
-            {nodeShapes.map((shape) => (
-              <SelectItem key={shape} value={shape}>
-                {shape}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
+          <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">
+            <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+              Appearance
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-3 pt-0">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">Color</label>
+                  <Input
+                    type="color"
+                    className="h-7 w-24 cursor-pointer"
+                    value={selectedNode.data.style?.color ?? "#E2E8F0"}
+                    onChange={(event) =>
+                      updateNodeStyle(selectedNode.id, { color: event.target.value })
+                    }
+                  />
+                </div>
 
-      <div className="space-y-2">
-        <label className="text-xs font-semibold uppercase text-slate-500">
-          Size
-        </label>
-        <Select
-          value={selectedNode.data.style?.size ?? "md"}
-          onValueChange={(value) =>
-            updateNodeStyle(selectedNode.id, { size: value as NodeSize })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select size" />
-          </SelectTrigger>
-          <SelectContent>
-            {nodeSizes.map((size) => (
-              <SelectItem key={size} value={size}>
-                {size}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">Shape</label>
+                  <ToggleGroup
+                    type="single"
+                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    value={selectedNode.data.style?.shape ?? "rounded"}
+                    onValueChange={(value) => {
+                      if (!value) {
+                        return;
+                      }
+                      updateNodeStyle(selectedNode.id, { shape: value as NodeShape });
+                    }}
+                    aria-label="Node shape"
+                  >
+                    {nodeShapes.map((shape) => (
+                      <Tooltip key={shape.value}>
+                        <TooltipTrigger asChild>
+                          <ToggleGroupItem
+                            value={shape.value}
+                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                            variant="ghost"
+                          >
+                            {shape.icon}
+                          </ToggleGroupItem>
+                        </TooltipTrigger>
+                        <TooltipContent>{shape.label}</TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </ToggleGroup>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">Size</label>
+                  <ToggleGroup
+                    type="single"
+                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    value={selectedNode.data.style?.size ?? "md"}
+                    onValueChange={(value) => {
+                      if (!value) {
+                        return;
+                      }
+                      updateNodeStyle(selectedNode.id, { size: value as NodeSize });
+                    }}
+                    aria-label="Node size"
+                  >
+                    {nodeSizes.map((size) => (
+                      <Tooltip key={size.value}>
+                        <TooltipTrigger asChild>
+                          <ToggleGroupItem
+                            value={size.value}
+                            className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                            variant="ghost"
+                          >
+                            {size.value.toUpperCase()}
+                          </ToggleGroupItem>
+                        </TooltipTrigger>
+                        <TooltipContent>{size.label}</TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </ToggleGroup>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
