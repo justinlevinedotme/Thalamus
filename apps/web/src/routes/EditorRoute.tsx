@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import Footer from "../components/Footer";
 import EditorToolbar from "../features/editor/EditorToolbar";
 import GraphCanvas from "../features/editor/GraphCanvas";
+import NodeLibrary from "../features/editor/NodeLibrary";
 import RelationshipInspector from "../features/editor/RelationshipInspector";
 import NodeSearch from "../features/search/NodeSearch";
 import { getGraph, updateGraph, createGraph } from "../features/cloud/graphApi";
@@ -98,6 +99,9 @@ export default function EditorRoute() {
         saveStatus={saveStatus}
       />
       <div className="flex flex-1 gap-4 overflow-hidden p-4">
+        <aside className="w-64 shrink-0 space-y-4">
+          <NodeLibrary />
+        </aside>
         <section className="flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white">
           <GraphCanvas />
         </section>

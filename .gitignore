@@ -5,3 +5,4 @@ node_modules/
 .clavix/outputs/
 .claude/
 .devserver.log
+supabase/.temp/cli-latest

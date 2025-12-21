@@ -19,7 +19,16 @@ export default function EditorToolbar({
   onShare,
   saveStatus = "idle",
 }: EditorToolbarProps) {
-  const { graphTitle, setGraphTitle, nodes, edges } = useGraphStore();
+  const {
+    graphTitle,
+    setGraphTitle,
+    nodes,
+    edges,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useGraphStore();
   const [exporting, setExporting] = useState<"png" | "pdf" | null>(null);
 
   const handleExportJson = () => {
@@ -51,6 +60,24 @@ export default function EditorToolbar({
         />
       </div>
       <div className="flex items-center gap-2">
+        <button
+          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+          type="button"
+          onClick={undo}
+          disabled={!canUndo}
+          aria-label="Undo last change"
+        >
+          Undo
+        </button>
+        <button
+          className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+          type="button"
+          onClick={redo}
+          disabled={!canRedo}
+          aria-label="Redo last change"
+        >
+          Redo
+        </button>
         <button
           className="rounded-md border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50"
           type="button"
