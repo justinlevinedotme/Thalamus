@@ -2,11 +2,16 @@ import { useEffect, useState } from "react";
 import { Handle, Position, type NodeProps } from "reactflow";
 
 import { Input } from "../../../components/ui/input";
-import { type NodeKind, useGraphStore } from "../../../store/graphStore";
+import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
-export default function EditableNode({ id, data, selected }: NodeProps<{
+export default function EditableNode({
+  id,
+  data,
+  selected,
+}: NodeProps<{
   label: string;
   kind: NodeKind;
+  style?: NodeStyle;
 }>) {
   const {
     editingNodeId,
@@ -62,15 +67,45 @@ export default function EditableNode({ id, data, selected }: NodeProps<{
     }
   };
 
+  const shapeClass = (() => {
+    switch (data.style?.shape) {
+      case "circle":
+        return "rounded-full";
+      case "pill":
+        return "rounded-full";
+      case "square":
+        return "rounded-none";
+      default:
+        return "rounded-md";
+    }
+  })();
+
+  const sizeClass = (() => {
+    switch (data.style?.size) {
+      case "sm":
+        return "min-w-[120px] min-h-[56px]";
+      case "lg":
+        return "min-w-[200px] min-h-[96px]";
+      default:
+        return "min-w-[150px] min-h-[72px]";
+    }
+  })();
+
+  const nodeStyle: React.CSSProperties = {
+    backgroundColor: data.style?.color,
+    borderColor: selected ? undefined : data.style?.color,
+  };
+
   return (
     <div
-      className={`min-w-[140px] max-w-[240px] rounded-md border bg-white px-3 py-2 text-sm shadow-sm transition ${
+      className={`max-w-[260px] border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${sizeClass} ${
         selected ? "border-slate-500" : "border-slate-200"
       }`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}
       tabIndex={0}
       aria-label={`Node ${data.label}`}
+      style={nodeStyle}
     >
       <Handle type="target" position={Position.Left} />
       {isEditing ? (

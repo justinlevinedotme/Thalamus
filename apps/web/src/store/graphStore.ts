@@ -16,14 +16,33 @@ export type RelationshipDirection = "forward" | "backward" | "none";
 export type RelationshipType = "causes" | "supports" | "contradicts" | "related";
 export type NodeKind = "idea" | "question" | "evidence" | "goal";
 
+export type NodeShape = "rounded" | "pill" | "circle" | "square";
+export type NodeSize = "sm" | "md" | "lg";
+
+export type NodeStyle = {
+  color: string;
+  shape: NodeShape;
+  size: NodeSize;
+};
+
+export type EdgeCurvature = "bezier" | "smoothstep" | "straight";
+
+export type EdgeStyle = {
+  color: string;
+  thickness: number;
+  curvature: EdgeCurvature;
+};
+
 export type RelationshipData = {
   relationType?: RelationshipType;
   direction?: RelationshipDirection;
+  style?: EdgeStyle;
 };
 
 type GraphNodeData = {
   label: string;
   kind: NodeKind;
+  style?: NodeStyle;
 };
 
 type GraphSnapshot = {
@@ -59,8 +78,11 @@ type GraphState = {
   setFocusNode: (nodeId?: string) => void;
   clearFocus: () => void;
   updateNodeLabel: (nodeId: string, label: string) => void;
+  updateNodeStyle: (nodeId: string, style: Partial<NodeStyle>) => void;
+  setNodeKind: (nodeId: string, kind: NodeKind) => void;
   updateEdgeLabel: (edgeId: string, label: string) => void;
-  updateEdgeData: (edgeId: string, data: RelationshipData) => void;
+  updateEdgeData: (edgeId: string, data: Partial<RelationshipData>) => void;
+  updateEdgeStyle: (edgeId: string, style: Partial<EdgeStyle>) => void;
   addNode: (input?: {
     position?: { x: number; y: number };
     label?: string;
@@ -71,9 +93,23 @@ type GraphState = {
   redo: () => void;
 };
 
+const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
+  idea: { color: "#E2E8F0", shape: "rounded", size: "md" },
+  question: { color: "#FDE68A", shape: "circle", size: "md" },
+  evidence: { color: "#BBF7D0", shape: "rounded", size: "sm" },
+  goal: { color: "#BFDBFE", shape: "pill", size: "lg" },
+};
+
+const defaultEdgeStyle: EdgeStyle = {
+  color: "#94A3B8",
+  thickness: 2,
+  curvature: "smoothstep",
+};
+
 const defaultEdgeData: RelationshipData = {
   relationType: "related",
   direction: "forward",
+  style: defaultEdgeStyle,
 };
 
 const cloneGraph = (
@@ -82,14 +118,36 @@ const cloneGraph = (
 ): GraphSnapshot => structuredClone({ nodes, edges });
 
 const normalizeNodes = (nodes: Node<GraphNodeData>[]) =>
-  nodes.map((node) => ({
-    ...node,
-    type: node.type ?? "editable",
-    data: {
-      label: node.data?.label ?? "Untitled",
-      kind: node.data?.kind ?? "idea",
-    },
-  }));
+  nodes.map((node) => {
+    const kind = node.data?.kind ?? "idea";
+    return {
+      ...node,
+      type: node.type ?? "editable",
+      data: {
+        label: node.data?.label ?? "Untitled",
+        kind,
+        style: node.data?.style ?? nodeStyleDefaults[kind],
+      },
+    };
+  });
+
+const normalizeEdges = (edges: Edge<RelationshipData>[]) =>
+  edges.map((edge) => {
+    const mergedStyle = {
+      ...defaultEdgeStyle,
+      ...edge.data?.style,
+    };
+    const mergedData = {
+      relationType: edge.data?.relationType ?? "related",
+      direction: edge.data?.direction ?? "forward",
+      style: mergedStyle,
+    };
+    return {
+      ...edge,
+      data: mergedData,
+      ...markerForDirection(mergedData.direction, mergedStyle.color),
+    };
+  });
 
 const setHistory = (past: GraphSnapshot[], future: GraphSnapshot[]) => ({
   historyPast: past,
@@ -112,17 +170,20 @@ const shouldCommitNodeChanges = (changes: NodeChange[]) =>
 const shouldCommitEdgeChanges = (changes: EdgeChange[]) =>
   changes.some((change) => change.type !== "select");
 
-const markerForDirection = (direction: RelationshipDirection): {
-  markerStart?: { type: MarkerType };
-  markerEnd?: { type: MarkerType };
+const markerForDirection = (
+  direction: RelationshipDirection,
+  color: string
+): {
+  markerStart?: { type: MarkerType; color?: string };
+  markerEnd?: { type: MarkerType; color?: string };
 } => {
   if (direction === "backward") {
-    return { markerStart: { type: MarkerType.ArrowClosed } };
+    return { markerStart: { type: MarkerType.ArrowClosed, color } };
   }
   if (direction === "none") {
     return {};
   }
-  return { markerEnd: { type: MarkerType.ArrowClosed } };
+  return { markerEnd: { type: MarkerType.ArrowClosed, color } };
 };
 
 export const useGraphStore = create<GraphState>((set, get) => ({
@@ -146,7 +207,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     }),
   setEdges: (edges) =>
     set({
-      edges,
+      edges: normalizeEdges(edges),
       ...setHistory([], []),
     }),
   onNodesChange: (changes) =>
@@ -183,8 +244,11 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         {
           ...connection,
           label: "relationship",
-          data: defaultEdgeData,
-          ...markerForDirection(defaultEdgeData.direction ?? "forward"),
+          data: { ...defaultEdgeData, style: { ...defaultEdgeStyle } },
+          ...markerForDirection(
+            defaultEdgeData.direction ?? "forward",
+            defaultEdgeStyle.color
+          ),
         },
         state.edges
       ),
@@ -223,15 +287,68 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         ),
       };
     }),
+  updateNodeStyle: (nodeId, style) =>
+    set((state) => {
+      const target = state.nodes.find((node) => node.id === nodeId);
+      if (!target) {
+        return {};
+      }
+      const nextStyle = {
+        ...nodeStyleDefaults[target.data.kind],
+        ...target.data.style,
+        ...style,
+      };
+      return {
+        nodes: state.nodes.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, style: nextStyle } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  setNodeKind: (nodeId, kind) =>
+    set((state) => {
+      const target = state.nodes.find((node) => node.id === nodeId);
+      if (!target || target.data.kind === kind) {
+        return {};
+      }
+      return {
+        nodes: state.nodes.map((node) =>
+          node.id === nodeId
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  kind,
+                  style: nodeStyleDefaults[kind],
+                },
+              }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
   updateEdgeLabel: (edgeId, label) =>
     set((state) => {
       const target = state.edges.find((edge) => edge.id === edgeId);
-      if (!target || target.label === label) {
+      if (!target) {
+        return {};
+      }
+      const nextLabel = label.trim();
+      const normalizedLabel = nextLabel.length > 0 ? nextLabel : undefined;
+      if (target.label === normalizedLabel) {
         return {};
       }
       return {
         edges: state.edges.map((edge) =>
-          edge.id === edgeId ? { ...edge, label } : edge
+          edge.id === edgeId ? { ...edge, label: normalizedLabel } : edge
         ),
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges)],
@@ -245,18 +362,60 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       if (!target) {
         return {};
       }
-      const nextData = { ...target.data, ...data };
+      const nextData = {
+        ...target.data,
+        ...data,
+        style: {
+          ...defaultEdgeStyle,
+          ...target.data?.style,
+          ...data.style,
+        },
+      };
       return {
         edges: state.edges.map((edge) => {
-        if (edge.id !== edgeId) {
-          return edge;
-        }
-        return {
-          ...edge,
-          data: nextData,
-          ...markerForDirection(nextData.direction ?? "forward"),
-        };
-      }),
+          if (edge.id !== edgeId) {
+            return edge;
+          }
+          return {
+            ...edge,
+            data: nextData,
+            ...markerForDirection(
+              nextData.direction ?? "forward",
+              nextData.style?.color ?? defaultEdgeStyle.color
+            ),
+          };
+        }),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  updateEdgeStyle: (edgeId, style) =>
+    set((state) => {
+      const target = state.edges.find((edge) => edge.id === edgeId);
+      if (!target) {
+        return {};
+      }
+      const nextStyle = {
+        ...defaultEdgeStyle,
+        ...target.data?.style,
+        ...style,
+      };
+      const nextData = { ...target.data, style: nextStyle };
+      return {
+        edges: state.edges.map((edge) =>
+          edge.id === edgeId
+            ? {
+                ...edge,
+                data: nextData,
+                ...markerForDirection(
+                  nextData.direction ?? "forward",
+                  nextStyle.color
+                ),
+              }
+            : edge
+        ),
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges)],
           []
@@ -265,13 +424,15 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     }),
   addNode: (input) => {
     const id = crypto.randomUUID();
+    const kind = input?.kind ?? "idea";
     const nextNode: Node<GraphNodeData> = {
       id,
       type: "editable",
       position: input?.position ?? { x: 0, y: 0 },
       data: {
         label: input?.label ?? "New node",
-        kind: input?.kind ?? "idea",
+        kind,
+        style: nodeStyleDefaults[kind],
       },
     };
     set((state) => ({

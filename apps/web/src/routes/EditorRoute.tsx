@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import EditorToolbar from "../features/editor/EditorToolbar";
 import GraphCanvas from "../features/editor/GraphCanvas";
 import NodeLibrary from "../features/editor/NodeLibrary";
+import NodeStyleInspector from "../features/editor/NodeStyleInspector";
 import RelationshipInspector from "../features/editor/RelationshipInspector";
 import NodeSearch from "../features/search/NodeSearch";
 import { getGraph, updateGraph, createGraph } from "../features/cloud/graphApi";
@@ -107,6 +108,7 @@ export default function EditorRoute() {
         </section>
         <aside className="w-80 shrink-0 space-y-4">
           <NodeSearch />
+          <NodeStyleInspector />
           <RelationshipInspector />
           {!canSave ? (
             <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-600">

@@ -83,6 +83,7 @@ export default function GraphCanvas() {
         data: {
           label: node.data?.label ?? "Untitled",
           kind: (node.data?.kind ?? "idea") as NodeKind,
+          style: node.data?.style,
         },
         selected: node.id === selectedNodeId,
       })),
@@ -93,9 +94,21 @@ export default function GraphCanvas() {
     () =>
       focusedSubgraph.edges.map((edge) => ({
         ...edge,
+        style: edge.data?.style
+          ? {
+              stroke: edge.data.style.color,
+              strokeWidth: edge.data.style.thickness,
+            }
+          : undefined,
+        type: edge.data?.style?.curvature
+          ? edge.data.style.curvature === "bezier"
+            ? "default"
+            : edge.data.style.curvature
+          : edge.type,
         data: {
           relationType: edge.data?.relationType ?? "related",
           direction: edge.data?.direction ?? "forward",
+          style: edge.data?.style,
         },
       })),
     [focusedSubgraph.edges]
