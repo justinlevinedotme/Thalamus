@@ -15,10 +15,18 @@ import {
   TooltipTrigger,
 } from "../../components/ui/tooltip";
 import {
+  type EdgePadding,
   type NodeShape,
   type NodeSize,
   useGraphStore,
 } from "../../store/graphStore";
+
+const edgePaddings: Array<{ value: EdgePadding; label: string }> = [
+  { value: "none", label: "None" },
+  { value: "sm", label: "Small" },
+  { value: "md", label: "Medium" },
+  { value: "lg", label: "Large" },
+];
 
 const nodeShapes: Array<{ value: NodeShape; label: string; icon: ReactNode }> = [
   {
@@ -248,6 +256,37 @@ export default function NodeStyleInspector() {
                           </ToggleGroupItem>
                         </TooltipTrigger>
                         <TooltipContent>{size.label}</TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </ToggleGroup>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">Edge Padding</label>
+                  <ToggleGroup
+                    type="single"
+                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    value={selectedNode.data.style?.edgePadding ?? "none"}
+                    onValueChange={(value) => {
+                      if (!value) {
+                        return;
+                      }
+                      updateNodeStyle(selectedNode.id, { edgePadding: value as EdgePadding });
+                    }}
+                    aria-label="Edge padding"
+                  >
+                    {edgePaddings.map((padding) => (
+                      <Tooltip key={padding.value}>
+                        <TooltipTrigger asChild>
+                          <ToggleGroupItem
+                            value={padding.value}
+                            className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                            variant="ghost"
+                          >
+                            {padding.value === "none" ? "0" : padding.value.toUpperCase()}
+                          </ToggleGroupItem>
+                        </TooltipTrigger>
+                        <TooltipContent>{padding.label}</TooltipContent>
                       </Tooltip>
                     ))}
                   </ToggleGroup>

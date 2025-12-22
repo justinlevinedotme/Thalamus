@@ -1,12 +1,22 @@
 import { useEffect, useRef, useState } from "react";
-import { Handle, Position, type NodeProps } from "reactflow";
+import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "reactflow";
 
 import {
+  type EdgePadding,
   type NodeHandle,
   type NodeKind,
   type NodeStyle,
   useGraphStore,
 } from "../../../store/graphStore";
+
+const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
+  switch (padding) {
+    case "sm": return 8;
+    case "md": return 16;
+    case "lg": return 24;
+    default: return 0;
+  }
+};
 
 export default function EditableNode({
   id,
@@ -27,11 +37,17 @@ export default function EditableNode({
     updateNodeLabel,
     updateNodeBody,
   } = useGraphStore();
+  const updateNodeInternals = useUpdateNodeInternals();
   const isEditing = editingNodeId === id;
   const [draftLabel, setDraftLabel] = useState(data.label);
   const [draftBody, setDraftBody] = useState(data.body ?? "");
   const [isExpanded, setIsExpanded] = useState(Boolean(data.body));
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+
+  // Update node internals when edge padding changes so edges recalculate
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, data.style?.edgePadding, updateNodeInternals]);
 
   useEffect(() => {
     setDraftLabel(data.label);
@@ -135,6 +151,7 @@ export default function EditableNode({
 
   const targetHandles = data.targetHandles ?? [{ id: "target" }];
   const sourceHandles = data.sourceHandles ?? [{ id: "source" }];
+  const paddingOffset = edgePaddingToOffset(data.style?.edgePadding);
 
   return (
     <div
@@ -156,6 +173,7 @@ export default function EditableNode({
           position={Position.Left}
           style={{
             top: `${((index + 1) / (targetHandles.length + 1)) * 100}%`,
+            left: -paddingOffset,
           }}
         />
       ))}
@@ -209,6 +227,7 @@ export default function EditableNode({
           position={Position.Right}
           style={{
             top: `${((index + 1) / (sourceHandles.length + 1)) * 100}%`,
+            right: -paddingOffset,
           }}
         />
       ))}

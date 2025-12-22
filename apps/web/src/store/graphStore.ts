@@ -25,10 +25,13 @@ export type NodeHandle = {
   id: string;
 };
 
+export type EdgePadding = "none" | "sm" | "md" | "lg";
+
 export type NodeStyle = {
   color: string;
   shape: NodeShape;
   size: NodeSize;
+  edgePadding?: EdgePadding;
 };
 
 export type EdgeCurvature = "bezier" | "smoothstep" | "straight";
