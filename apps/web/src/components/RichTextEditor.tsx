@@ -56,7 +56,7 @@ export default function RichTextEditor({
     editorProps: {
       attributes: {
         class: cn(
-          "nodrag outline-none min-h-[1.5em]",
+          "nodrag outline-none",
           "[&_p]:m-0", // Remove paragraph margins
           className
         ),
@@ -88,7 +88,7 @@ export default function RichTextEditor({
       const html = editor.getHTML();
       // For single-line, strip paragraph tags and just get inner content
       if (singleLine) {
-        const content = html.replace(/<\/?p>/g, "").trim();
+        const content = html.replace(/<\/?p>/g, "");
         onChange(content);
       } else {
         onChange(html);

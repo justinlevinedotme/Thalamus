@@ -120,3 +120,14 @@
 .ProseMirror-focused {
   outline: none;
 }
+
+/* Match static node-rich-text display exactly */
+.node-rich-text,
+.tiptap,
+.ProseMirror {
+  line-height: 1.5;
+  font-size: inherit;
+  font-weight: inherit;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}

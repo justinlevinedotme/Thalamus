@@ -6,8 +6,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../components/ui/accordion";
+import { ColorPicker, ColorSwatch } from "../../components/ui/color-picker";
 import { IconPicker, NodeIconDisplay } from "../../components/ui/icon-picker";
-import { Input } from "../../components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 import {
   Tooltip,
@@ -201,21 +201,21 @@ export default function NodeStyleInspector() {
                 </button>
               </IconPicker>
               {selectedNode.data.style?.icon && selectedNode.data.style.icon.type !== "emoji" && (
-                <label className="relative flex h-7 w-7 cursor-pointer items-center justify-center">
-                  <span
-                    className="h-5 w-5 rounded-full border border-slate-300 shadow-sm"
-                    style={{ backgroundColor: selectedNode.data.style?.iconColor ?? "#1e293b" }}
-                  />
-                  <Input
-                    type="color"
-                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                    value={selectedNode.data.style?.iconColor ?? "#1e293b"}
-                    onChange={(event) =>
-                      updateNodeStyle(selectedNode.id, { iconColor: event.target.value })
-                    }
+                <ColorPicker
+                  value={selectedNode.data.style?.iconColor ?? "#1e293b"}
+                  onChange={(color) => updateNodeStyle(selectedNode.id, { iconColor: color })}
+                >
+                  <button
+                    type="button"
+                    className="flex h-7 w-7 cursor-pointer items-center justify-center"
                     title="Icon color"
-                  />
-                </label>
+                  >
+                    <ColorSwatch
+                      color={selectedNode.data.style?.iconColor ?? "#1e293b"}
+                      className="h-5 w-5"
+                    />
+                  </button>
+                </ColorPicker>
               )}
               {selectedNode.data.style?.icon && (
                 <button
@@ -240,14 +240,21 @@ export default function NodeStyleInspector() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
                   <label className="text-xs text-slate-500">Background</label>
-                  <Input
-                    type="color"
-                    className="h-7 w-24 cursor-pointer"
+                  <ColorPicker
                     value={selectedNode.data.style?.color ?? "#E2E8F0"}
-                    onChange={(event) =>
-                      updateNodeStyle(selectedNode.id, { color: event.target.value })
-                    }
-                  />
+                    onChange={(color) => updateNodeStyle(selectedNode.id, { color })}
+                  >
+                    <button
+                      type="button"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                      title="Background color"
+                    >
+                      <ColorSwatch
+                        color={selectedNode.data.style?.color ?? "#E2E8F0"}
+                        className="h-5 w-5"
+                      />
+                    </button>
+                  </ColorPicker>
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
@@ -354,26 +361,40 @@ export default function NodeStyleInspector() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
                   <label className="text-xs text-slate-500">Title</label>
-                  <Input
-                    type="color"
-                    className="h-7 w-24 cursor-pointer"
+                  <ColorPicker
                     value={selectedNode.data.style?.textColor ?? "#1e293b"}
-                    onChange={(event) =>
-                      updateNodeStyle(selectedNode.id, { textColor: event.target.value })
-                    }
-                  />
+                    onChange={(color) => updateNodeStyle(selectedNode.id, { textColor: color })}
+                  >
+                    <button
+                      type="button"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                      title="Title color"
+                    >
+                      <ColorSwatch
+                        color={selectedNode.data.style?.textColor ?? "#1e293b"}
+                        className="h-5 w-5"
+                      />
+                    </button>
+                  </ColorPicker>
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
                   <label className="text-xs text-slate-500">Body</label>
-                  <Input
-                    type="color"
-                    className="h-7 w-24 cursor-pointer"
+                  <ColorPicker
                     value={selectedNode.data.style?.bodyTextColor ?? selectedNode.data.style?.textColor ?? "#475569"}
-                    onChange={(event) =>
-                      updateNodeStyle(selectedNode.id, { bodyTextColor: event.target.value })
-                    }
-                  />
+                    onChange={(color) => updateNodeStyle(selectedNode.id, { bodyTextColor: color })}
+                  >
+                    <button
+                      type="button"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                      title="Body text color"
+                    >
+                      <ColorSwatch
+                        color={selectedNode.data.style?.bodyTextColor ?? selectedNode.data.style?.textColor ?? "#475569"}
+                        className="h-5 w-5"
+                      />
+                    </button>
+                  </ColorPicker>
                 </div>
               </div>
             </AccordionContent>

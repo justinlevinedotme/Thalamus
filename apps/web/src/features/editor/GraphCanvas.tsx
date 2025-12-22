@@ -482,8 +482,11 @@ export default function GraphCanvas() {
         onInit={handleInit}
         nodeTypes={nodeTypes}
         selectionOnDrag
-        multiSelectionKeyCode="Shift"
-        deleteKeyCode={["Backspace", "Delete"]}
+        multiSelectionKeyCode={editingNodeId ? null : "Shift"}
+        deleteKeyCode={editingNodeId ? null : ["Backspace", "Delete"]}
+        selectionKeyCode={editingNodeId ? null : "Shift"}
+        panActivationKeyCode={editingNodeId ? null : "Space"}
+        disableKeyboardA11y={!!editingNodeId}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onNodeDrag={handleNodeDrag}

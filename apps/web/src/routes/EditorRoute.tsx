@@ -42,6 +42,7 @@ export default function EditorRoute() {
     addNodeAtCenter,
     selectedNodeId,
     selectedEdgeId,
+    editingNodeId,
     isFocusMode,
     clearFocus,
     setFocusNode,
@@ -102,10 +103,12 @@ export default function EditorRoute() {
         return;
       }
 
-      // Ignore other shortcuts if user is typing in an input
+      // Ignore other shortcuts if user is typing in an input or editing a node
       if (
         event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement
+        event.target instanceof HTMLTextAreaElement ||
+        (event.target instanceof HTMLElement && event.target.isContentEditable) ||
+        editingNodeId
       ) {
         return;
       }
@@ -130,7 +133,7 @@ export default function EditorRoute() {
         return;
       }
     },
-    [addNodeAtCenter, searchOpen, canSave, handleSave]
+    [addNodeAtCenter, searchOpen, canSave, handleSave, editingNodeId]
   );
 
   useEffect(() => {
