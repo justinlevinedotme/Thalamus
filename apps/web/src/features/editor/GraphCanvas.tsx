@@ -140,6 +140,7 @@ export default function GraphCanvas() {
     focusNodeId,
     connectNodes,
     reconnectEdge,
+    deleteSelectedNodes,
   } = useGraphStore();
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
@@ -172,7 +173,16 @@ export default function GraphCanvas() {
   );
 
   const handleNodeClick = useCallback(
-    (_event: React.MouseEvent, node: { id: string }) => {
+    (event: React.MouseEvent, node: Node) => {
+      // Shift+Click: toggle node in multi-selection (let React Flow handle it)
+      if (event.shiftKey) {
+        // React Flow handles the multi-selection toggle automatically
+        // Just clear edge selection and update selectedNodeId to last clicked
+        selectEdge(undefined);
+        selectNode(node.id);
+        return;
+      }
+      // Regular click: select only this node
       selectNode(node.id);
       selectEdge(undefined);
     },
@@ -241,9 +251,9 @@ export default function GraphCanvas() {
           sourceHandles: node.data?.sourceHandles,
           targetHandles: node.data?.targetHandles,
         },
-        selected: node.id === selectedNodeId,
+        // Let React Flow manage selection state natively for multi-select support
       })),
-    [focusedSubgraph.nodes, selectedNodeId]
+    [focusedSubgraph.nodes]
   );
 
   const displayEdges = useMemo(
@@ -336,6 +346,15 @@ export default function GraphCanvas() {
           return;
         }
       }
+
+      // Handle delete key - delete all selected nodes
+      if (event.key === "Backspace" || event.key === "Delete") {
+        event.preventDefault();
+        deleteSelectedNodes();
+        return;
+      }
+
+      // Handle undo/redo
       if (!event.metaKey && !event.ctrlKey) {
         return;
       }
@@ -351,7 +370,7 @@ export default function GraphCanvas() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [editingNodeId, redo, undo]);
+  }, [deleteSelectedNodes, editingNodeId, redo, undo]);
 
   const handleDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();

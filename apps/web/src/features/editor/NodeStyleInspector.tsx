@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import {
   Accordion,
@@ -20,8 +20,21 @@ import {
   type EdgePadding,
   type NodeShape,
   type NodeSize,
+  type NodeStyle,
   useGraphStore,
 } from "../../store/graphStore";
+
+// Helper to check if all values in an array are the same
+function allSame<T>(values: T[]): boolean {
+  if (values.length === 0) return true;
+  return values.every((v) => v === values[0]);
+}
+
+// Helper to get common value or undefined if mixed
+function getCommonValue<T>(values: T[]): T | undefined {
+  if (values.length === 0) return undefined;
+  return allSame(values) ? values[0] : undefined;
+}
 
 const edgePaddings: Array<{ value: EdgePadding; label: string }> = [
   { value: "none", label: "None" },
@@ -78,17 +91,49 @@ const nodeSizes: Array<{ value: NodeSize; label: string }> = [
 export default function NodeStyleInspector() {
   const {
     nodes,
-    selectedNodeId,
     updateNodeStyle,
     updateNodeHandles,
+    updateSelectedNodesStyle,
   } = useGraphStore();
 
-  const selectedNode = nodes.find((node) => node.id === selectedNodeId);
+  // Get all selected nodes from React Flow's selection state
+  const selectedNodes = useMemo(
+    () => nodes.filter((node) => node.selected),
+    [nodes]
+  );
+
+  const isMultiSelect = selectedNodes.length > 1;
+  const selectedNode = selectedNodes.length === 1 ? selectedNodes[0] : null;
+
+  // For multi-selection, compute common values
+  const commonStyles = useMemo(() => {
+    if (selectedNodes.length === 0) return null;
+    const styles = selectedNodes.map((n) => n.data?.style);
+    return {
+      color: getCommonValue(styles.map((s) => s?.color)),
+      shape: getCommonValue(styles.map((s) => s?.shape)),
+      size: getCommonValue(styles.map((s) => s?.size)),
+      edgePadding: getCommonValue(styles.map((s) => s?.edgePadding)),
+      textColor: getCommonValue(styles.map((s) => s?.textColor)),
+      bodyTextColor: getCommonValue(styles.map((s) => s?.bodyTextColor)),
+      icon: getCommonValue(styles.map((s) => JSON.stringify(s?.icon))),
+      iconColor: getCommonValue(styles.map((s) => s?.iconColor)),
+    };
+  }, [selectedNodes]);
 
   const sourceHandleCount = selectedNode?.data?.sourceHandles?.length ?? 1;
   const targetHandleCount = selectedNode?.data?.targetHandles?.length ?? 1;
 
-  if (!selectedNode) {
+  // Style update handler - uses batch update for multi-select
+  const handleStyleUpdate = (style: Partial<NodeStyle>) => {
+    if (isMultiSelect) {
+      updateSelectedNodesStyle(style);
+    } else if (selectedNode) {
+      updateNodeStyle(selectedNode.id, style);
+    }
+  };
+
+  if (selectedNodes.length === 0) {
     return (
       <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-500">
         Select a node to edit its type and style.
@@ -96,140 +141,165 @@ export default function NodeStyleInspector() {
     );
   }
 
+  // Get current style values - use common styles for multi-select, single node styles for single select
+  const currentColor = isMultiSelect ? commonStyles?.color : selectedNode?.data?.style?.color;
+  const currentShape = isMultiSelect ? commonStyles?.shape : selectedNode?.data?.style?.shape;
+  const currentSize = isMultiSelect ? commonStyles?.size : selectedNode?.data?.style?.size;
+  const currentEdgePadding = isMultiSelect ? commonStyles?.edgePadding : selectedNode?.data?.style?.edgePadding;
+  const currentTextColor = isMultiSelect ? commonStyles?.textColor : selectedNode?.data?.style?.textColor;
+  const currentBodyTextColor = isMultiSelect ? commonStyles?.bodyTextColor : selectedNode?.data?.style?.bodyTextColor;
+  const currentIconColor = isMultiSelect ? commonStyles?.iconColor : selectedNode?.data?.style?.iconColor;
+
+  // For icon, we need to parse the JSON back
+  const currentIcon = isMultiSelect
+    ? (commonStyles?.icon ? JSON.parse(commonStyles.icon) : undefined)
+    : selectedNode?.data?.style?.icon;
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-        <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">Node Style</h2>
+        <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">
+          {isMultiSelect ? `${selectedNodes.length} nodes selected` : "Node Style"}
+        </h2>
 
-        {/* Handles - always visible */}
-        <div className="space-y-3 px-3 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Inputs</label>
-            <div className="flex items-center gap-1">
-              <button
-                className="flex h-7 w-7 items-center justify-center rounded-l-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
-                type="button"
-                onClick={() =>
-                  updateNodeHandles(
-                    selectedNode.id,
-                    sourceHandleCount,
-                    Math.max(0, targetHandleCount - 1)
-                  )
-                }
-                disabled={targetHandleCount <= 0}
-                aria-label="Decrease input handles"
-              >
-                −
-              </button>
-              <span className="flex h-7 w-8 items-center justify-center border-y border-slate-200 bg-white text-xs text-slate-700">
-                {targetHandleCount}
-              </span>
-              <button
-                className="flex h-7 w-7 items-center justify-center rounded-r-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
-                type="button"
-                onClick={() =>
-                  updateNodeHandles(
-                    selectedNode.id,
-                    sourceHandleCount,
-                    Math.min(8, targetHandleCount + 1)
-                  )
-                }
-                disabled={targetHandleCount >= 8}
-                aria-label="Increase input handles"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Outputs</label>
-            <div className="flex items-center gap-1">
-              <button
-                className="flex h-7 w-7 items-center justify-center rounded-l-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
-                type="button"
-                onClick={() =>
-                  updateNodeHandles(
-                    selectedNode.id,
-                    Math.max(0, sourceHandleCount - 1),
-                    targetHandleCount
-                  )
-                }
-                disabled={sourceHandleCount <= 0}
-                aria-label="Decrease output handles"
-              >
-                −
-              </button>
-              <span className="flex h-7 w-8 items-center justify-center border-y border-slate-200 bg-white text-xs text-slate-700">
-                {sourceHandleCount}
-              </span>
-              <button
-                className="flex h-7 w-7 items-center justify-center rounded-r-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
-                type="button"
-                onClick={() =>
-                  updateNodeHandles(
-                    selectedNode.id,
-                    Math.min(8, sourceHandleCount + 1),
-                    targetHandleCount
-                  )
-                }
-                disabled={sourceHandleCount >= 8}
-                aria-label="Increase output handles"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Icon</label>
-            <div className="flex items-center gap-1">
-              <IconPicker
-                value={selectedNode.data.style?.icon}
-                onChange={(icon) => updateNodeStyle(selectedNode.id, { icon })}
-              >
+        {/* Handles - only show for single selection */}
+        {!isMultiSelect && selectedNode && (
+          <div className="space-y-3 px-3 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <label className="text-xs font-semibold uppercase text-slate-500">Inputs</label>
+              <div className="flex items-center gap-1">
                 <button
+                  className="flex h-7 w-7 items-center justify-center rounded-l-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
                   type="button"
-                  className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
-                  style={{ color: selectedNode.data.style?.iconColor ?? "#1e293b" }}
+                  onClick={() =>
+                    updateNodeHandles(
+                      selectedNode.id,
+                      sourceHandleCount,
+                      Math.max(0, targetHandleCount - 1)
+                    )
+                  }
+                  disabled={targetHandleCount <= 0}
+                  aria-label="Decrease input handles"
                 >
-                  {selectedNode.data.style?.icon ? (
-                    <NodeIconDisplay icon={selectedNode.data.style.icon} className="h-4 w-4" />
-                  ) : (
-                    <Smile className="h-4 w-4 text-slate-400" />
-                  )}
+                  −
                 </button>
-              </IconPicker>
-              {selectedNode.data.style?.icon && selectedNode.data.style.icon.type !== "emoji" && (
-                <ColorPicker
-                  value={selectedNode.data.style?.iconColor ?? "#1e293b"}
-                  onChange={(color) => updateNodeStyle(selectedNode.id, { iconColor: color })}
+                <span className="flex h-7 w-8 items-center justify-center border-y border-slate-200 bg-white text-xs text-slate-700">
+                  {targetHandleCount}
+                </span>
+                <button
+                  className="flex h-7 w-7 items-center justify-center rounded-r-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                  type="button"
+                  onClick={() =>
+                    updateNodeHandles(
+                      selectedNode.id,
+                      sourceHandleCount,
+                      Math.min(8, targetHandleCount + 1)
+                    )
+                  }
+                  disabled={targetHandleCount >= 8}
+                  aria-label="Increase input handles"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <label className="text-xs font-semibold uppercase text-slate-500">Outputs</label>
+              <div className="flex items-center gap-1">
+                <button
+                  className="flex h-7 w-7 items-center justify-center rounded-l-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                  type="button"
+                  onClick={() =>
+                    updateNodeHandles(
+                      selectedNode.id,
+                      Math.max(0, sourceHandleCount - 1),
+                      targetHandleCount
+                    )
+                  }
+                  disabled={sourceHandleCount <= 0}
+                  aria-label="Decrease output handles"
+                >
+                  −
+                </button>
+                <span className="flex h-7 w-8 items-center justify-center border-y border-slate-200 bg-white text-xs text-slate-700">
+                  {sourceHandleCount}
+                </span>
+                <button
+                  className="flex h-7 w-7 items-center justify-center rounded-r-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                  type="button"
+                  onClick={() =>
+                    updateNodeHandles(
+                      selectedNode.id,
+                      Math.min(8, sourceHandleCount + 1),
+                      targetHandleCount
+                    )
+                  }
+                  disabled={sourceHandleCount >= 8}
+                  aria-label="Increase output handles"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <label className="text-xs font-semibold uppercase text-slate-500">Icon</label>
+              <div className="flex items-center gap-1">
+                <IconPicker
+                  value={currentIcon}
+                  onChange={(icon) => handleStyleUpdate({ icon })}
                 >
                   <button
                     type="button"
-                    className="flex h-7 w-7 cursor-pointer items-center justify-center"
-                    title="Icon color"
+                    className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
+                    style={{ color: currentIconColor ?? "#1e293b" }}
                   >
-                    <ColorSwatch
-                      color={selectedNode.data.style?.iconColor ?? "#1e293b"}
-                      className="h-5 w-5"
-                    />
+                    {currentIcon ? (
+                      <NodeIconDisplay icon={currentIcon} className="h-4 w-4" />
+                    ) : (
+                      <Smile className="h-4 w-4 text-slate-400" />
+                    )}
                   </button>
-                </ColorPicker>
-              )}
-              {selectedNode.data.style?.icon && (
-                <button
-                  className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
-                  type="button"
-                  onClick={() => updateNodeStyle(selectedNode.id, { icon: undefined, iconColor: undefined })}
-                  aria-label="Clear icon"
-                >
-                  ×
-                </button>
-              )}
+                </IconPicker>
+                {currentIcon && currentIcon.type !== "emoji" && (
+                  <ColorPicker
+                    value={currentIconColor ?? "#1e293b"}
+                    onChange={(color) => handleStyleUpdate({ iconColor: color })}
+                  >
+                    <button
+                      type="button"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                      title="Icon color"
+                    >
+                      <ColorSwatch
+                        color={currentIconColor ?? "#1e293b"}
+                        className="h-5 w-5"
+                      />
+                    </button>
+                  </ColorPicker>
+                )}
+                {currentIcon && (
+                  <button
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                    type="button"
+                    onClick={() => handleStyleUpdate({ icon: undefined, iconColor: undefined })}
+                    aria-label="Clear icon"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Multi-select info message */}
+        {isMultiSelect && (
+          <div className="px-3 py-2 text-xs text-slate-500">
+            Style changes apply to all selected nodes
+          </div>
+        )}
 
         <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
           <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">
@@ -241,18 +311,19 @@ export default function NodeStyleInspector() {
                 <div className="flex items-center justify-between gap-4">
                   <label className="text-xs text-slate-500">Background</label>
                   <ColorPicker
-                    value={selectedNode.data.style?.color ?? "#E2E8F0"}
-                    onChange={(color) => updateNodeStyle(selectedNode.id, { color })}
+                    value={currentColor ?? "#E2E8F0"}
+                    onChange={(color) => handleStyleUpdate({ color })}
                   >
                     <button
                       type="button"
                       className="flex h-7 w-7 cursor-pointer items-center justify-center"
                       title="Background color"
                     >
-                      <ColorSwatch
-                        color={selectedNode.data.style?.color ?? "#E2E8F0"}
-                        className="h-5 w-5"
-                      />
+                      {currentColor ? (
+                        <ColorSwatch color={currentColor} className="h-5 w-5" />
+                      ) : (
+                        <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                      )}
                     </button>
                   </ColorPicker>
                 </div>
@@ -262,12 +333,12 @@ export default function NodeStyleInspector() {
                   <ToggleGroup
                     type="single"
                     className="h-7 rounded-md border border-slate-200 bg-white"
-                    value={selectedNode.data.style?.shape ?? "rounded"}
+                    value={currentShape ?? ""}
                     onValueChange={(value) => {
                       if (!value) {
                         return;
                       }
-                      updateNodeStyle(selectedNode.id, { shape: value as NodeShape });
+                      handleStyleUpdate({ shape: value as NodeShape });
                     }}
                     aria-label="Node shape"
                   >
@@ -293,12 +364,12 @@ export default function NodeStyleInspector() {
                   <ToggleGroup
                     type="single"
                     className="h-7 rounded-md border border-slate-200 bg-white"
-                    value={selectedNode.data.style?.size ?? "md"}
+                    value={currentSize ?? ""}
                     onValueChange={(value) => {
                       if (!value) {
                         return;
                       }
-                      updateNodeStyle(selectedNode.id, { size: value as NodeSize });
+                      handleStyleUpdate({ size: value as NodeSize });
                     }}
                     aria-label="Node size"
                   >
@@ -324,12 +395,12 @@ export default function NodeStyleInspector() {
                   <ToggleGroup
                     type="single"
                     className="h-7 rounded-md border border-slate-200 bg-white"
-                    value={selectedNode.data.style?.edgePadding ?? "none"}
+                    value={currentEdgePadding ?? ""}
                     onValueChange={(value) => {
                       if (!value) {
                         return;
                       }
-                      updateNodeStyle(selectedNode.id, { edgePadding: value as EdgePadding });
+                      handleStyleUpdate({ edgePadding: value as EdgePadding });
                     }}
                     aria-label="Edge padding"
                   >
@@ -362,18 +433,19 @@ export default function NodeStyleInspector() {
                 <div className="flex items-center justify-between gap-4">
                   <label className="text-xs text-slate-500">Title</label>
                   <ColorPicker
-                    value={selectedNode.data.style?.textColor ?? "#1e293b"}
-                    onChange={(color) => updateNodeStyle(selectedNode.id, { textColor: color })}
+                    value={currentTextColor ?? "#1e293b"}
+                    onChange={(color) => handleStyleUpdate({ textColor: color })}
                   >
                     <button
                       type="button"
                       className="flex h-7 w-7 cursor-pointer items-center justify-center"
                       title="Title color"
                     >
-                      <ColorSwatch
-                        color={selectedNode.data.style?.textColor ?? "#1e293b"}
-                        className="h-5 w-5"
-                      />
+                      {currentTextColor ? (
+                        <ColorSwatch color={currentTextColor} className="h-5 w-5" />
+                      ) : (
+                        <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                      )}
                     </button>
                   </ColorPicker>
                 </div>
@@ -381,18 +453,19 @@ export default function NodeStyleInspector() {
                 <div className="flex items-center justify-between gap-4">
                   <label className="text-xs text-slate-500">Body</label>
                   <ColorPicker
-                    value={selectedNode.data.style?.bodyTextColor ?? selectedNode.data.style?.textColor ?? "#475569"}
-                    onChange={(color) => updateNodeStyle(selectedNode.id, { bodyTextColor: color })}
+                    value={currentBodyTextColor ?? currentTextColor ?? "#475569"}
+                    onChange={(color) => handleStyleUpdate({ bodyTextColor: color })}
                   >
                     <button
                       type="button"
                       className="flex h-7 w-7 cursor-pointer items-center justify-center"
                       title="Body text color"
                     >
-                      <ColorSwatch
-                        color={selectedNode.data.style?.bodyTextColor ?? selectedNode.data.style?.textColor ?? "#475569"}
-                        className="h-5 w-5"
-                      />
+                      {currentBodyTextColor || currentTextColor ? (
+                        <ColorSwatch color={currentBodyTextColor ?? currentTextColor ?? "#475569"} className="h-5 w-5" />
+                      ) : (
+                        <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                      )}
                     </button>
                   </ColorPicker>
                 </div>

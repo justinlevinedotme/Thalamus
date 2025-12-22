@@ -147,6 +147,8 @@ type GraphState = {
   connectNodes: (sourceId: string, targetId: string) => void;
   updateAllNodeStyles: (style: Partial<NodeStyle>) => void;
   updateAllEdgeStyles: (style: Partial<EdgeStyle>) => void;
+  updateSelectedNodesStyle: (style: Partial<NodeStyle>) => void;
+  deleteSelectedNodes: () => void;
   updateEdgeControlPoints: (edgeId: string, controlPoints: ControlPoint[]) => void;
   clearAllEdgeLabels: () => void;
   autoLayout: (options?: LayoutOptions) => Promise<void>;
@@ -832,6 +834,57 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             ),
           };
         }),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  updateSelectedNodesStyle: (style) =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length === 0) {
+        return {};
+      }
+      return {
+        nodes: state.nodes.map((node) =>
+          node.selected
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  style: {
+                    ...nodeStyleDefaults[node.data.kind],
+                    ...node.data.style,
+                    ...style,
+                  },
+                },
+              }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  deleteSelectedNodes: () =>
+    set((state) => {
+      const selectedNodeIds = new Set(
+        state.nodes.filter((n) => n.selected).map((n) => n.id)
+      );
+      if (selectedNodeIds.size === 0) {
+        return {};
+      }
+      // Remove selected nodes and any edges connected to them
+      const nextNodes = state.nodes.filter((n) => !selectedNodeIds.has(n.id));
+      const nextEdges = state.edges.filter(
+        (e) => !selectedNodeIds.has(e.source) && !selectedNodeIds.has(e.target)
+      );
+      return {
+        nodes: nextNodes,
+        edges: nextEdges,
+        selectedNodeId: undefined,
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges)],
           []
