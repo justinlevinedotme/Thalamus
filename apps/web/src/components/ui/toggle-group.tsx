@@ -23,16 +23,24 @@ const toggleGroupVariants = cva("inline-flex rounded-md", {
   },
 });
 
+// Context to track selected value
+const ToggleGroupContext = React.createContext<{
+  value?: string | string[];
+  type?: "single" | "multiple";
+}>({});
+
 const ToggleGroup = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
     VariantProps<typeof toggleGroupVariants>
 >(({ className, variant, size, ...props }, ref) => (
-  <ToggleGroupPrimitive.Root
-    ref={ref}
-    className={cn(toggleGroupVariants({ variant, size, className }))}
-    {...props}
-  />
+  <ToggleGroupContext.Provider value={{ value: props.value, type: props.type }}>
+    <ToggleGroupPrimitive.Root
+      ref={ref}
+      className={cn(toggleGroupVariants({ variant, size, className }))}
+      {...props}
+    />
+  </ToggleGroupContext.Provider>
 ));
 ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
 
@@ -40,17 +48,26 @@ const ToggleGroupItem = React.forwardRef<
   React.ElementRef<typeof ToggleGroupPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
     VariantProps<typeof buttonVariants>
->(({ className, variant, size, ...props }, ref) => (
-  <ToggleGroupPrimitive.Item
-    ref={ref}
-    className={cn(
-      buttonVariants({ variant, size }),
-      "data-[state=on]:bg-slate-900 data-[state=on]:text-slate-50 data-[state=on]:hover:bg-slate-900/90",
-      className
-    )}
-    {...props}
-  />
-));
+>(({ className, variant, size, value, ...props }, ref) => {
+  const context = React.useContext(ToggleGroupContext);
+
+  const isSelected = context.type === "multiple"
+    ? Array.isArray(context.value) && context.value.includes(value)
+    : context.value === value;
+
+  return (
+    <ToggleGroupPrimitive.Item
+      ref={ref}
+      value={value}
+      className={cn(
+        buttonVariants({ variant, size }),
+        isSelected && "!bg-slate-200 !text-slate-900",
+        className
+      )}
+      {...props}
+    />
+  );
+});
 ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName;
 
 export { ToggleGroup, ToggleGroupItem };

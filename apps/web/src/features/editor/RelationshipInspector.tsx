@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowLeftRight, ArrowRight, Minus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { BezierIcon } from "../../components/icons/BezierIcon";
@@ -23,7 +23,8 @@ import {
   type EdgeCurvature,
   type EdgeLabelStyle,
   type EdgeLineStyle,
-  type RelationshipDirection,
+  type EdgeMarkerSize,
+  type EdgeMarkerType,
   useGraphStore,
 } from "../../store/graphStore";
 
@@ -34,16 +35,6 @@ const defaultLabelStyle: EdgeLabelStyle = {
   showBorder: true,
 };
 
-const directions: Array<{
-  value: RelationshipDirection;
-  label: string;
-  icon: ReactNode;
-}> = [
-  { value: "forward", label: "Forward", icon: <ArrowRight className="h-4 w-4" /> },
-  { value: "backward", label: "Backward", icon: <ArrowLeft className="h-4 w-4" /> },
-  { value: "both", label: "Both", icon: <ArrowLeftRight className="h-4 w-4" /> },
-  { value: "none", label: "None", icon: <Minus className="h-4 w-4" /> },
-];
 const curvatures: Array<{
   value: EdgeCurvature;
   label: string;
@@ -82,12 +73,69 @@ const lineStyles: Array<{ value: EdgeLineStyle; label: string; icon: ReactNode }
   },
 ];
 
+const markerTypes: Array<{ value: EdgeMarkerType; label: string; icon: ReactNode }> = [
+  {
+    value: "arrow",
+    label: "Arrow",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M3 8h10M10 4l4 4-4 4" />
+      </svg>
+    ),
+  },
+  {
+    value: "arrowclosed",
+    label: "Filled Arrow",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="1">
+        <path d="M3 8h7" fill="none" />
+        <path d="M10 4l4 4-4 4z" />
+      </svg>
+    ),
+  },
+  {
+    value: "circle",
+    label: "Circle",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <line x1="2" y1="8" x2="9" y2="8" />
+        <circle cx="12" cy="8" r="3" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    value: "diamond",
+    label: "Diamond",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="1">
+        <line x1="2" y1="8" x2="8" y2="8" fill="none" />
+        <path d="M12 5l3 3-3 3-3-3z" />
+      </svg>
+    ),
+  },
+  {
+    value: "none",
+    label: "None",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="2" y1="8" x2="14" y2="8" />
+      </svg>
+    ),
+  },
+];
+
+const markerSizes: Array<{ value: EdgeMarkerSize; label: string }> = [
+  { value: "xs", label: "Extra Small" },
+  { value: "sm", label: "Small" },
+  { value: "md", label: "Medium" },
+  { value: "lg", label: "Large" },
+];
+
 export default function RelationshipInspector() {
   const {
     edges,
     selectedEdgeId,
     updateEdgeLabel,
-    updateEdgeData,
     updateEdgeStyle,
   } = useGraphStore();
 
@@ -182,7 +230,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={String(thickness.value)}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
                             variant="ghost"
                           >
                             <svg
@@ -227,7 +275,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={style.value}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
                             variant="ghost"
                           >
                             {style.icon}
@@ -260,7 +308,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={curvature.value}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
                             variant="ghost"
                           >
                             {curvature.icon}
@@ -281,37 +329,105 @@ export default function RelationshipInspector() {
               Arrow
             </AccordionTrigger>
             <AccordionContent className="px-3 pb-3 pt-0">
-              <div className="flex items-center justify-between gap-4">
-                <label className="text-xs text-slate-500">Direction</label>
-                <ToggleGroup
-                  type="single"
-                  className="h-7 rounded-md border border-slate-200 bg-white"
-                  value={selectedEdge.data?.direction ?? "forward"}
-                  onValueChange={(value) => {
-                    if (!value) {
-                      return;
-                    }
-                    updateEdgeData(selectedEdge.id, {
-                      direction: value as RelationshipDirection,
-                    });
-                  }}
-                  aria-label="Arrow direction"
-                >
-                  {directions.map((direction) => (
-                    <Tooltip key={direction.value}>
-                      <TooltipTrigger asChild>
-                        <ToggleGroupItem
-                          value={direction.value}
-                          className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
-                          variant="ghost"
-                        >
-                          {direction.icon}
-                        </ToggleGroupItem>
-                      </TooltipTrigger>
-                      <TooltipContent>{direction.label}</TooltipContent>
-                    </Tooltip>
-                  ))}
-                </ToggleGroup>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">End Type</label>
+                  <ToggleGroup
+                    type="single"
+                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    value={selectedEdge.data?.style?.markerEnd ?? "arrow"}
+                    onValueChange={(value) => {
+                      if (!value) {
+                        return;
+                      }
+                      updateEdgeStyle(selectedEdge.id, {
+                        markerEnd: value as EdgeMarkerType,
+                      });
+                    }}
+                    aria-label="End marker type"
+                  >
+                    {markerTypes.map((marker) => (
+                      <Tooltip key={marker.value}>
+                        <TooltipTrigger asChild>
+                          <ToggleGroupItem
+                            value={marker.value}
+                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700"
+                            variant="ghost"
+                          >
+                            {marker.icon}
+                          </ToggleGroupItem>
+                        </TooltipTrigger>
+                        <TooltipContent>{marker.label}</TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </ToggleGroup>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">Start Type</label>
+                  <ToggleGroup
+                    type="single"
+                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    value={selectedEdge.data?.style?.markerStart ?? "none"}
+                    onValueChange={(value) => {
+                      if (!value) {
+                        return;
+                      }
+                      updateEdgeStyle(selectedEdge.id, {
+                        markerStart: value as EdgeMarkerType,
+                      });
+                    }}
+                    aria-label="Start marker type"
+                  >
+                    {markerTypes.map((marker) => (
+                      <Tooltip key={marker.value}>
+                        <TooltipTrigger asChild>
+                          <ToggleGroupItem
+                            value={marker.value}
+                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700"
+                            variant="ghost"
+                          >
+                            {marker.icon}
+                          </ToggleGroupItem>
+                        </TooltipTrigger>
+                        <TooltipContent>{marker.label}</TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </ToggleGroup>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">Size</label>
+                  <ToggleGroup
+                    type="single"
+                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    value={selectedEdge.data?.style?.markerSize ?? "md"}
+                    onValueChange={(value) => {
+                      if (!value) {
+                        return;
+                      }
+                      updateEdgeStyle(selectedEdge.id, {
+                        markerSize: value as EdgeMarkerSize,
+                      });
+                    }}
+                    aria-label="Marker size"
+                  >
+                    {markerSizes.map((size) => (
+                      <Tooltip key={size.value}>
+                        <TooltipTrigger asChild>
+                          <ToggleGroupItem
+                            value={size.value}
+                            className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700"
+                            variant="ghost"
+                          >
+                            {size.value.toUpperCase()}
+                          </ToggleGroupItem>
+                        </TooltipTrigger>
+                        <TooltipContent>{size.label}</TooltipContent>
+                      </Tooltip>
+                    ))}
+                  </ToggleGroup>
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>

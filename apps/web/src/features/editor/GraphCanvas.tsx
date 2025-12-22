@@ -11,6 +11,9 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 
 import {
+  type EdgeMarkerSize,
+  type EdgeMarkerType,
+  getMarkerId,
   type NodeKind,
   type RelationshipData,
   useGraphStore,
@@ -18,6 +21,100 @@ import {
 import { nodeTypes } from "./nodeTypes";
 import { getFocusSubgraph } from "../search/focus";
 import CanvasContextMenu, { type ContextMenuState } from "./CanvasContextMenu";
+
+// Custom marker definitions for circle and diamond
+function CustomMarkerDefs({ edges }: { edges: Array<{ data?: RelationshipData }> }) {
+  // Collect unique marker configurations needed
+  const markerConfigs = useMemo(() => {
+    const configs = new Set<string>();
+
+    for (const edge of edges) {
+      const style = edge.data?.style;
+      const color = style?.color ?? "#94A3B8";
+      const size = style?.markerSize ?? "md";
+
+      const customMarkerTypes: EdgeMarkerType[] = ["circle", "diamond"];
+      const markers = [style?.markerStart, style?.markerEnd].filter(Boolean) as EdgeMarkerType[];
+
+      for (const marker of markers) {
+        if (customMarkerTypes.includes(marker)) {
+          configs.add(JSON.stringify({ type: marker, color, size }));
+        }
+      }
+    }
+
+    return Array.from(configs).map((c) => JSON.parse(c) as { type: EdgeMarkerType; color: string; size: EdgeMarkerSize });
+  }, [edges]);
+
+  const sizeToValue = (size: EdgeMarkerSize): number => {
+    switch (size) {
+      case "xs": return 8;
+      case "sm": return 15;
+      case "lg": return 35;
+      default: return 25;
+    }
+  };
+
+  if (markerConfigs.length === 0) return null;
+
+  return (
+    <svg style={{ position: "absolute", top: 0, left: 0, width: 0, height: 0 }}>
+      <defs>
+        {markerConfigs.map(({ type, color, size }) => {
+          const id = getMarkerId(type, color, size);
+          const markerSize = sizeToValue(size);
+
+          if (type === "circle") {
+            return (
+              <marker
+                key={id}
+                id={id}
+                markerWidth={markerSize}
+                markerHeight={markerSize}
+                viewBox={`0 0 ${markerSize} ${markerSize}`}
+                refX={markerSize / 2}
+                refY={markerSize / 2}
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <circle
+                  cx={markerSize / 2}
+                  cy={markerSize / 2}
+                  r={markerSize / 2 - 1}
+                  fill={color}
+                />
+              </marker>
+            );
+          }
+
+          if (type === "diamond") {
+            const half = markerSize / 2;
+            return (
+              <marker
+                key={id}
+                id={id}
+                markerWidth={markerSize}
+                markerHeight={markerSize}
+                viewBox={`0 0 ${markerSize} ${markerSize}`}
+                refX={half}
+                refY={half}
+                orient="auto"
+                markerUnits="userSpaceOnUse"
+              >
+                <path
+                  d={`M ${half} 0 L ${markerSize} ${half} L ${half} ${markerSize} L 0 ${half} Z`}
+                  fill={color}
+                />
+              </marker>
+            );
+          }
+
+          return null;
+        })}
+      </defs>
+    </svg>
+  );
+}
 
 export default function GraphCanvas() {
   const {
@@ -161,6 +258,9 @@ export default function GraphCanvas() {
             strokeDasharray: lineStyle === "dashed" ? "8 4" : undefined,
             filter: isSelected ? "drop-shadow(0 0 3px rgba(100, 116, 139, 0.5))" : undefined,
           },
+          // Explicitly pass through marker properties
+          markerStart: edge.markerStart,
+          markerEnd: edge.markerEnd,
           labelStyle: labelStyle
             ? {
                 fill: labelStyle.textColor,
@@ -365,6 +465,7 @@ export default function GraphCanvas() {
 
   return (
     <div className="h-full w-full" id="graph-canvas">
+      <CustomMarkerDefs edges={edges} />
       <ReactFlow
         nodes={displayNodes}
         edges={displayEdges}

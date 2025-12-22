@@ -33,6 +33,8 @@ export type NodeStyle = {
 
 export type EdgeCurvature = "bezier" | "smoothstep" | "straight";
 export type EdgeLineStyle = "solid" | "dashed";
+export type EdgeMarkerType = "arrow" | "arrowclosed" | "circle" | "diamond" | "none";
+export type EdgeMarkerSize = "xs" | "sm" | "md" | "lg";
 
 export type EdgeLabelStyle = {
   backgroundColor: string;
@@ -41,12 +43,21 @@ export type EdgeLabelStyle = {
   showBorder: boolean;
 };
 
+export type ControlPoint = {
+  x: number;
+  y: number;
+};
+
 export type EdgeStyle = {
   color: string;
   thickness: number;
   curvature: EdgeCurvature;
   lineStyle: EdgeLineStyle;
   labelStyle?: EdgeLabelStyle;
+  controlPoints?: ControlPoint[];
+  markerStart?: EdgeMarkerType;
+  markerEnd?: EdgeMarkerType;
+  markerSize?: EdgeMarkerSize;
 };
 
 export type RelationshipData = {
@@ -124,6 +135,7 @@ type GraphState = {
   connectNodes: (sourceId: string, targetId: string) => void;
   updateAllNodeStyles: (style: Partial<NodeStyle>) => void;
   updateAllEdgeStyles: (style: Partial<EdgeStyle>) => void;
+  updateEdgeControlPoints: (edgeId: string, controlPoints: ControlPoint[]) => void;
   clearAllEdgeLabels: () => void;
   autoLayout: (options?: LayoutOptions) => Promise<void>;
   undo: () => void;
@@ -163,8 +175,11 @@ const normalizeNodes = (nodes: Node<GraphNodeData>[]) =>
       type: node.type ?? "editable",
       data: {
         label: node.data?.label ?? "Untitled",
+        body: node.data?.body,
         kind,
         style: node.data?.style ?? nodeStyleDefaults[kind],
+        sourceHandles: node.data?.sourceHandles,
+        targetHandles: node.data?.targetHandles,
       },
     };
   });
@@ -183,7 +198,7 @@ const normalizeEdges = (edges: Edge<RelationshipData>[]) =>
     return {
       ...edge,
       data: mergedData,
-      ...markerForDirection(mergedData.direction, mergedStyle.color),
+      ...markerForDirection(mergedData.direction, mergedStyle.color, mergedStyle),
     };
   });
 
@@ -208,31 +223,88 @@ const shouldCommitNodeChanges = (changes: NodeChange[]) =>
 const shouldCommitEdgeChanges = (changes: EdgeChange[]) =>
   changes.some((change) => change.type !== "select");
 
+type MarkerConfig = { type: MarkerType; color?: string; width?: number; height?: number } | string | undefined;
+
+const markerSizeToScale = (size: EdgeMarkerSize): number => {
+  switch (size) {
+    case "xs":
+      return 8;
+    case "sm":
+      return 15;
+    case "lg":
+      return 35;
+    default:
+      return 25;
+  }
+};
+
+// Generate a unique marker ID based on type, color and size
+export const getMarkerId = (markerType: EdgeMarkerType, color: string, size: EdgeMarkerSize): string => {
+  // Encode color to be URL-safe (remove #)
+  const colorId = color.replace("#", "");
+  return `marker-${markerType}-${colorId}-${size}`;
+};
+
 const markerForDirection = (
   direction: RelationshipDirection,
-  color: string
+  color: string,
+  style?: EdgeStyle
 ): {
-  markerStart?: { type: MarkerType; color?: string } | undefined;
-  markerEnd?: { type: MarkerType; color?: string } | undefined;
+  markerStart?: MarkerConfig;
+  markerEnd?: MarkerConfig;
 } => {
-  if (direction === "backward") {
-    return {
-      markerStart: { type: MarkerType.ArrowClosed, color },
-      markerEnd: undefined,
-    };
-  }
-  if (direction === "both") {
-    return {
-      markerStart: { type: MarkerType.ArrowClosed, color },
-      markerEnd: { type: MarkerType.ArrowClosed, color },
-    };
-  }
-  if (direction === "none") {
+  const markerSize = markerSizeToScale(style?.markerSize ?? "md");
+  const size = style?.markerSize ?? "md";
+
+  // Get custom marker types from style, with fallbacks based on direction
+  const getStartMarkerType = (): EdgeMarkerType | undefined => {
+    if (style?.markerStart) {
+      return style.markerStart === "none" ? undefined : style.markerStart;
+    }
+    // Default behavior based on direction
+    if (direction === "backward" || direction === "both") {
+      return "arrowclosed";
+    }
+    return undefined;
+  };
+
+  const getEndMarkerType = (): EdgeMarkerType | undefined => {
+    if (style?.markerEnd) {
+      return style.markerEnd === "none" ? undefined : style.markerEnd;
+    }
+    // Default behavior based on direction
+    if (direction === "forward" || direction === "both") {
+      return "arrowclosed";
+    }
+    return undefined;
+  };
+
+  if (direction === "none" && !style?.markerStart && !style?.markerEnd) {
     return { markerStart: undefined, markerEnd: undefined };
   }
+
+  const startType = getStartMarkerType();
+  const endType = getEndMarkerType();
+
+  // For built-in arrow types, use React Flow's MarkerType
+  // For custom types (circle, diamond), use custom marker IDs
+  const getMarkerConfig = (type: EdgeMarkerType | undefined): MarkerConfig => {
+    if (!type) return undefined;
+
+    if (type === "arrow") {
+      return { type: MarkerType.Arrow, color, width: markerSize, height: markerSize };
+    }
+    if (type === "arrowclosed") {
+      return { type: MarkerType.ArrowClosed, color, width: markerSize, height: markerSize };
+    }
+    // For circle and diamond, use custom marker ID
+    // React Flow expects just the marker ID, it will wrap it in url(#...) internally
+    return getMarkerId(type, color, size);
+  };
+
   return {
-    markerStart: undefined,
-    markerEnd: { type: MarkerType.ArrowClosed, color },
+    markerStart: getMarkerConfig(startType),
+    markerEnd: getMarkerConfig(endType),
   };
 };
 
@@ -297,7 +369,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           data: { ...defaultEdgeData, style: { ...defaultEdgeStyle } },
           ...markerForDirection(
             defaultEdgeData.direction ?? "forward",
-            defaultEdgeStyle.color
+            defaultEdgeStyle.color,
+            defaultEdgeStyle
           ),
         },
         state.edges
@@ -484,7 +557,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             data: nextData,
             ...markerForDirection(
               nextData.direction ?? "forward",
-              nextData.style?.color ?? defaultEdgeStyle.color
+              nextData.style?.color ?? defaultEdgeStyle.color,
+              nextData.style
             ),
           };
         }),
@@ -514,7 +588,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
                 data: nextData,
                 ...markerForDirection(
                   nextData.direction ?? "forward",
-                  nextStyle.color
+                  nextStyle.color,
+                  nextStyle
                 ),
               }
             : edge
@@ -681,7 +756,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         data: { ...defaultEdgeData, style: { ...defaultEdgeStyle } },
         ...markerForDirection(
           defaultEdgeData.direction ?? "forward",
-          defaultEdgeStyle.color
+          defaultEdgeStyle.color,
+          defaultEdgeStyle
         ),
       };
       return {
@@ -733,10 +809,38 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             data: nextData,
             ...markerForDirection(
               nextData.direction ?? "forward",
-              nextStyle.color
+              nextStyle.color,
+              nextStyle
             ),
           };
         }),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          []
+        ),
+      };
+    }),
+  updateEdgeControlPoints: (edgeId, controlPoints) =>
+    set((state) => {
+      const target = state.edges.find((edge) => edge.id === edgeId);
+      if (!target) {
+        return {};
+      }
+      const nextStyle = {
+        ...defaultEdgeStyle,
+        ...target.data?.style,
+        controlPoints,
+      };
+      const nextData = { ...target.data, style: nextStyle };
+      return {
+        edges: state.edges.map((edge) =>
+          edge.id === edgeId
+            ? {
+                ...edge,
+                data: nextData,
+              }
+            : edge
+        ),
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges)],
           []

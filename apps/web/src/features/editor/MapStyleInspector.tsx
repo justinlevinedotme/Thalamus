@@ -16,6 +16,8 @@ import { Button } from "../../components/ui/button";
 import {
   type EdgeCurvature,
   type EdgeLineStyle,
+  type EdgeMarkerSize,
+  type EdgeMarkerType,
   type NodeShape,
   useGraphStore,
 } from "../../store/graphStore";
@@ -95,6 +97,64 @@ const lineStyles: Array<{ value: EdgeLineStyle; label: string; icon: ReactNode }
       </svg>
     ),
   },
+];
+
+const markerTypes: Array<{ value: EdgeMarkerType; label: string; icon: ReactNode }> = [
+  {
+    value: "arrow",
+    label: "Arrow",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M3 8h10M10 4l4 4-4 4" />
+      </svg>
+    ),
+  },
+  {
+    value: "arrowclosed",
+    label: "Filled Arrow",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="1">
+        <path d="M3 8h7" fill="none" />
+        <path d="M10 4l4 4-4 4z" />
+      </svg>
+    ),
+  },
+  {
+    value: "circle",
+    label: "Circle",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <line x1="2" y1="8" x2="9" y2="8" />
+        <circle cx="12" cy="8" r="3" fill="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    value: "diamond",
+    label: "Diamond",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" strokeWidth="1">
+        <line x1="2" y1="8" x2="8" y2="8" fill="none" />
+        <path d="M12 5l3 3-3 3-3-3z" />
+      </svg>
+    ),
+  },
+  {
+    value: "none",
+    label: "None",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="2" y1="8" x2="14" y2="8" />
+      </svg>
+    ),
+  },
+];
+
+const markerSizes: Array<{ value: EdgeMarkerSize; label: string }> = [
+  { value: "xs", label: "Extra Small" },
+  { value: "sm", label: "Small" },
+  { value: "md", label: "Medium" },
+  { value: "lg", label: "Large" },
 ];
 
 export default function MapStyleInspector() {
@@ -290,6 +350,102 @@ export default function MapStyleInspector() {
                     </ToggleGroupItem>
                   </TooltipTrigger>
                   <TooltipContent>{curvature.label}</TooltipContent>
+                </Tooltip>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              End Type
+            </label>
+            <ToggleGroup
+              type="single"
+              className="h-8 rounded-md border border-slate-200 bg-white"
+              onValueChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                updateAllEdgeStyles({ markerEnd: value as EdgeMarkerType });
+              }}
+              aria-label="End marker type"
+            >
+              {markerTypes.map((marker) => (
+                <Tooltip key={marker.value}>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem
+                      value={marker.value}
+                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      variant="ghost"
+                    >
+                      {marker.icon}
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>{marker.label}</TooltipContent>
+                </Tooltip>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Start Type
+            </label>
+            <ToggleGroup
+              type="single"
+              className="h-8 rounded-md border border-slate-200 bg-white"
+              onValueChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                updateAllEdgeStyles({ markerStart: value as EdgeMarkerType });
+              }}
+              aria-label="Start marker type"
+            >
+              {markerTypes.map((marker) => (
+                <Tooltip key={marker.value}>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem
+                      value={marker.value}
+                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      variant="ghost"
+                    >
+                      {marker.icon}
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>{marker.label}</TooltipContent>
+                </Tooltip>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Arrow Size
+            </label>
+            <ToggleGroup
+              type="single"
+              className="h-8 rounded-md border border-slate-200 bg-white"
+              onValueChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                updateAllEdgeStyles({ markerSize: value as EdgeMarkerSize });
+              }}
+              aria-label="Marker size"
+            >
+              {markerSizes.map((size) => (
+                <Tooltip key={size.value}>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem
+                      value={size.value}
+                      className="h-full w-11 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      variant="ghost"
+                    >
+                      {size.value.toUpperCase()}
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent>{size.label}</TooltipContent>
                 </Tooltip>
               ))}
             </ToggleGroup>
