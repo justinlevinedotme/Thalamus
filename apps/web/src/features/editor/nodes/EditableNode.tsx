@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "reactflow";
-import { NodeResizer } from "@reactflow/node-resizer";
-import "@reactflow/node-resizer/dist/style.css";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
+import { Kbd } from "../../../components/ui/kbd";
 import {
   type EdgePadding,
   type NodeHandle,
@@ -12,9 +11,6 @@ import {
   type NodeStyle,
   useGraphStore,
 } from "../../../store/graphStore";
-
-const MIN_NODE_WIDTH = 100;
-const MIN_NODE_HEIGHT = 36;
 
 const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
   switch (padding) {
@@ -169,14 +165,6 @@ export default function EditableNode({
       aria-label={`Node ${stripHtml(data.label)}`}
       style={nodeStyle}
     >
-      <NodeResizer
-        minWidth={MIN_NODE_WIDTH}
-        minHeight={MIN_NODE_HEIGHT}
-        isVisible={selected}
-        lineClassName="!border-slate-400"
-        handleClassName="!h-2 !w-2 !rounded-sm !border-slate-400 !bg-white"
-      />
-
       {/* Target handles (left side) */}
       {targetHandles.map((handle, index) => (
         <Handle
@@ -276,10 +264,13 @@ export default function EditableNode({
         )
       ) : null}
 
-      {/* Hint when editing title and no body exists */}
+      {/* Hint popover when editing title and no body exists */}
       {isEditing && editingField === "title" && !hasBody && (
-        <div className="mt-1 text-[10px] text-slate-400 pointer-events-none">
-          Press Tab to add body text
+        <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none z-50">
+          <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1 shadow-md text-[11px] text-slate-500 whitespace-nowrap">
+            <Kbd>Tab</Kbd>
+            <span>to add body text</span>
+          </div>
         </div>
       )}
     </div>
