@@ -21,13 +21,32 @@ type EditorToolbarProps = {
   onSave: () => Promise<void>;
   onShare: () => void;
   saveStatus?: "idle" | "saving" | "saved" | "error";
+  lastSavedAt?: Date | null;
 };
+
+function formatLastSaved(date: Date | null | undefined): string {
+  if (!date) return "";
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHour = Math.floor(diffMin / 60);
+
+  if (diffSec < 10) return "Saved just now";
+  if (diffSec < 60) return "Saved a few seconds ago";
+  if (diffMin === 1) return "Saved 1 minute ago";
+  if (diffMin < 60) return `Saved ${diffMin} minutes ago`;
+  if (diffHour === 1) return "Saved 1 hour ago";
+  if (diffHour < 24) return `Saved ${diffHour} hours ago`;
+  return `Saved ${date.toLocaleDateString()}`;
+}
 
 export default function EditorToolbar({
   canSave,
   onSave,
   onShare,
   saveStatus = "idle",
+  lastSavedAt,
 }: EditorToolbarProps) {
   const {
     graphTitle,
@@ -67,7 +86,7 @@ export default function EditorToolbar({
   return (
     <div className="border-b border-slate-200 bg-white">
       {/* Top nav bar - consistent with other pages */}
-      <Header>
+      <Header fullWidth onShare={onShare}>
         <div className="ml-4 min-w-[200px] max-w-md flex-1">
           <Input
             value={graphTitle}
@@ -154,25 +173,32 @@ export default function EditorToolbar({
           </MenubarMenu>
         </Menubar>
 
-        <div className="ml-auto flex items-center gap-1">
-          <button
-            className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
-            type="button"
-            onClick={undo}
-            disabled={!canUndo}
-            aria-label="Undo"
-          >
-            <Undo2 className="h-4 w-4" />
-          </button>
-          <button
-            className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
-            type="button"
-            onClick={redo}
-            disabled={!canRedo}
-            aria-label="Redo"
-          >
-            <Redo2 className="h-4 w-4" />
-          </button>
+        <div className="ml-auto flex items-center gap-3">
+          {saveStatus === "saving" ? (
+            <span className="text-xs text-slate-400">Saving...</span>
+          ) : lastSavedAt ? (
+            <span className="text-xs text-slate-400">{formatLastSaved(lastSavedAt)}</span>
+          ) : null}
+          <div className="flex items-center gap-1">
+            <button
+              className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
+              type="button"
+              onClick={undo}
+              disabled={!canUndo}
+              aria-label="Undo"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+            <button
+              className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
+              type="button"
+              onClick={redo}
+              disabled={!canRedo}
+              aria-label="Redo"
+            >
+              <Redo2 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

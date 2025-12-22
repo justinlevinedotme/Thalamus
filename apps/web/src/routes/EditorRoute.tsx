@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Focus, LayoutGrid, Paintbrush, Plus, Search, X } from "lucide-react";
 
@@ -49,6 +49,7 @@ export default function EditorRoute() {
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -57,23 +58,57 @@ export default function EditorRoute() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mapStyleOpen, setMapStyleOpen] = useState(false);
   const [layoutOpen, setLayoutOpen] = useState(false);
+  const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastPayloadRef = useRef<string>("");
 
   const canSave = Boolean(user);
   const payload = useMemo(() => ({ nodes, edges }), [edges, nodes]);
 
+  // Define handleSave first so it can be used in handleKeyDown
+  const handleSave = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      setSaveStatus("saving");
+      if (graphId) {
+        await updateGraph(graphId, graphTitle, payload);
+      } else {
+        const graph = await createGraph(graphTitle, payload);
+        navigate(`/docs/${graph.id}`);
+      }
+      setSaveStatus("saved");
+      setLastSavedAt(new Date());
+      lastPayloadRef.current = JSON.stringify(payload);
+      setTimeout(() => setSaveStatus("idle"), 1500);
+    } catch (error) {
+      console.error(error);
+      setSaveStatus("error");
+    }
+  }, [user, graphId, graphTitle, payload, navigate]);
+
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      // Ignore if user is typing in an input
+      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+      const modKey = isMac ? event.metaKey : event.ctrlKey;
+
+      // Cmd/Ctrl + S - Save (always intercept to prevent browser save dialog)
+      if (modKey && event.key === "s") {
+        event.preventDefault();
+        if (canSave) {
+          void handleSave();
+        }
+        return;
+      }
+
+      // Ignore other shortcuts if user is typing in an input
       if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement
       ) {
         return;
       }
-
-      const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
-      const modKey = isMac ? event.metaKey : event.ctrlKey;
 
       // Cmd/Ctrl + K - Open search
       if (modKey && event.key === "k") {
@@ -95,7 +130,7 @@ export default function EditorRoute() {
         return;
       }
     },
-    [addNodeAtCenter, searchOpen]
+    [addNodeAtCenter, searchOpen, canSave, handleSave]
   );
 
   useEffect(() => {
@@ -132,25 +167,34 @@ export default function EditorRoute() {
     };
   }, [graphId, setEdges, setGraphTitle, setNodes, user]);
 
-  const handleSave = async () => {
-    if (!user) {
+  // Auto-save: debounce changes and save after 3 seconds of inactivity
+  useEffect(() => {
+    if (!user || !graphId) {
       return;
     }
-    try {
-      setSaveStatus("saving");
-      if (graphId) {
-        await updateGraph(graphId, graphTitle, payload);
-      } else {
-        const graph = await createGraph(graphTitle, payload);
-        navigate(`/docs/${graph.id}`);
-      }
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 1500);
-    } catch (error) {
-      console.error(error);
-      setSaveStatus("error");
+
+    const currentPayload = JSON.stringify(payload);
+    // Skip if payload hasn't changed since last save
+    if (currentPayload === lastPayloadRef.current) {
+      return;
     }
-  };
+
+    // Clear existing timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+
+    // Set new timeout for auto-save
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      void handleSave();
+    }, 3000);
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [user, graphId, payload, handleSave]);
 
   const handleShare = () => {
     if (!user) {
@@ -185,11 +229,12 @@ export default function EditorRoute() {
             onSave={handleSave}
             onShare={handleShare}
             saveStatus={saveStatus}
+            lastSavedAt={lastSavedAt}
           />
         </div>
 
         {/* Left floating panel - Tools */}
-        <div className="absolute left-4 top-20 z-10">
+        <div className="absolute left-4 top-28 z-10">
           {showLeftPanel ? (
             <div className="flex items-start gap-2">
               <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
@@ -301,21 +346,21 @@ export default function EditorRoute() {
 
         {/* Map Style Inspector Panel */}
         {mapStyleOpen ? (
-          <div className="absolute left-20 top-20 z-10 w-72">
+          <div className="absolute left-20 top-28 z-10 w-72">
             <MapStyleInspector />
           </div>
         ) : null}
 
         {/* Layout Inspector Panel */}
         {layoutOpen ? (
-          <div className="absolute left-20 top-20 z-10 w-72">
+          <div className="absolute left-20 top-28 z-10 w-72">
             <LayoutInspector />
           </div>
         ) : null}
 
         {/* Right floating panel - Inspector */}
         {showRightPanel && (selectedNodeId || selectedEdgeId) ? (
-          <div className="absolute right-4 top-20 z-10 w-72">
+          <div className="absolute right-4 top-28 z-10 w-72">
             <div className="flex items-start gap-2">
               <button
                 className="mt-2 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
@@ -332,7 +377,7 @@ export default function EditorRoute() {
             </div>
           </div>
         ) : !showRightPanel ? (
-          <div className="absolute right-4 top-20 z-10">
+          <div className="absolute right-4 top-28 z-10">
             <button
               className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
               type="button"
