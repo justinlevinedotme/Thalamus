@@ -479,6 +479,12 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       const targetHandles = Array.from({ length: targetCount }, (_, i) => ({
         id: `${nodeId}-t-${i}`,
       }));
+      // undefined = 1 handle (default), [] = 0 handles, array = multiple handles
+      const getHandles = (count: number, handles: NodeHandle[]) => {
+        if (count === 0) return [];
+        if (count === 1) return undefined;
+        return handles;
+      };
       return {
         nodes: state.nodes.map((node) =>
           node.id === nodeId
@@ -486,8 +492,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
                 ...node,
                 data: {
                   ...node.data,
-                  sourceHandles: sourceCount > 1 ? sourceHandles : undefined,
-                  targetHandles: targetCount > 1 ? targetHandles : undefined,
+                  sourceHandles: getHandles(sourceCount, sourceHandles),
+                  targetHandles: getHandles(targetCount, targetHandles),
                 },
               }
             : node

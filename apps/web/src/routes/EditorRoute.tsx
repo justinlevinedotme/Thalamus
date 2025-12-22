@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Focus, LayoutGrid, Paintbrush, Plus, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Focus, LayoutGrid, Paintbrush, Plus, Search, Settings, X } from "lucide-react";
 
 import { Card } from "../components/ui/card";
 import {
@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../components/ui/tooltip";
+import EditorSettingsInspector from "../features/editor/EditorSettingsInspector";
 import EditorToolbar from "../features/editor/EditorToolbar";
 import GraphCanvas from "../features/editor/GraphCanvas";
 import LayoutInspector from "../features/editor/LayoutInspector";
@@ -59,6 +60,7 @@ export default function EditorRoute() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [mapStyleOpen, setMapStyleOpen] = useState(false);
   const [layoutOpen, setLayoutOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPayloadRef = useRef<string>("");
 
@@ -325,6 +327,25 @@ export default function EditorRoute() {
                     Auto Layout
                   </TooltipContent>
                 </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      className={`mt-1 flex h-10 w-10 items-center justify-center rounded-md transition ${
+                        settingsOpen
+                          ? "bg-slate-100 text-slate-900"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`}
+                      type="button"
+                      onClick={() => setSettingsOpen(!settingsOpen)}
+                      aria-label="Editor settings"
+                    >
+                      <Settings className="h-5 w-5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    Editor Settings
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <button
                 className="mt-2 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
@@ -358,6 +379,13 @@ export default function EditorRoute() {
         {layoutOpen ? (
           <div className="absolute left-20 top-28 z-10 w-72">
             <LayoutInspector />
+          </div>
+        ) : null}
+
+        {/* Editor Settings Panel */}
+        {settingsOpen ? (
+          <div className="absolute left-20 top-28 z-10 w-72">
+            <EditorSettingsInspector />
           </div>
         ) : null}
 

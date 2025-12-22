@@ -132,6 +132,31 @@
   word-break: break-word;
 }
 
+/* Ensure TipTap editor content takes full width */
+.tiptap,
+.ProseMirror {
+  width: 100%;
+}
+
+/* Ensure the EditorContent wrapper doesn't constrain width */
+.tiptap > .ProseMirror,
+[data-tiptap-editor] .ProseMirror {
+  width: 100%;
+}
+
+/* TipTap BubbleMenu z-index - escape React Flow node stacking context */
+[data-tippy-root],
+.tippy-box,
+[data-floating-ui-portal],
+.tiptap-bubble-menu {
+  z-index: 9999 !important;
+}
+
+/* Target BubbleMenu wrapper rendered by TipTap */
+.react-flow__node [style*="position: absolute"] > div:has(button) {
+  z-index: 9999 !important;
+}
+
 /* Node resizer styles */
 .react-flow__resize-control.line {
   border-color: #94a3b8 !important;

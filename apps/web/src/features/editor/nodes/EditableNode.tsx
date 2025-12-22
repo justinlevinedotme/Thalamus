@@ -168,7 +168,16 @@ export default function EditableNode({
   const paddingOffset = edgePaddingToOffset(data.style?.edgePadding);
 
   return (
-    <>
+    <div
+      className={`relative h-full w-full border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
+        selected ? "border-slate-500" : "border-slate-200"
+      }`}
+      onDoubleClick={handleDoubleClick}
+      onKeyDown={handleFocusKeyDown}
+      tabIndex={0}
+      aria-label={`Node ${stripHtml(data.label)}`}
+      style={nodeStyle}
+    >
       <NodeResizer
         minWidth={MIN_NODE_WIDTH}
         minHeight={MIN_NODE_HEIGHT}
@@ -176,17 +185,8 @@ export default function EditableNode({
         lineClassName="!border-slate-400"
         handleClassName="!h-2 !w-2 !rounded-sm !border-slate-400 !bg-white"
       />
-      <div
-        className={`relative h-full w-full overflow-hidden border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
-          selected ? "border-slate-500" : "border-slate-200"
-        }`}
-        onDoubleClick={handleDoubleClick}
-        onKeyDown={handleFocusKeyDown}
-        tabIndex={0}
-        aria-label={`Node ${stripHtml(data.label)}`}
-        style={nodeStyle}
-      >
-        {/* Target handles (left side) */}
+
+      {/* Target handles (left side) */}
       {targetHandles.map((handle, index) => (
         <Handle
           key={handle.id}
@@ -196,6 +196,20 @@ export default function EditableNode({
           style={{
             top: `${((index + 1) / (targetHandles.length + 1)) * 100}%`,
             left: -paddingOffset,
+          }}
+        />
+      ))}
+
+      {/* Source handles (right side) */}
+      {sourceHandles.map((handle, index) => (
+        <Handle
+          key={handle.id}
+          id={handle.id}
+          type="source"
+          position={Position.Right}
+          style={{
+            top: `${((index + 1) / (sourceHandles.length + 1)) * 100}%`,
+            right: -paddingOffset,
           }}
         />
       ))}
@@ -230,7 +244,7 @@ export default function EditableNode({
         />
       ) : (
         <div
-          className="node-rich-text font-medium"
+          className="node-rich-text font-medium w-full"
           style={{ color: data.style?.textColor ?? "#1e293b" }}
           dangerouslySetInnerHTML={{ __html: data.label }}
         />
@@ -259,7 +273,7 @@ export default function EditableNode({
           />
         ) : (
           <div
-            className="nodrag node-rich-text mt-1 text-xs cursor-text"
+            className="nodrag node-rich-text mt-1 w-full text-xs cursor-text"
             style={{ color: data.style?.bodyTextColor ?? data.style?.textColor ?? "#475569" }}
             dangerouslySetInnerHTML={{ __html: draftBody || data.body || "" }}
             onClick={(e) => {
@@ -278,21 +292,6 @@ export default function EditableNode({
           + Add notes
         </button>
       ) : null}
-
-      {/* Source handles (right side) */}
-      {sourceHandles.map((handle, index) => (
-        <Handle
-          key={handle.id}
-          id={handle.id}
-          type="source"
-          position={Position.Right}
-          style={{
-            top: `${((index + 1) / (sourceHandles.length + 1)) * 100}%`,
-            right: -paddingOffset,
-          }}
-        />
-      ))}
-      </div>
-    </>
+    </div>
   );
 }

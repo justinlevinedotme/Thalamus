@@ -5,6 +5,7 @@ import ReactFlow, {
   type Connection,
   type Edge,
   type Node,
+  type NodeChange,
   type NodeDragHandler,
   type ReactFlowInstance,
 } from "reactflow";
@@ -18,9 +19,11 @@ import {
   type RelationshipData,
   useGraphStore,
 } from "../../store/graphStore";
+import { useEditorSettingsStore } from "../../store/editorSettingsStore";
 import { nodeTypes } from "./nodeTypes";
 import { getFocusSubgraph } from "../search/focus";
 import CanvasContextMenu, { type ContextMenuState } from "./CanvasContextMenu";
+import { useHelperLines, HelperLinesRenderer } from "./helperLines";
 
 // Custom marker definitions for circle and diamond
 function CustomMarkerDefs({ edges }: { edges: Array<{ data?: RelationshipData }> }) {
@@ -142,6 +145,8 @@ export default function GraphCanvas() {
     useState<ReactFlowInstance | null>(null);
   const lastCenteredNodeId = useRef<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
+  const { helperLines, applyHelperLines, resetHelperLines } = useHelperLines();
+  const { helperLinesEnabled, connectionSuggestionsEnabled } = useEditorSettingsStore();
   const [proximityTarget, setProximityTarget] = useState<{
     sourceNodeId: string;
     targetNodeId: string;
@@ -371,7 +376,10 @@ export default function GraphCanvas() {
 
   const handleNodeDrag: NodeDragHandler = useCallback(
     (_event, draggedNode) => {
-      const draggedWidth = draggedNode.width ?? 150;
+      if (!connectionSuggestionsEnabled) {
+        return;
+      }
+
       const draggedHeight = draggedNode.height ?? 50;
 
       // Calculate the dragged node's target handle positions (left side)
@@ -443,7 +451,7 @@ export default function GraphCanvas() {
         setProximityTarget(null);
       }
     },
-    [nodes, edges, PROXIMITY_THRESHOLD]
+    [connectionSuggestionsEnabled, nodes, edges, PROXIMITY_THRESHOLD]
   );
 
   const handleNodeDragStop: NodeDragHandler = useCallback(
@@ -452,8 +460,22 @@ export default function GraphCanvas() {
         connectNodes(proximityTarget.sourceNodeId, proximityTarget.targetNodeId);
         setProximityTarget(null);
       }
+      resetHelperLines();
     },
-    [connectNodes, proximityTarget]
+    [connectNodes, proximityTarget, resetHelperLines]
+  );
+
+  // Wrap onNodesChange to apply helper lines snapping
+  const handleNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      if (helperLinesEnabled) {
+        const modifiedChanges = applyHelperLines(changes, nodes);
+        onNodesChange(modifiedChanges);
+      } else {
+        onNodesChange(changes);
+      }
+    },
+    [applyHelperLines, helperLinesEnabled, nodes, onNodesChange]
   );
 
   const handleReconnect = useCallback(
@@ -469,7 +491,7 @@ export default function GraphCanvas() {
       <ReactFlow
         nodes={displayNodes}
         edges={displayEdges}
-        onNodesChange={onNodesChange}
+        onNodesChange={handleNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onReconnect={handleReconnect}
@@ -500,6 +522,7 @@ export default function GraphCanvas() {
       >
         <Background gap={24} size={1} />
         <Controls showInteractive={false} />
+        {helperLinesEnabled && <HelperLinesRenderer helperLines={helperLines} />}
       </ReactFlow>
       {/* Proximity Connect Indicator */}
       {proximityTarget && reactFlowInstance && (() => {

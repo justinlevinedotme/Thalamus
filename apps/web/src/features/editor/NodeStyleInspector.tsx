@@ -113,10 +113,10 @@ export default function NodeStyleInspector() {
                   updateNodeHandles(
                     selectedNode.id,
                     sourceHandleCount,
-                    Math.max(1, targetHandleCount - 1)
+                    Math.max(0, targetHandleCount - 1)
                   )
                 }
-                disabled={targetHandleCount <= 1}
+                disabled={targetHandleCount <= 0}
                 aria-label="Decrease input handles"
               >
                 −
@@ -151,11 +151,11 @@ export default function NodeStyleInspector() {
                 onClick={() =>
                   updateNodeHandles(
                     selectedNode.id,
-                    Math.max(1, sourceHandleCount - 1),
+                    Math.max(0, sourceHandleCount - 1),
                     targetHandleCount
                   )
                 }
-                disabled={sourceHandleCount <= 1}
+                disabled={sourceHandleCount <= 0}
                 aria-label="Decrease output handles"
               >
                 −

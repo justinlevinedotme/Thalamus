@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { Redo2, Undo2 } from "lucide-react";
+import { Download, FileJson, FileText, Image, Redo2, Undo2 } from "lucide-react";
 
 import Header from "../../components/Header";
 import { Input } from "../../components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
 import {
   Menubar,
   MenubarContent,
@@ -12,6 +18,11 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "../../components/ui/menubar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../../components/ui/tooltip";
 import { exportGraphPdf, exportGraphPng } from "../../lib/exportImage";
 import { exportGraphJson } from "../../lib/exportJson";
 import { useGraphStore } from "../../store/graphStore";
@@ -180,24 +191,66 @@ export default function EditorToolbar({
             <span className="text-xs text-slate-400">{formatLastSaved(lastSavedAt)}</span>
           ) : null}
           <div className="flex items-center gap-1">
-            <button
-              className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
-              type="button"
-              onClick={undo}
-              disabled={!canUndo}
-              aria-label="Undo"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-            <button
-              className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
-              type="button"
-              onClick={redo}
-              disabled={!canRedo}
-              aria-label="Redo"
-            >
-              <Redo2 className="h-4 w-4" />
-            </button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
+                  type="button"
+                  onClick={undo}
+                  disabled={!canUndo}
+                  aria-label="Undo"
+                >
+                  <Undo2 className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Undo</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
+                  type="button"
+                  onClick={redo}
+                  disabled={!canRedo}
+                  aria-label="Redo"
+                >
+                  <Redo2 className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Redo</TooltipContent>
+            </Tooltip>
+            <div className="mx-1 h-4 w-px bg-slate-200" />
+            <DropdownMenu>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
+                      type="button"
+                      disabled={exporting !== null}
+                      aria-label="Export"
+                    >
+                      <Download className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Export</TooltipContent>
+              </Tooltip>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportJson} disabled={exporting !== null}>
+                  <FileJson className="mr-2 h-4 w-4" />
+                  Export as JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExportImage("png")} disabled={exporting !== null}>
+                  <Image className="mr-2 h-4 w-4" />
+                  Export as PNG
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExportImage("pdf")} disabled={exporting !== null}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  Export as PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
