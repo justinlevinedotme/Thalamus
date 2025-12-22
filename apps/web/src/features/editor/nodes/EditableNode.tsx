@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "reactflow";
 
 import RichTextEditor from "../../../components/RichTextEditor";
+import { NodeIconDisplay } from "../../../components/ui/icon-picker";
 import {
   type EdgePadding,
   type NodeHandle,
@@ -187,6 +188,13 @@ export default function EditableNode({
       ))}
 
       {/* Title */}
+      <div className="flex items-center gap-1.5">
+        {data.style?.icon && (
+          <span className="flex-shrink-0 flex items-center" style={{ color: data.style?.iconColor ?? data.style?.textColor ?? "#1e293b" }}>
+            <NodeIconDisplay icon={data.style.icon} className="h-4 w-4" />
+          </span>
+        )}
+        <div className="flex-1 min-w-0">
       {isEditing ? (
         <RichTextEditor
           value={draftLabel}
@@ -214,6 +222,8 @@ export default function EditableNode({
           dangerouslySetInnerHTML={{ __html: data.label }}
         />
       )}
+        </div>
+      </div>
 
       {/* Body text */}
       {hasBody ? (

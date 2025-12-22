@@ -27,6 +27,11 @@ export type NodeHandle = {
 
 export type EdgePadding = "none" | "sm" | "md" | "lg";
 
+export type NodeIcon =
+  | { type: "emoji"; value: string }
+  | { type: "lucide"; value: string }
+  | { type: "simple"; value: string };
+
 export type NodeStyle = {
   color: string;
   shape: NodeShape;
@@ -34,6 +39,8 @@ export type NodeStyle = {
   edgePadding?: EdgePadding;
   textColor?: string;
   bodyTextColor?: string;
+  icon?: NodeIcon;
+  iconColor?: string;
 };
 
 export type EdgeCurvature = "bezier" | "smoothstep" | "straight";

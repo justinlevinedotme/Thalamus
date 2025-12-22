@@ -6,6 +6,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../components/ui/accordion";
+import { IconPicker, NodeIconDisplay } from "../../components/ui/icon-picker";
 import { Input } from "../../components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 import {
@@ -14,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
+import { Smile } from "lucide-react";
 import {
   type EdgePadding,
   type NodeShape,
@@ -176,6 +178,55 @@ export default function NodeStyleInspector() {
               >
                 +
               </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">Icon</label>
+            <div className="flex items-center gap-1">
+              <IconPicker
+                value={selectedNode.data.style?.icon}
+                onChange={(icon) => updateNodeStyle(selectedNode.id, { icon })}
+              >
+                <button
+                  type="button"
+                  className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
+                  style={{ color: selectedNode.data.style?.iconColor ?? "#1e293b" }}
+                >
+                  {selectedNode.data.style?.icon ? (
+                    <NodeIconDisplay icon={selectedNode.data.style.icon} className="h-4 w-4" />
+                  ) : (
+                    <Smile className="h-4 w-4 text-slate-400" />
+                  )}
+                </button>
+              </IconPicker>
+              {selectedNode.data.style?.icon && selectedNode.data.style.icon.type !== "emoji" && (
+                <label className="relative flex h-7 w-7 cursor-pointer items-center justify-center">
+                  <span
+                    className="h-5 w-5 rounded-full border border-slate-300 shadow-sm"
+                    style={{ backgroundColor: selectedNode.data.style?.iconColor ?? "#1e293b" }}
+                  />
+                  <Input
+                    type="color"
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                    value={selectedNode.data.style?.iconColor ?? "#1e293b"}
+                    onChange={(event) =>
+                      updateNodeStyle(selectedNode.id, { iconColor: event.target.value })
+                    }
+                    title="Icon color"
+                  />
+                </label>
+              )}
+              {selectedNode.data.style?.icon && (
+                <button
+                  className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                  type="button"
+                  onClick={() => updateNodeStyle(selectedNode.id, { icon: undefined, iconColor: undefined })}
+                  aria-label="Clear icon"
+                >
+                  ×
+                </button>
+              )}
             </div>
           </div>
         </div>
