@@ -1,10 +1,10 @@
-import { Copy, Focus, Pencil, Plus, Trash2 } from "lucide-react";
-import { useCallback, useEffect, useRef } from "react";
+import { AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Copy, Focus, Group, Pencil, Plus, Trash2, Ungroup } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useGraphStore } from "../../store/graphStore";
 
 type ContextMenuState = {
-  type: "node" | "edge" | "pane";
+  type: "node" | "edge" | "pane" | "selection";
   nodeId?: string;
   edgeId?: string;
   position: { x: number; y: number };
@@ -20,15 +20,46 @@ export default function CanvasContextMenu({
   onClose,
 }: CanvasContextMenuProps) {
   const {
+    nodes,
     duplicateNode,
     deleteNode,
     deleteEdge,
+    deleteSelectedNodes,
     startEditingNode,
     setFocusNode,
     addNode,
     flowInstance,
+    groupSelectedNodes,
+    ungroupNodes,
+    distributeNodesHorizontally,
+    distributeNodesVertically,
   } = useGraphStore();
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Get info about selected nodes for group/ungroup logic
+  const selectedNodes = useMemo(
+    () => nodes.filter((n) => n.selected),
+    [nodes]
+  );
+  const selectedCount = selectedNodes.length;
+
+  // Check if right-clicked node is part of a group
+  const clickedNode = menu?.nodeId ? nodes.find((n) => n.id === menu.nodeId) : null;
+  const clickedNodeGroupId = clickedNode?.data?.groupId;
+
+  // For selection context menu, check if all selected are in same group
+  const selectedGroupIds = useMemo(() => {
+    const groupIds = new Set<string>(
+      selectedNodes.map((n) => n.data.groupId).filter((id): id is string => Boolean(id))
+    );
+    return groupIds;
+  }, [selectedNodes]);
+
+  // Can group if 2+ nodes selected and none are already grouped
+  const canGroup = selectedCount >= 2 && selectedGroupIds.size === 0;
+
+  // Can ungroup if any selected nodes are in a group
+  const canUngroup = selectedGroupIds.size > 0;
 
   // Close on click outside or escape
   useEffect(() => {
@@ -88,6 +119,41 @@ export default function CanvasContextMenu({
     onClose();
   }, [addNode, flowInstance, menu, onClose]);
 
+  const handleGroup = useCallback(() => {
+    groupSelectedNodes();
+    onClose();
+  }, [groupSelectedNodes, onClose]);
+
+  const handleUngroup = useCallback(() => {
+    // Ungroup all selected groups
+    for (const groupId of selectedGroupIds) {
+      ungroupNodes(groupId);
+    }
+    onClose();
+  }, [selectedGroupIds, ungroupNodes, onClose]);
+
+  const handleUngroupSingle = useCallback(() => {
+    if (clickedNodeGroupId) {
+      ungroupNodes(clickedNodeGroupId);
+    }
+    onClose();
+  }, [clickedNodeGroupId, ungroupNodes, onClose]);
+
+  const handleDistributeHorizontally = useCallback(() => {
+    distributeNodesHorizontally();
+    onClose();
+  }, [distributeNodesHorizontally, onClose]);
+
+  const handleDistributeVertically = useCallback(() => {
+    distributeNodesVertically();
+    onClose();
+  }, [distributeNodesVertically, onClose]);
+
+  const handleDeleteSelection = useCallback(() => {
+    deleteSelectedNodes();
+    onClose();
+  }, [deleteSelectedNodes, onClose]);
+
   if (!menu) {
     return null;
   }
@@ -106,7 +172,43 @@ export default function CanvasContextMenu({
         top: menu.position.y,
       }}
     >
-      {menu.type === "node" ? (
+      {menu.type === "selection" ? (
+        <>
+          {canGroup && (
+            <button className={menuItemClass} type="button" onClick={handleGroup}>
+              <Group className="h-4 w-4" />
+              Group ({selectedCount} nodes)
+            </button>
+          )}
+          {canUngroup && (
+            <button className={menuItemClass} type="button" onClick={handleUngroup}>
+              <Ungroup className="h-4 w-4" />
+              Ungroup
+            </button>
+          )}
+          {selectedCount >= 2 && (
+            <>
+              <button className={menuItemClass} type="button" onClick={handleDistributeHorizontally}>
+                <AlignHorizontalSpaceAround className="h-4 w-4" />
+                Distribute Horizontally
+              </button>
+              <button className={menuItemClass} type="button" onClick={handleDistributeVertically}>
+                <AlignVerticalSpaceAround className="h-4 w-4" />
+                Distribute Vertically
+              </button>
+            </>
+          )}
+          {(canGroup || canUngroup || selectedCount >= 2) && <div className="my-1 h-px bg-slate-200" />}
+          <button
+            className={dangerItemClass}
+            type="button"
+            onClick={handleDeleteSelection}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete ({selectedCount} nodes)
+          </button>
+        </>
+      ) : menu.type === "node" ? (
         <>
           <button className={menuItemClass} type="button" onClick={handleEdit}>
             <Pencil className="h-4 w-4" />
@@ -124,6 +226,15 @@ export default function CanvasContextMenu({
             <Focus className="h-4 w-4" />
             Focus
           </button>
+          {clickedNodeGroupId && (
+            <>
+              <div className="my-1 h-px bg-slate-200" />
+              <button className={menuItemClass} type="button" onClick={handleUngroupSingle}>
+                <Ungroup className="h-4 w-4" />
+                Ungroup
+              </button>
+            </>
+          )}
           <div className="my-1 h-px bg-slate-200" />
           <button
             className={dangerItemClass}

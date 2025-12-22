@@ -134,15 +134,6 @@ export default function EditableNode({
     }
   };
 
-  const toggleBody = (event: React.MouseEvent) => {
-    event.stopPropagation();
-    if (!isExpanded) {
-      setIsExpanded(true);
-      setEditingField("body");
-      startEditingNode(id);
-    }
-  };
-
   const shapeClass = (() => {
     switch (data.style?.shape) {
       case "circle":
@@ -283,15 +274,14 @@ export default function EditableNode({
             }}
           />
         )
-      ) : selected ? (
-        <button
-          className="mt-1 text-xs text-slate-400 hover:text-slate-600"
-          type="button"
-          onClick={toggleBody}
-        >
-          + Add notes
-        </button>
       ) : null}
+
+      {/* Hint when editing title and no body exists */}
+      {isEditing && editingField === "title" && !hasBody && (
+        <div className="mt-1 text-[10px] text-slate-400 pointer-events-none">
+          Press Tab to add body text
+        </div>
+      )}
     </div>
   );
 }

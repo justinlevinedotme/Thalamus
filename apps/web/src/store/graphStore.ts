@@ -32,6 +32,12 @@ export type NodeIcon =
   | { type: "lucide"; value: string }
   | { type: "simple"; value: string };
 
+export type NodeGroup = {
+  id: string;
+  label: string;
+  color: string;
+};
+
 export type NodeStyle = {
   color: string;
   shape: NodeShape;
@@ -85,16 +91,19 @@ type GraphNodeData = {
   style?: NodeStyle;
   sourceHandles?: NodeHandle[];
   targetHandles?: NodeHandle[];
+  groupId?: string;
 };
 
 type GraphSnapshot = {
   nodes: Node<GraphNodeData>[];
   edges: Edge<RelationshipData>[];
+  groups: NodeGroup[];
 };
 
 type GraphState = {
   nodes: Node<GraphNodeData>[];
   edges: Edge<RelationshipData>[];
+  groups: NodeGroup[];
   graphTitle: string;
   selectedEdgeId?: string;
   selectedNodeId?: string;
@@ -152,6 +161,11 @@ type GraphState = {
   updateEdgeControlPoints: (edgeId: string, controlPoints: ControlPoint[]) => void;
   clearAllEdgeLabels: () => void;
   autoLayout: (options?: LayoutOptions) => Promise<void>;
+  groupSelectedNodes: () => void;
+  ungroupNodes: (groupId: string) => void;
+  setGroups: (groups: NodeGroup[]) => void;
+  distributeNodesHorizontally: () => void;
+  distributeNodesVertically: () => void;
   undo: () => void;
   redo: () => void;
 };
@@ -178,8 +192,9 @@ const defaultEdgeData: RelationshipData = {
 
 const cloneGraph = (
   nodes: Node<GraphNodeData>[],
-  edges: Edge<RelationshipData>[]
-): GraphSnapshot => structuredClone({ nodes, edges });
+  edges: Edge<RelationshipData>[],
+  groups: NodeGroup[]
+): GraphSnapshot => structuredClone({ nodes, edges, groups });
 
 const normalizeNodes = (nodes: Node<GraphNodeData>[]) =>
   nodes.map((node) => {
@@ -325,6 +340,7 @@ const markerForDirection = (
 export const useGraphStore = create<GraphState>((set, get) => ({
   nodes: [],
   edges: [],
+  groups: [],
   graphTitle: "Untitled Graph",
   selectedEdgeId: undefined,
   selectedNodeId: undefined,
@@ -355,7 +371,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       return {
         nodes: nextNodes,
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -369,7 +385,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       return {
         edges: nextEdges,
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -390,7 +406,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         state.edges
       ),
       ...setHistory(
-        [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+        [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
         []
       ),
     })),
@@ -419,7 +435,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             : node
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -441,7 +457,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             : node
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -464,7 +480,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             : node
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -501,7 +517,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             : node
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -526,7 +542,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             : node
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -547,7 +563,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           edge.id === edgeId ? { ...edge, label: normalizedLabel } : edge
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -583,7 +599,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           };
         }),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -615,7 +631,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             : edge
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -636,7 +652,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     set((state) => ({
       nodes: [...state.nodes, nextNode],
       ...setHistory(
-        [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+        [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
         []
       ),
     }));
@@ -676,7 +692,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       nodes: [...state.nodes, newNode],
       selectedNodeId: newId,
       ...setHistory(
-        [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+        [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
         []
       ),
     });
@@ -695,7 +711,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         selectedNodeId:
           state.selectedNodeId === nodeId ? undefined : state.selectedNodeId,
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -711,7 +727,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         selectedEdgeId:
           state.selectedEdgeId === edgeId ? undefined : state.selectedEdgeId,
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -746,7 +762,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           };
         }),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -783,7 +799,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       return {
         edges: [...state.edges, newEdge],
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -806,7 +822,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           },
         })),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -835,7 +851,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           };
         }),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -863,7 +879,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             : node
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -886,7 +902,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         edges: nextEdges,
         selectedNodeId: undefined,
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -913,7 +929,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             : edge
         ),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -930,7 +946,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           label: undefined,
         })),
         ...setHistory(
-          [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
       };
@@ -948,11 +964,161 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     set({
       nodes: layoutedNodes,
       ...setHistory(
-        [...state.historyPast, cloneGraph(state.nodes, state.edges)],
+        [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
         []
       ),
     });
   },
+  groupSelectedNodes: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) {
+        return {};
+      }
+      // Check if any selected nodes are already in a group
+      const existingGroupIds = new Set(
+        selectedNodes.map((n) => n.data.groupId).filter(Boolean)
+      );
+      if (existingGroupIds.size > 0) {
+        // Don't allow grouping nodes that are already grouped
+        return {};
+      }
+      const groupId = crypto.randomUUID();
+      const groupColors = [
+        "#E0E7FF", // indigo-100
+        "#DBEAFE", // blue-100
+        "#D1FAE5", // emerald-100
+        "#FEF3C7", // amber-100
+        "#FCE7F3", // pink-100
+        "#E5E7EB", // gray-200
+      ];
+      const colorIndex = state.groups.length % groupColors.length;
+      const newGroup: NodeGroup = {
+        id: groupId,
+        label: `Group ${state.groups.length + 1}`,
+        color: groupColors[colorIndex],
+      };
+      return {
+        nodes: state.nodes.map((node) =>
+          node.selected
+            ? { ...node, data: { ...node.data, groupId } }
+            : node
+        ),
+        groups: [...state.groups, newGroup],
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  ungroupNodes: (groupId) =>
+    set((state) => {
+      const groupExists = state.groups.some((g) => g.id === groupId);
+      if (!groupExists) {
+        return {};
+      }
+      return {
+        nodes: state.nodes.map((node) =>
+          node.data.groupId === groupId
+            ? { ...node, data: { ...node.data, groupId: undefined } }
+            : node
+        ),
+        groups: state.groups.filter((g) => g.id !== groupId),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  setGroups: (groups) =>
+    set({
+      groups,
+      ...setHistory([], []),
+    }),
+  distributeNodesHorizontally: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) return {};
+
+      // Sort nodes by x position
+      const sorted = [...selectedNodes].sort((a, b) => a.position.x - b.position.x);
+      const first = sorted[0];
+      const last = sorted[sorted.length - 1];
+
+      // Calculate total width span
+      const startX = first.position.x;
+      const endX = last.position.x + (last.width ?? 150);
+      const totalSpan = endX - startX;
+
+      // Calculate total width of all nodes
+      const totalNodeWidth = sorted.reduce((sum, n) => sum + (n.width ?? 150), 0);
+
+      // Calculate gap between nodes
+      const totalGap = totalSpan - totalNodeWidth;
+      const gapBetween = totalGap / (sorted.length - 1);
+
+      // Build new positions
+      const newPositions: Record<string, number> = {};
+      let currentX = startX;
+      for (const node of sorted) {
+        newPositions[node.id] = currentX;
+        currentX += (node.width ?? 150) + gapBetween;
+      }
+
+      return {
+        nodes: state.nodes.map((node) =>
+          newPositions[node.id] !== undefined
+            ? { ...node, position: { ...node.position, x: newPositions[node.id] } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  distributeNodesVertically: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) return {};
+
+      // Sort nodes by y position
+      const sorted = [...selectedNodes].sort((a, b) => a.position.y - b.position.y);
+      const first = sorted[0];
+      const last = sorted[sorted.length - 1];
+
+      // Calculate total height span
+      const startY = first.position.y;
+      const endY = last.position.y + (last.height ?? 50);
+      const totalSpan = endY - startY;
+
+      // Calculate total height of all nodes
+      const totalNodeHeight = sorted.reduce((sum, n) => sum + (n.height ?? 50), 0);
+
+      // Calculate gap between nodes
+      const totalGap = totalSpan - totalNodeHeight;
+      const gapBetween = totalGap / (sorted.length - 1);
+
+      // Build new positions
+      const newPositions: Record<string, number> = {};
+      let currentY = startY;
+      for (const node of sorted) {
+        newPositions[node.id] = currentY;
+        currentY += (node.height ?? 50) + gapBetween;
+      }
+
+      return {
+        nodes: state.nodes.map((node) =>
+          newPositions[node.id] !== undefined
+            ? { ...node, position: { ...node.position, y: newPositions[node.id] } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
   undo: () =>
     set((state) => {
       if (state.historyPast.length === 0) {
@@ -961,12 +1127,13 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       const previous = state.historyPast[state.historyPast.length - 1];
       const nextPast = state.historyPast.slice(0, -1);
       const nextFuture = [
-        cloneGraph(state.nodes, state.edges),
+        cloneGraph(state.nodes, state.edges, state.groups),
         ...state.historyFuture,
       ];
       return {
         nodes: previous.nodes,
         edges: previous.edges,
+        groups: previous.groups,
         ...setHistory(nextPast, nextFuture),
       };
     }),
@@ -979,11 +1146,12 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       const nextFuture = state.historyFuture.slice(1);
       const nextPast = [
         ...state.historyPast,
-        cloneGraph(state.nodes, state.edges),
+        cloneGraph(state.nodes, state.edges, state.groups),
       ];
       return {
         nodes: next.nodes,
         edges: next.edges,
+        groups: next.groups,
         ...setHistory(nextPast, nextFuture),
       };
     }),
