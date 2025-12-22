@@ -1,11 +1,12 @@
 import type { Edge, Node } from "reactflow";
 
 import { supabase } from "../../lib/supabaseClient";
-import type { RelationshipData } from "../../store/graphStore";
+import type { NodeGroup, RelationshipData } from "../../store/graphStore";
 
 export type GraphPayload = {
   nodes: Node[];
   edges: Edge<RelationshipData>[];
+  groups?: NodeGroup[];
 };
 
 export type GraphRecord = {
@@ -19,6 +20,7 @@ export type GraphRecord = {
 export const emptyGraphPayload = (): GraphPayload => ({
   nodes: [],
   edges: [],
+  groups: [],
 });
 
 export async function listGraphs() {

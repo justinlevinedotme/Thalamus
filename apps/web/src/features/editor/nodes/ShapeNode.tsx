@@ -1,10 +1,12 @@
 import { NodeResizer } from "@reactflow/node-resizer";
 import "@reactflow/node-resizer/dist/style.css";
+import { flushSync } from "react-dom";
 import { type NodeProps } from "reactflow";
 
 import {
   type NodeKind,
   type NodeStyle,
+  useGraphStore,
 } from "../../../store/graphStore";
 
 const MIN_WIDTH = 100;
@@ -17,7 +19,24 @@ export default function ShapeNode({
   label: string;
   kind: NodeKind;
   style?: NodeStyle;
+  groupId?: string;
 }>) {
+  const { selectGroupNodes } = useGraphStore();
+
+  // Handle mousedown to select all group nodes BEFORE React Flow starts dragging
+  // We use flushSync to force the selection update to happen synchronously
+  const handleMouseDown = (event: React.MouseEvent) => {
+    if (event.button !== 0 || event.shiftKey) {
+      return;
+    }
+    const groupId = data.groupId;
+    if (groupId) {
+      flushSync(() => {
+        selectGroupNodes(groupId);
+      });
+    }
+  };
+
   const shapeClass = (() => {
     switch (data.style?.shape) {
       case "circle":
@@ -49,6 +68,7 @@ export default function ShapeNode({
         className={`h-full w-full border-2 border-dashed transition ${shapeClass}`}
         style={nodeStyle}
         aria-label="Shape container"
+        onMouseDown={handleMouseDown}
       />
     </>
   );

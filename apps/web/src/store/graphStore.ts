@@ -168,6 +168,7 @@ type GraphState = {
   distributeNodesVertically: () => void;
   sendNodeToFront: (nodeId: string) => void;
   sendNodeToBack: (nodeId: string) => void;
+  selectGroupNodes: (groupId: string) => void;
   undo: () => void;
   redo: () => void;
 };
@@ -215,6 +216,7 @@ const normalizeNodes = (nodes: Node<GraphNodeData>[]) =>
         style: node.data?.style ?? nodeStyleDefaults[kind],
         sourceHandles: node.data?.sourceHandles,
         targetHandles: node.data?.targetHandles,
+        groupId: node.data?.groupId,
       },
     };
   });
@@ -1168,6 +1170,22 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
         ),
+      };
+    }),
+  selectGroupNodes: (groupId) =>
+    set((state) => {
+      // Select all nodes that belong to this group
+      const groupNodeIds = new Set(
+        state.nodes.filter((n) => n.data.groupId === groupId).map((n) => n.id)
+      );
+      if (groupNodeIds.size === 0) {
+        return {};
+      }
+      return {
+        nodes: state.nodes.map((node) => ({
+          ...node,
+          selected: groupNodeIds.has(node.id),
+        })),
       };
     }),
   undo: () =>

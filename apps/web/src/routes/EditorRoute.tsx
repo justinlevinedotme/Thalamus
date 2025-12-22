@@ -36,10 +36,12 @@ export default function EditorRoute() {
   const {
     nodes,
     edges,
+    groups,
     graphTitle,
     setGraphTitle,
     setNodes,
     setEdges,
+    setGroups,
     addNodeAtCenter,
     selectedNodeId,
     selectedEdgeId,
@@ -65,7 +67,7 @@ export default function EditorRoute() {
   const lastPayloadRef = useRef<string>("");
 
   const canSave = Boolean(user);
-  const payload = useMemo(() => ({ nodes, edges }), [edges, nodes]);
+  const payload = useMemo(() => ({ nodes, edges, groups }), [edges, groups, nodes]);
 
   // Define handleSave first so it can be used in handleKeyDown
   const handleSave = useCallback(async () => {
@@ -157,6 +159,7 @@ export default function EditorRoute() {
         setGraphTitle(graph.title ?? "Untitled Graph");
         setNodes(graph.data?.nodes ?? []);
         setEdges(graph.data?.edges ?? []);
+        setGroups(graph.data?.groups ?? []);
         setLoadError(null);
       } catch (error) {
         if (!ignore) {
@@ -170,7 +173,7 @@ export default function EditorRoute() {
     return () => {
       ignore = true;
     };
-  }, [graphId, setEdges, setGraphTitle, setNodes, user]);
+  }, [graphId, setEdges, setGraphTitle, setGroups, setNodes, user]);
 
   // Auto-save: debounce changes and save after 3 seconds of inactivity
   useEffect(() => {

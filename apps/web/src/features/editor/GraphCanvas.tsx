@@ -243,6 +243,13 @@ export default function GraphCanvas() {
   const lastCenteredNodeId = useRef<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
   const { helperLines, applyHelperLines, resetHelperLines } = useHelperLines();
+
+  // Track group dragging state
+  const groupDragRef = useRef<{
+    groupId: string;
+    draggedNodeId: string;
+    initialPositions: Map<string, { x: number; y: number }>;
+  } | null>(null);
   const { helperLinesEnabled, connectionSuggestionsEnabled } = useEditorSettingsStore();
   const [proximityTarget, setProximityTarget] = useState<{
     sourceNodeId: string;
@@ -269,16 +276,9 @@ export default function GraphCanvas() {
   );
 
   const handleNodeClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
-      // Shift+Click: toggle node in multi-selection (let React Flow handle it)
-      if (event.shiftKey) {
-        // React Flow handles the multi-selection toggle automatically
-        // Just clear edge selection and update selectedNodeId to last clicked
-        selectEdge(undefined);
-        selectNode(node.id);
-        return;
-      }
-      // Regular click: select only this node
+    (_event: React.MouseEvent, node: Node) => {
+      // Group selection is now handled in handleNodesChange for proper timing
+      // This handler just updates our store's selectedNodeId for the inspector
       selectNode(node.id);
       selectEdge(undefined);
     },
@@ -357,6 +357,7 @@ export default function GraphCanvas() {
           style: node.data?.style,
           sourceHandles: node.data?.sourceHandles,
           targetHandles: node.data?.targetHandles,
+          groupId: node.data?.groupId,
         },
         // Let React Flow manage selection state natively for multi-select support
       })),
@@ -500,8 +501,82 @@ export default function GraphCanvas() {
     [addNode, reactFlowInstance]
   );
 
+  // When a grouped node starts dragging, capture initial positions of all group members
+  // and select all group nodes so the visual feedback is correct
+  const handleNodeDragStart: NodeDragHandler = useCallback(
+    (_event, draggedNode) => {
+      const groupId = draggedNode.data?.groupId;
+      if (!groupId) {
+        groupDragRef.current = null;
+        return;
+      }
+
+      // Find all nodes in this group
+      const groupNodes = nodes.filter((n) => n.data?.groupId === groupId);
+      if (groupNodes.length <= 1) {
+        groupDragRef.current = null;
+        return;
+      }
+
+      // Store initial positions
+      const initialPositions = new Map<string, { x: number; y: number }>();
+      for (const node of groupNodes) {
+        initialPositions.set(node.id, { ...node.position });
+      }
+
+      groupDragRef.current = {
+        groupId,
+        draggedNodeId: draggedNode.id,
+        initialPositions,
+      };
+
+      // Select all group nodes for visual feedback
+      // This happens after drag starts, so it doesn't affect which nodes React Flow drags,
+      // but it shows the user that all group nodes are selected
+      const selectionChanges: NodeChange[] = nodes.map((node) => ({
+        type: "select" as const,
+        id: node.id,
+        selected: node.data?.groupId === groupId,
+      }));
+      onNodesChange(selectionChanges);
+    },
+    [nodes, onNodesChange]
+  );
+
   const handleNodeDrag: NodeDragHandler = useCallback(
     (_event, draggedNode) => {
+      // Handle group dragging - move all group members together
+      if (groupDragRef.current && groupDragRef.current.draggedNodeId === draggedNode.id) {
+        const { initialPositions, draggedNodeId } = groupDragRef.current;
+        const draggedInitialPos = initialPositions.get(draggedNodeId);
+
+        if (draggedInitialPos) {
+          // Calculate the delta from the initial position
+          const deltaX = draggedNode.position.x - draggedInitialPos.x;
+          const deltaY = draggedNode.position.y - draggedInitialPos.y;
+
+          // Apply delta to all other group nodes
+          const positionChanges: NodeChange[] = [];
+          for (const [nodeId, initialPos] of initialPositions) {
+            if (nodeId !== draggedNodeId) {
+              positionChanges.push({
+                type: "position",
+                id: nodeId,
+                position: {
+                  x: initialPos.x + deltaX,
+                  y: initialPos.y + deltaY,
+                },
+                dragging: true,
+              });
+            }
+          }
+
+          if (positionChanges.length > 0) {
+            onNodesChange(positionChanges);
+          }
+        }
+      }
+
       if (!connectionSuggestionsEnabled) {
         return;
       }
@@ -582,6 +657,9 @@ export default function GraphCanvas() {
 
   const handleNodeDragStop: NodeDragHandler = useCallback(
     (_event, _node) => {
+      // Clear group drag state
+      groupDragRef.current = null;
+
       if (proximityTarget) {
         connectNodes(proximityTarget.sourceNodeId, proximityTarget.targetNodeId);
         setProximityTarget(null);
@@ -591,15 +669,67 @@ export default function GraphCanvas() {
     [connectNodes, proximityTarget, resetHelperLines]
   );
 
-  // Wrap onNodesChange to apply helper lines snapping
+  // Wrap onNodesChange to apply helper lines snapping and group selection
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      if (helperLinesEnabled) {
-        const modifiedChanges = applyHelperLines(changes, nodes);
-        onNodesChange(modifiedChanges);
-      } else {
-        onNodesChange(changes);
+      let modifiedChanges = changes;
+
+      // Check for selection changes that involve grouped nodes
+      // When a grouped node is selected (without shift), select all nodes in the group
+      const selectionChanges = changes.filter(
+        (c): c is NodeChange & { type: "select"; selected: boolean } =>
+          c.type === "select"
+      );
+
+      if (selectionChanges.length > 0) {
+        // Find nodes being selected (not deselected)
+        const nodesBeingSelected = selectionChanges.filter((c) => c.selected);
+
+        if (nodesBeingSelected.length === 1) {
+          // Single node selection - check if it's part of a group
+          const selectedNodeId = nodesBeingSelected[0].id;
+          const selectedNode = nodes.find((n) => n.id === selectedNodeId);
+          const groupId = selectedNode?.data?.groupId;
+
+          if (groupId) {
+            // Get all nodes in this group
+            const groupNodeIds = nodes
+              .filter((n) => n.data?.groupId === groupId)
+              .map((n) => n.id);
+
+            // Check if we're deselecting other nodes (single click behavior)
+            const nodesBeingDeselected = selectionChanges.filter((c) => !c.selected);
+            const isRegularClick = nodesBeingDeselected.length > 0;
+
+            if (isRegularClick) {
+              // Add selection changes for all group nodes
+              const additionalSelections: NodeChange[] = groupNodeIds
+                .filter((id) => id !== selectedNodeId)
+                .map((id) => ({
+                  type: "select" as const,
+                  id,
+                  selected: true,
+                }));
+
+              // Remove deselection changes for group nodes
+              modifiedChanges = changes.filter((c) => {
+                if (c.type === "select" && !c.selected) {
+                  return !groupNodeIds.includes(c.id);
+                }
+                return true;
+              });
+
+              modifiedChanges = [...modifiedChanges, ...additionalSelections];
+            }
+          }
+        }
       }
+
+      if (helperLinesEnabled) {
+        modifiedChanges = applyHelperLines(modifiedChanges, nodes);
+      }
+
+      onNodesChange(modifiedChanges);
     },
     [applyHelperLines, helperLinesEnabled, nodes, onNodesChange]
   );
@@ -637,6 +767,7 @@ export default function GraphCanvas() {
         disableKeyboardA11y={!!editingNodeId}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
+        onNodeDragStart={handleNodeDragStart}
         onNodeDrag={handleNodeDrag}
         onNodeDragStop={handleNodeDragStop}
         panOnScroll

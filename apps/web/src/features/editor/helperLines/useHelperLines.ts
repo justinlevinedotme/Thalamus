@@ -46,6 +46,33 @@ export function useHelperLines(): UseHelperLinesResult {
       let newHorizontal: HelperLine | null = null;
       let newVertical: HelperLine | null = null;
 
+      // When multiple nodes are being dragged (group/multi-select),
+      // calculate snap offset based on the FIRST dragged node only,
+      // then apply the same offset to ALL dragged nodes.
+      // This prevents group nodes from snapping to different positions.
+      let sharedOffset: { x: number; y: number } | null = null;
+
+      if (positionChanges.length > 1) {
+        // Multi-node drag: calculate offset from first node
+        const firstChange = positionChanges[0];
+        if (firstChange.position) {
+          const firstNode = nodes.find((n) => n.id === firstChange.id);
+          if (firstNode) {
+            const tempNode: Node = {
+              ...firstNode,
+              position: firstChange.position,
+            };
+            const { horizontal, vertical } = findClosestHelperLines(
+              tempNode,
+              allHelperLines
+            );
+            sharedOffset = calculateSnapOffset(horizontal, vertical);
+            if (horizontal) newHorizontal = horizontal.line;
+            if (vertical) newVertical = vertical.line;
+          }
+        }
+      }
+
       // Process each dragging node
       const modifiedChanges = changes.map((change) => {
         if (
@@ -56,48 +83,48 @@ export function useHelperLines(): UseHelperLinesResult {
           return change;
         }
 
-        // Find the node being dragged
-        const node = nodes.find((n) => n.id === change.id);
-        if (!node) {
-          return change;
-        }
-
-        // Create a temporary node with the new position
-        const tempNode: Node = {
-          ...node,
-          position: change.position,
-        };
-
-        // Find closest helper lines
-        const { horizontal, vertical } = findClosestHelperLines(
-          tempNode,
-          allHelperLines
-        );
-
-        // Calculate snap offset
-        const offset = calculateSnapOffset(horizontal, vertical);
-
-        // Update helper lines state (keep the closest ones across all dragged nodes)
-        if (horizontal) {
-          if (!newHorizontal) {
-            newHorizontal = horizontal.line;
-          }
-        }
-        if (vertical) {
-          if (!newVertical) {
-            newVertical = vertical.line;
-          }
-        }
-
-        // Apply snap offset to the position
-        if (offset.x !== 0 || offset.y !== 0) {
+        // If we have a shared offset (multi-node drag), apply it to all
+        if (sharedOffset && (sharedOffset.x !== 0 || sharedOffset.y !== 0)) {
           return {
             ...change,
             position: {
-              x: change.position.x + offset.x,
-              y: change.position.y + offset.y,
+              x: change.position.x + sharedOffset.x,
+              y: change.position.y + sharedOffset.y,
             },
           };
+        }
+
+        // Single node drag: calculate offset for this specific node
+        if (positionChanges.length === 1) {
+          const node = nodes.find((n) => n.id === change.id);
+          if (!node) {
+            return change;
+          }
+
+          const tempNode: Node = {
+            ...node,
+            position: change.position,
+          };
+
+          const { horizontal, vertical } = findClosestHelperLines(
+            tempNode,
+            allHelperLines
+          );
+
+          const offset = calculateSnapOffset(horizontal, vertical);
+
+          if (horizontal) newHorizontal = horizontal.line;
+          if (vertical) newVertical = vertical.line;
+
+          if (offset.x !== 0 || offset.y !== 0) {
+            return {
+              ...change,
+              position: {
+                x: change.position.x + offset.x,
+                y: change.position.y + offset.y,
+              },
+            };
+          }
         }
 
         return change;

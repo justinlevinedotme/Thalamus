@@ -38,6 +38,7 @@ export default function EditableNode({
   style?: NodeStyle;
   sourceHandles?: NodeHandle[];
   targetHandles?: NodeHandle[];
+  groupId?: string;
 }>) {
   const {
     editingNodeId,

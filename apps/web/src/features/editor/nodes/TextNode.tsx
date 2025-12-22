@@ -35,12 +35,14 @@ export default function TextNode({
   label: string;
   kind: NodeKind;
   style?: NodeStyle;
+  groupId?: string;
 }>) {
   const {
     editingNodeId,
     startEditingNode,
     stopEditingNode,
     updateNodeLabel,
+    selectGroupNodes,
   } = useGraphStore();
   const isEditing = editingNodeId === id;
   const [draftLabel, setDraftLabel] = useState(data.label);
@@ -84,6 +86,20 @@ export default function TextNode({
     }
   };
 
+  // Handle mousedown to select all group nodes BEFORE React Flow starts dragging
+  // We use flushSync to force the selection update to happen synchronously
+  const handleMouseDown = (event: React.MouseEvent) => {
+    if (event.button !== 0 || event.shiftKey) {
+      return;
+    }
+    const groupId = data.groupId;
+    if (groupId) {
+      flushSync(() => {
+        selectGroupNodes(groupId);
+      });
+    }
+  };
+
   const textSizeClass = sizeToTextClass(data.style?.size);
 
   // Text nodes have no background by default, transparent
@@ -96,6 +112,7 @@ export default function TextNode({
       className={`relative px-2 py-1 font-semibold transition ${textSizeClass} ${
         selected ? "ring-2 ring-slate-400 ring-offset-2 rounded" : ""
       }`}
+      onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}
       tabIndex={0}
