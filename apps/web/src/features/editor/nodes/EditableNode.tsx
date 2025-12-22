@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "reactflow";
 
+import RichTextEditor from "../../../components/RichTextEditor";
 import {
   type EdgePadding,
   type NodeHandle,
@@ -16,6 +17,12 @@ const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
     case "lg": return 24;
     default: return 0;
   }
+};
+
+// Strip HTML tags for plain text display
+const stripHtml = (html: string): string => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
 };
 
 export default function EditableNode({
@@ -43,7 +50,6 @@ export default function EditableNode({
   const [draftBody, setDraftBody] = useState(data.body ?? "");
   const [isExpanded, setIsExpanded] = useState(Boolean(data.body));
   const [editingField, setEditingField] = useState<"title" | "body" | null>(null);
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   // Update node internals when edge padding changes so edges recalculate
   useEffect(() => {
@@ -59,16 +65,9 @@ export default function EditableNode({
     setIsExpanded(Boolean(data.body));
   }, [data.body]);
 
-  // Auto-resize textarea
-  useEffect(() => {
-    if (bodyRef.current) {
-      bodyRef.current.style.height = "auto";
-      bodyRef.current.style.height = `${bodyRef.current.scrollHeight}px`;
-    }
-  }, [draftBody, isExpanded]);
-
   const commitLabel = () => {
-    const nextLabel = draftLabel.trim() || "Untitled";
+    const plainText = stripHtml(draftLabel);
+    const nextLabel = plainText.trim() ? draftLabel : "Untitled";
     updateNodeLabel(id, nextLabel);
     setEditingField(null);
     stopEditingNode();
@@ -91,28 +90,31 @@ export default function EditableNode({
     startEditingNode(id);
   };
 
-  const handleLabelKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      commitLabel();
-      // Focus body if it exists
-      if (isExpanded && bodyRef.current) {
-        bodyRef.current.focus();
-      }
-    }
-    if (event.key === "Escape") {
-      event.preventDefault();
-      cancelEditing();
+  const handleTitleEnter = () => {
+    commitLabel();
+    // Move to body if it exists
+    if (isExpanded) {
+      setEditingField("body");
+      startEditingNode(id);
     }
   };
 
-  const handleBodyKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === "Escape") {
-      event.preventDefault();
-      commitBody();
-      setEditingField(null);
-      stopEditingNode();
+  const handleTitleTab = () => {
+    // Expand body if not already and move focus to it
+    if (!isExpanded) {
+      setIsExpanded(true);
     }
+    setEditingField("body");
+  };
+
+  const handleTitleEscape = () => {
+    cancelEditing();
+  };
+
+  const handleBodyEscape = () => {
+    commitBody();
+    setEditingField(null);
+    stopEditingNode();
   };
 
   const handleFocusKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -132,7 +134,6 @@ export default function EditableNode({
       setIsExpanded(true);
       setEditingField("body");
       startEditingNode(id);
-      setTimeout(() => bodyRef.current?.focus(), 0);
     }
   };
 
@@ -168,7 +169,7 @@ export default function EditableNode({
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}
       tabIndex={0}
-      aria-label={`Node ${data.label}`}
+      aria-label={`Node ${stripHtml(data.label)}`}
       style={nodeStyle}
     >
       {/* Target handles (left side) */}
@@ -187,45 +188,64 @@ export default function EditableNode({
 
       {/* Title */}
       {isEditing ? (
-        <input
-          className="nodrag w-full bg-transparent font-medium outline-none placeholder:text-slate-400"
-          style={{ color: data.style?.textColor ?? "#1e293b" }}
+        <RichTextEditor
           value={draftLabel}
-          onChange={(event) => setDraftLabel(event.target.value)}
-          onBlur={commitLabel}
-          onKeyDown={handleLabelKeyDown}
+          onChange={setDraftLabel}
+          onBlur={() => {
+            // Only commit if we're actually editing the title
+            if (editingField === "title") {
+              commitLabel();
+            }
+          }}
+          onEnter={handleTitleEnter}
+          onEscape={handleTitleEscape}
+          onTab={handleTitleTab}
           onFocus={() => setEditingField("title")}
-          autoFocus={editingField === "title"}
           placeholder="Node title"
-          aria-label="Edit node label"
+          className="w-full bg-transparent font-medium"
+          textColor={data.style?.textColor ?? "#1e293b"}
+          singleLine
+          autoFocus={editingField === "title"}
         />
       ) : (
         <div
-          className="font-medium"
+          className="node-rich-text font-medium"
           style={{ color: data.style?.textColor ?? "#1e293b" }}
-        >
-          {data.label}
-        </div>
+          dangerouslySetInnerHTML={{ __html: data.label }}
+        />
       )}
 
       {/* Body text */}
       {hasBody ? (
-        <textarea
-          ref={bodyRef}
-          className="nodrag mt-1 w-full resize-none bg-transparent text-xs outline-none placeholder:text-slate-400"
-          style={{ color: data.style?.bodyTextColor ?? data.style?.textColor ?? "#475569" }}
-          value={draftBody}
-          onChange={(event) => setDraftBody(event.target.value)}
-          onBlur={commitBody}
-          onKeyDown={handleBodyKeyDown}
-          onFocus={() => {
-            setEditingField("body");
-            startEditingNode(id);
-          }}
-          placeholder="Add notes..."
-          rows={1}
-          aria-label="Node body text"
-        />
+        isEditing ? (
+          <RichTextEditor
+            value={draftBody}
+            onChange={setDraftBody}
+            onBlur={() => {
+              // Only commit if we're actually editing the body
+              if (editingField === "body") {
+                commitBody();
+              }
+            }}
+            onEscape={handleBodyEscape}
+            onFocus={() => setEditingField("body")}
+            placeholder="Add notes..."
+            className="mt-1 w-full bg-transparent text-xs"
+            textColor={data.style?.bodyTextColor ?? data.style?.textColor ?? "#475569"}
+            autoFocus={editingField === "body"}
+          />
+        ) : (
+          <div
+            className="nodrag node-rich-text mt-1 text-xs cursor-text"
+            style={{ color: data.style?.bodyTextColor ?? data.style?.textColor ?? "#475569" }}
+            dangerouslySetInnerHTML={{ __html: draftBody || data.body || "" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditingField("body");
+              startEditingNode(id);
+            }}
+          />
+        )
       ) : selected ? (
         <button
           className="mt-1 text-xs text-slate-400 hover:text-slate-600"
