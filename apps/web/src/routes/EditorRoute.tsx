@@ -346,7 +346,7 @@ export default function EditorRoute() {
 
         {/* Map Style Inspector Panel */}
         {mapStyleOpen ? (
-          <div className="absolute left-20 top-28 z-10 w-72">
+          <div className="absolute left-20 top-28 z-10 w-72 max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-styled rounded-lg">
             <MapStyleInspector />
           </div>
         ) : null}

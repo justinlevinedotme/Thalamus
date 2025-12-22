@@ -32,6 +32,8 @@ export type NodeStyle = {
   shape: NodeShape;
   size: NodeSize;
   edgePadding?: EdgePadding;
+  textColor?: string;
+  bodyTextColor?: string;
 };
 
 export type EdgeCurvature = "bezier" | "smoothstep" | "straight";

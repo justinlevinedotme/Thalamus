@@ -188,7 +188,7 @@ export default function NodeStyleInspector() {
             <AccordionContent className="px-3 pb-3 pt-0">
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Color</label>
+                  <label className="text-xs text-slate-500">Background</label>
                   <Input
                     type="color"
                     className="h-7 w-24 cursor-pointer"
@@ -290,6 +290,39 @@ export default function NodeStyleInspector() {
                       </Tooltip>
                     ))}
                   </ToggleGroup>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="text" className="border-b-0 border-t border-slate-200">
+            <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+              Text
+            </AccordionTrigger>
+            <AccordionContent className="px-3 pb-3 pt-0">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">Title</label>
+                  <Input
+                    type="color"
+                    className="h-7 w-24 cursor-pointer"
+                    value={selectedNode.data.style?.textColor ?? "#1e293b"}
+                    onChange={(event) =>
+                      updateNodeStyle(selectedNode.id, { textColor: event.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <label className="text-xs text-slate-500">Body</label>
+                  <Input
+                    type="color"
+                    className="h-7 w-24 cursor-pointer"
+                    value={selectedNode.data.style?.bodyTextColor ?? selectedNode.data.style?.textColor ?? "#475569"}
+                    onChange={(event) =>
+                      updateNodeStyle(selectedNode.id, { bodyTextColor: event.target.value })
+                    }
+                  />
                 </div>
               </div>
             </AccordionContent>

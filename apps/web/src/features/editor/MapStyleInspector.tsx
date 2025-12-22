@@ -186,7 +186,7 @@ export default function MapStyleInspector() {
 
           <div className="flex items-center justify-between gap-4">
             <label className="text-xs font-semibold uppercase text-slate-500">
-              Color
+              Background
             </label>
             <Input
               type="color"
@@ -260,6 +260,34 @@ export default function MapStyleInspector() {
                 </Tooltip>
               ))}
             </ToggleGroup>
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Title Text
+            </label>
+            <Input
+              type="color"
+              className="h-8 w-36 cursor-pointer"
+              defaultValue="#1e293b"
+              onChange={(event) =>
+                updateAllNodeStyles({ textColor: event.target.value })
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-4">
+            <label className="text-xs font-semibold uppercase text-slate-500">
+              Body Text
+            </label>
+            <Input
+              type="color"
+              className="h-8 w-36 cursor-pointer"
+              defaultValue="#475569"
+              onChange={(event) =>
+                updateAllNodeStyles({ bodyTextColor: event.target.value })
+              }
+            />
           </div>
         </div>
 

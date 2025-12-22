@@ -42,6 +42,7 @@ export default function EditableNode({
   const [draftLabel, setDraftLabel] = useState(data.label);
   const [draftBody, setDraftBody] = useState(data.body ?? "");
   const [isExpanded, setIsExpanded] = useState(Boolean(data.body));
+  const [editingField, setEditingField] = useState<"title" | "body" | null>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   // Update node internals when edge padding changes so edges recalculate
@@ -69,6 +70,7 @@ export default function EditableNode({
   const commitLabel = () => {
     const nextLabel = draftLabel.trim() || "Untitled";
     updateNodeLabel(id, nextLabel);
+    setEditingField(null);
     stopEditingNode();
   };
 
@@ -79,11 +81,13 @@ export default function EditableNode({
   const cancelEditing = () => {
     setDraftLabel(data.label);
     setDraftBody(data.body ?? "");
+    setEditingField(null);
     stopEditingNode();
   };
 
   const handleDoubleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
+    setEditingField("title");
     startEditingNode(id);
   };
 
@@ -106,6 +110,7 @@ export default function EditableNode({
     if (event.key === "Escape") {
       event.preventDefault();
       commitBody();
+      setEditingField(null);
       stopEditingNode();
     }
   };
@@ -116,6 +121,7 @@ export default function EditableNode({
     }
     if (event.key === "Enter") {
       event.preventDefault();
+      setEditingField("title");
       startEditingNode(id);
     }
   };
@@ -124,6 +130,7 @@ export default function EditableNode({
     event.stopPropagation();
     if (!isExpanded) {
       setIsExpanded(true);
+      setEditingField("body");
       startEditingNode(id);
       setTimeout(() => bodyRef.current?.focus(), 0);
     }
@@ -181,29 +188,40 @@ export default function EditableNode({
       {/* Title */}
       {isEditing ? (
         <input
-          className="w-full bg-transparent font-medium text-slate-800 outline-none placeholder:text-slate-400"
+          className="nodrag w-full bg-transparent font-medium outline-none placeholder:text-slate-400"
+          style={{ color: data.style?.textColor ?? "#1e293b" }}
           value={draftLabel}
           onChange={(event) => setDraftLabel(event.target.value)}
           onBlur={commitLabel}
           onKeyDown={handleLabelKeyDown}
-          autoFocus
+          onFocus={() => setEditingField("title")}
+          autoFocus={editingField === "title"}
           placeholder="Node title"
           aria-label="Edit node label"
         />
       ) : (
-        <div className="font-medium text-slate-800">{data.label}</div>
+        <div
+          className="font-medium"
+          style={{ color: data.style?.textColor ?? "#1e293b" }}
+        >
+          {data.label}
+        </div>
       )}
 
       {/* Body text */}
       {hasBody ? (
         <textarea
           ref={bodyRef}
-          className="mt-1 w-full resize-none bg-transparent text-xs text-slate-600 outline-none placeholder:text-slate-400"
+          className="nodrag mt-1 w-full resize-none bg-transparent text-xs outline-none placeholder:text-slate-400"
+          style={{ color: data.style?.bodyTextColor ?? data.style?.textColor ?? "#475569" }}
           value={draftBody}
           onChange={(event) => setDraftBody(event.target.value)}
           onBlur={commitBody}
           onKeyDown={handleBodyKeyDown}
-          onFocus={() => startEditingNode(id)}
+          onFocus={() => {
+            setEditingField("body");
+            startEditingNode(id);
+          }}
           placeholder="Add notes..."
           rows={1}
           aria-label="Node body text"
