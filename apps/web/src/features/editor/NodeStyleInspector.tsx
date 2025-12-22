@@ -105,6 +105,13 @@ export default function NodeStyleInspector() {
   const isMultiSelect = selectedNodes.length > 1;
   const selectedNode = selectedNodes.length === 1 ? selectedNodes[0] : null;
 
+  // Check if we're dealing with text nodes (headings)
+  const isTextNode = selectedNode?.data?.kind === "text";
+  const isShapeNode = selectedNode?.data?.kind === "shape";
+  // For multi-select, check if all selected are text/shape nodes
+  const allTextNodes = selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "text");
+  const allShapeNodes = selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "shape");
+
   // For multi-selection, compute common values
   const commonStyles = useMemo(() => {
     if (selectedNodes.length === 0) return null;
@@ -155,15 +162,28 @@ export default function NodeStyleInspector() {
     ? (commonStyles?.icon ? JSON.parse(commonStyles.icon) : undefined)
     : selectedNode?.data?.style?.icon;
 
+  // Determine header text
+  const getHeaderText = () => {
+    if (isMultiSelect) {
+      return `${selectedNodes.length} nodes selected`;
+    }
+    if (isTextNode) return "Text Style";
+    if (isShapeNode) return "Shape Style";
+    return "Node Style";
+  };
+
+  // Should show handles section (not for text/shape nodes)
+  const showHandles = !isMultiSelect && selectedNode && !isTextNode && !isShapeNode;
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
         <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">
-          {isMultiSelect ? `${selectedNodes.length} nodes selected` : "Node Style"}
+          {getHeaderText()}
         </h2>
 
-        {/* Handles - only show for single selection */}
-        {!isMultiSelect && selectedNode && (
+        {/* Handles - only show for single selection of regular nodes */}
+        {showHandles && (
           <div className="space-y-3 px-3 py-3">
             <div className="flex items-center justify-between gap-4">
               <label className="text-xs font-semibold uppercase text-slate-500">Inputs</label>
@@ -301,178 +321,290 @@ export default function NodeStyleInspector() {
           </div>
         )}
 
-        <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
-          <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">
-            <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
-              Appearance
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-0">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Background</label>
+        {/* Text node simplified controls - just color, size, icon */}
+        {(isTextNode || allTextNodes) ? (
+          <div className="space-y-3 px-3 py-3 border-t border-slate-200">
+            <div className="flex items-center justify-between gap-4">
+              <label className="text-xs text-slate-500">Color</label>
+              <ColorPicker
+                value={currentTextColor ?? "#1e293b"}
+                onChange={(color) => handleStyleUpdate({ textColor: color })}
+              >
+                <button
+                  type="button"
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                  title="Text color"
+                >
+                  {currentTextColor ? (
+                    <ColorSwatch color={currentTextColor} className="h-5 w-5" />
+                  ) : (
+                    <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                  )}
+                </button>
+              </ColorPicker>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <label className="text-xs text-slate-500">Size</label>
+              <ToggleGroup
+                type="single"
+                className="h-7 rounded-md border border-slate-200 bg-white"
+                value={currentSize ?? ""}
+                onValueChange={(value) => {
+                  if (!value) {
+                    return;
+                  }
+                  handleStyleUpdate({ size: value as NodeSize });
+                }}
+                aria-label="Text size"
+              >
+                {nodeSizes.map((size) => (
+                  <Tooltip key={size.value}>
+                    <TooltipTrigger asChild>
+                      <ToggleGroupItem
+                        value={size.value}
+                        className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                        variant="ghost"
+                      >
+                        {size.value.toUpperCase()}
+                      </ToggleGroupItem>
+                    </TooltipTrigger>
+                    <TooltipContent>{size.label}</TooltipContent>
+                  </Tooltip>
+                ))}
+              </ToggleGroup>
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <label className="text-xs text-slate-500">Icon</label>
+              <div className="flex items-center gap-1">
+                <IconPicker
+                  value={currentIcon}
+                  onChange={(icon) => handleStyleUpdate({ icon })}
+                >
+                  <button
+                    type="button"
+                    className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
+                    style={{ color: currentIconColor ?? "#1e293b" }}
+                  >
+                    {currentIcon ? (
+                      <NodeIconDisplay icon={currentIcon} className="h-4 w-4" />
+                    ) : (
+                      <Smile className="h-4 w-4 text-slate-400" />
+                    )}
+                  </button>
+                </IconPicker>
+                {currentIcon && currentIcon.type !== "emoji" && (
                   <ColorPicker
-                    value={currentColor ?? "#E2E8F0"}
-                    onChange={(color) => handleStyleUpdate({ color })}
+                    value={currentIconColor ?? "#1e293b"}
+                    onChange={(color) => handleStyleUpdate({ iconColor: color })}
                   >
                     <button
                       type="button"
                       className="flex h-7 w-7 cursor-pointer items-center justify-center"
-                      title="Background color"
+                      title="Icon color"
                     >
-                      {currentColor ? (
-                        <ColorSwatch color={currentColor} className="h-5 w-5" />
-                      ) : (
-                        <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
-                      )}
+                      <ColorSwatch
+                        color={currentIconColor ?? "#1e293b"}
+                        className="h-5 w-5"
+                      />
                     </button>
                   </ColorPicker>
-                </div>
-
-                <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Shape</label>
-                  <ToggleGroup
-                    type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
-                    value={currentShape ?? ""}
-                    onValueChange={(value) => {
-                      if (!value) {
-                        return;
-                      }
-                      handleStyleUpdate({ shape: value as NodeShape });
-                    }}
-                    aria-label="Node shape"
+                )}
+                {currentIcon && (
+                  <button
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                    type="button"
+                    onClick={() => handleStyleUpdate({ icon: undefined, iconColor: undefined })}
+                    aria-label="Clear icon"
                   >
-                    {nodeShapes.map((shape) => (
-                      <Tooltip key={shape.value}>
-                        <TooltipTrigger asChild>
-                          <ToggleGroupItem
-                            value={shape.value}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
-                            variant="ghost"
-                          >
-                            {shape.icon}
-                          </ToggleGroupItem>
-                        </TooltipTrigger>
-                        <TooltipContent>{shape.label}</TooltipContent>
-                      </Tooltip>
-                    ))}
-                  </ToggleGroup>
-                </div>
-
-                <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Size</label>
-                  <ToggleGroup
-                    type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
-                    value={currentSize ?? ""}
-                    onValueChange={(value) => {
-                      if (!value) {
-                        return;
-                      }
-                      handleStyleUpdate({ size: value as NodeSize });
-                    }}
-                    aria-label="Node size"
-                  >
-                    {nodeSizes.map((size) => (
-                      <Tooltip key={size.value}>
-                        <TooltipTrigger asChild>
-                          <ToggleGroupItem
-                            value={size.value}
-                            className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
-                            variant="ghost"
-                          >
-                            {size.value.toUpperCase()}
-                          </ToggleGroupItem>
-                        </TooltipTrigger>
-                        <TooltipContent>{size.label}</TooltipContent>
-                      </Tooltip>
-                    ))}
-                  </ToggleGroup>
-                </div>
-
-                <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Edge Padding</label>
-                  <ToggleGroup
-                    type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
-                    value={currentEdgePadding ?? ""}
-                    onValueChange={(value) => {
-                      if (!value) {
-                        return;
-                      }
-                      handleStyleUpdate({ edgePadding: value as EdgePadding });
-                    }}
-                    aria-label="Edge padding"
-                  >
-                    {edgePaddings.map((padding) => (
-                      <Tooltip key={padding.value}>
-                        <TooltipTrigger asChild>
-                          <ToggleGroupItem
-                            value={padding.value}
-                            className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
-                            variant="ghost"
-                          >
-                            {padding.value === "none" ? "0" : padding.value.toUpperCase()}
-                          </ToggleGroupItem>
-                        </TooltipTrigger>
-                        <TooltipContent>{padding.label}</TooltipContent>
-                      </Tooltip>
-                    ))}
-                  </ToggleGroup>
-                </div>
+                    ×
+                  </button>
+                )}
               </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="text" className="border-b-0 border-t border-slate-200">
-            <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
-              Text
-            </AccordionTrigger>
-            <AccordionContent className="px-3 pb-3 pt-0">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Title</label>
-                  <ColorPicker
-                    value={currentTextColor ?? "#1e293b"}
-                    onChange={(color) => handleStyleUpdate({ textColor: color })}
-                  >
-                    <button
-                      type="button"
-                      className="flex h-7 w-7 cursor-pointer items-center justify-center"
-                      title="Title color"
+            </div>
+          </div>
+        ) : (
+          /* Regular node controls */
+          <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
+            <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+                Appearance
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3 pt-0">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Background</label>
+                    <ColorPicker
+                      value={currentColor ?? "#E2E8F0"}
+                      onChange={(color) => handleStyleUpdate({ color })}
                     >
-                      {currentTextColor ? (
-                        <ColorSwatch color={currentTextColor} className="h-5 w-5" />
-                      ) : (
-                        <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
-                      )}
-                    </button>
-                  </ColorPicker>
-                </div>
+                      <button
+                        type="button"
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                        title="Background color"
+                      >
+                        {currentColor ? (
+                          <ColorSwatch color={currentColor} className="h-5 w-5" />
+                        ) : (
+                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                        )}
+                      </button>
+                    </ColorPicker>
+                  </div>
 
-                <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Body</label>
-                  <ColorPicker
-                    value={currentBodyTextColor ?? currentTextColor ?? "#475569"}
-                    onChange={(color) => handleStyleUpdate({ bodyTextColor: color })}
-                  >
-                    <button
-                      type="button"
-                      className="flex h-7 w-7 cursor-pointer items-center justify-center"
-                      title="Body text color"
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Shape</label>
+                    <ToggleGroup
+                      type="single"
+                      className="h-7 rounded-md border border-slate-200 bg-white"
+                      value={currentShape ?? ""}
+                      onValueChange={(value) => {
+                        if (!value) {
+                          return;
+                        }
+                        handleStyleUpdate({ shape: value as NodeShape });
+                      }}
+                      aria-label="Node shape"
                     >
-                      {currentBodyTextColor || currentTextColor ? (
-                        <ColorSwatch color={currentBodyTextColor ?? currentTextColor ?? "#475569"} className="h-5 w-5" />
-                      ) : (
-                        <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
-                      )}
-                    </button>
-                  </ColorPicker>
+                      {nodeShapes.map((shape) => (
+                        <Tooltip key={shape.value}>
+                          <TooltipTrigger asChild>
+                            <ToggleGroupItem
+                              value={shape.value}
+                              className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                              variant="ghost"
+                            >
+                              {shape.icon}
+                            </ToggleGroupItem>
+                          </TooltipTrigger>
+                          <TooltipContent>{shape.label}</TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </ToggleGroup>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Size</label>
+                    <ToggleGroup
+                      type="single"
+                      className="h-7 rounded-md border border-slate-200 bg-white"
+                      value={currentSize ?? ""}
+                      onValueChange={(value) => {
+                        if (!value) {
+                          return;
+                        }
+                        handleStyleUpdate({ size: value as NodeSize });
+                      }}
+                      aria-label="Node size"
+                    >
+                      {nodeSizes.map((size) => (
+                        <Tooltip key={size.value}>
+                          <TooltipTrigger asChild>
+                            <ToggleGroupItem
+                              value={size.value}
+                              className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                              variant="ghost"
+                            >
+                              {size.value.toUpperCase()}
+                            </ToggleGroupItem>
+                          </TooltipTrigger>
+                          <TooltipContent>{size.label}</TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </ToggleGroup>
+                  </div>
+
+                  {/* Edge padding - hide for shape nodes */}
+                  {!isShapeNode && !allShapeNodes && (
+                    <div className="flex items-center justify-between gap-4">
+                      <label className="text-xs text-slate-500">Edge Padding</label>
+                      <ToggleGroup
+                        type="single"
+                        className="h-7 rounded-md border border-slate-200 bg-white"
+                        value={currentEdgePadding ?? ""}
+                        onValueChange={(value) => {
+                          if (!value) {
+                            return;
+                          }
+                          handleStyleUpdate({ edgePadding: value as EdgePadding });
+                        }}
+                        aria-label="Edge padding"
+                      >
+                        {edgePaddings.map((padding) => (
+                          <Tooltip key={padding.value}>
+                            <TooltipTrigger asChild>
+                              <ToggleGroupItem
+                                value={padding.value}
+                                className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                                variant="ghost"
+                              >
+                                {padding.value === "none" ? "0" : padding.value.toUpperCase()}
+                              </ToggleGroupItem>
+                            </TooltipTrigger>
+                            <TooltipContent>{padding.label}</TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </ToggleGroup>
+                    </div>
+                  )}
                 </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Text section - hide for shape nodes */}
+            {!isShapeNode && !allShapeNodes && (
+              <AccordionItem value="text" className="border-b-0 border-t border-slate-200">
+                <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+                  Text
+                </AccordionTrigger>
+                <AccordionContent className="px-3 pb-3 pt-0">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <label className="text-xs text-slate-500">Title</label>
+                      <ColorPicker
+                        value={currentTextColor ?? "#1e293b"}
+                        onChange={(color) => handleStyleUpdate({ textColor: color })}
+                      >
+                        <button
+                          type="button"
+                          className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                          title="Title color"
+                        >
+                          {currentTextColor ? (
+                            <ColorSwatch color={currentTextColor} className="h-5 w-5" />
+                          ) : (
+                            <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          )}
+                        </button>
+                      </ColorPicker>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4">
+                      <label className="text-xs text-slate-500">Body</label>
+                      <ColorPicker
+                        value={currentBodyTextColor ?? currentTextColor ?? "#475569"}
+                        onChange={(color) => handleStyleUpdate({ bodyTextColor: color })}
+                      >
+                        <button
+                          type="button"
+                          className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                          title="Body text color"
+                        >
+                          {currentBodyTextColor || currentTextColor ? (
+                            <ColorSwatch color={currentBodyTextColor ?? currentTextColor ?? "#475569"} className="h-5 w-5" />
+                          ) : (
+                            <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          )}
+                        </button>
+                      </ColorPicker>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+          </Accordion>
+        )}
       </div>
     </TooltipProvider>
   );

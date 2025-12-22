@@ -16,7 +16,7 @@ import { getLayoutedElements, type LayoutOptions } from "../lib/autoLayout";
 
 export type RelationshipDirection = "forward" | "backward" | "both" | "none";
 export type RelationshipType = "causes" | "supports" | "contradicts" | "related";
-export type NodeKind = "idea" | "question" | "evidence" | "goal";
+export type NodeKind = "idea" | "question" | "evidence" | "goal" | "text" | "shape";
 
 export type NodeShape = "rounded" | "pill" | "circle" | "square";
 export type NodeSize = "sm" | "md" | "lg";
@@ -166,6 +166,8 @@ type GraphState = {
   setGroups: (groups: NodeGroup[]) => void;
   distributeNodesHorizontally: () => void;
   distributeNodesVertically: () => void;
+  sendNodeToFront: (nodeId: string) => void;
+  sendNodeToBack: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
 };
@@ -175,6 +177,8 @@ const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
   question: { color: "#FDE68A", shape: "circle", size: "md" },
   evidence: { color: "#BBF7D0", shape: "rounded", size: "sm" },
   goal: { color: "#BFDBFE", shape: "pill", size: "lg" },
+  text: { color: "transparent", shape: "rounded", size: "md" },
+  shape: { color: "#F1F5F9", shape: "rounded", size: "lg" },
 };
 
 const defaultEdgeStyle: EdgeStyle = {
@@ -199,9 +203,11 @@ const cloneGraph = (
 const normalizeNodes = (nodes: Node<GraphNodeData>[]) =>
   nodes.map((node) => {
     const kind = node.data?.kind ?? "idea";
+    // Map kind to React Flow node type
+    const nodeType = node.type ?? (kind === "text" ? "text" : kind === "shape" ? "shape" : "editable");
     return {
       ...node,
-      type: node.type ?? "editable",
+      type: nodeType,
       data: {
         label: node.data?.label ?? "Untitled",
         body: node.data?.body,
@@ -639,12 +645,17 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   addNode: (input) => {
     const id = crypto.randomUUID();
     const kind = input?.kind ?? "idea";
+    // Map kind to React Flow node type
+    const nodeType = kind === "text" ? "text" : kind === "shape" ? "shape" : "editable";
+    const defaultLabel = kind === "text" ? "Heading" : kind === "shape" ? "" : "New node";
     const nextNode: Node<GraphNodeData> = {
       id,
-      type: "editable",
+      type: nodeType,
       position: input?.position ?? { x: 0, y: 0 },
+      // Shape nodes need initial dimensions for resizing
+      ...(kind === "shape" ? { style: { width: 200, height: 120 } } : {}),
       data: {
-        label: input?.label ?? "New node",
+        label: input?.label ?? defaultLabel,
         kind,
         style: nodeStyleDefaults[kind],
       },
@@ -1113,6 +1124,46 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             ? { ...node, position: { ...node.position, y: newPositions[node.id] } }
             : node
         ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  sendNodeToFront: (nodeId) =>
+    set((state) => {
+      const nodeIndex = state.nodes.findIndex((n) => n.id === nodeId);
+      if (nodeIndex === -1 || nodeIndex === state.nodes.length - 1) {
+        return {};
+      }
+      const node = state.nodes[nodeIndex];
+      const nextNodes = [
+        ...state.nodes.slice(0, nodeIndex),
+        ...state.nodes.slice(nodeIndex + 1),
+        node,
+      ];
+      return {
+        nodes: nextNodes,
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  sendNodeToBack: (nodeId) =>
+    set((state) => {
+      const nodeIndex = state.nodes.findIndex((n) => n.id === nodeId);
+      if (nodeIndex === -1 || nodeIndex === 0) {
+        return {};
+      }
+      const node = state.nodes[nodeIndex];
+      const nextNodes = [
+        node,
+        ...state.nodes.slice(0, nodeIndex),
+        ...state.nodes.slice(nodeIndex + 1),
+      ];
+      return {
+        nodes: nextNodes,
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []

@@ -1,4 +1,4 @@
-import { AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Copy, Focus, Group, Pencil, Plus, Trash2, Ungroup } from "lucide-react";
+import { AlignHorizontalSpaceAround, AlignVerticalSpaceAround, ArrowDownToLine, ArrowUpToLine, Copy, Focus, Group, Pencil, Plus, Square, Trash2, Type, Ungroup } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useGraphStore } from "../../store/graphStore";
@@ -33,6 +33,8 @@ export default function CanvasContextMenu({
     ungroupNodes,
     distributeNodesHorizontally,
     distributeNodesVertically,
+    sendNodeToFront,
+    sendNodeToBack,
   } = useGraphStore();
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -46,6 +48,8 @@ export default function CanvasContextMenu({
   // Check if right-clicked node is part of a group
   const clickedNode = menu?.nodeId ? nodes.find((n) => n.id === menu.nodeId) : null;
   const clickedNodeGroupId = clickedNode?.data?.groupId;
+  const clickedNodeKind = clickedNode?.data?.kind;
+  const isTextOrShapeNode = clickedNodeKind === "text" || clickedNodeKind === "shape";
 
   // For selection context menu, check if all selected are in same group
   const selectedGroupIds = useMemo(() => {
@@ -119,6 +123,22 @@ export default function CanvasContextMenu({
     onClose();
   }, [addNode, flowInstance, menu, onClose]);
 
+  const handleAddTextNode = useCallback(() => {
+    if (menu?.type === "pane" && flowInstance) {
+      const position = flowInstance.screenToFlowPosition(menu.position);
+      addNode({ position, kind: "text" });
+    }
+    onClose();
+  }, [addNode, flowInstance, menu, onClose]);
+
+  const handleAddShapeNode = useCallback(() => {
+    if (menu?.type === "pane" && flowInstance) {
+      const position = flowInstance.screenToFlowPosition(menu.position);
+      addNode({ position, kind: "shape" });
+    }
+    onClose();
+  }, [addNode, flowInstance, menu, onClose]);
+
   const handleGroup = useCallback(() => {
     groupSelectedNodes();
     onClose();
@@ -153,6 +173,20 @@ export default function CanvasContextMenu({
     deleteSelectedNodes();
     onClose();
   }, [deleteSelectedNodes, onClose]);
+
+  const handleSendToFront = useCallback(() => {
+    if (menu?.type === "node" && menu.nodeId) {
+      sendNodeToFront(menu.nodeId);
+    }
+    onClose();
+  }, [menu, onClose, sendNodeToFront]);
+
+  const handleSendToBack = useCallback(() => {
+    if (menu?.type === "node" && menu.nodeId) {
+      sendNodeToBack(menu.nodeId);
+    }
+    onClose();
+  }, [menu, onClose, sendNodeToBack]);
 
   if (!menu) {
     return null;
@@ -210,10 +244,13 @@ export default function CanvasContextMenu({
         </>
       ) : menu.type === "node" ? (
         <>
-          <button className={menuItemClass} type="button" onClick={handleEdit}>
-            <Pencil className="h-4 w-4" />
-            Edit
-          </button>
+          {/* Edit option - only for non-shape nodes */}
+          {clickedNodeKind !== "shape" && (
+            <button className={menuItemClass} type="button" onClick={handleEdit}>
+              <Pencil className="h-4 w-4" />
+              Edit
+            </button>
+          )}
           <button
             className={menuItemClass}
             type="button"
@@ -222,10 +259,27 @@ export default function CanvasContextMenu({
             <Copy className="h-4 w-4" />
             Duplicate
           </button>
-          <button className={menuItemClass} type="button" onClick={handleFocus}>
-            <Focus className="h-4 w-4" />
-            Focus
-          </button>
+          {/* Focus option - only for regular nodes */}
+          {!isTextOrShapeNode && (
+            <button className={menuItemClass} type="button" onClick={handleFocus}>
+              <Focus className="h-4 w-4" />
+              Focus
+            </button>
+          )}
+          {/* Send to front/back - for text and shape nodes */}
+          {isTextOrShapeNode && (
+            <>
+              <div className="my-1 h-px bg-slate-200" />
+              <button className={menuItemClass} type="button" onClick={handleSendToFront}>
+                <ArrowUpToLine className="h-4 w-4" />
+                Send to Front
+              </button>
+              <button className={menuItemClass} type="button" onClick={handleSendToBack}>
+                <ArrowDownToLine className="h-4 w-4" />
+                Send to Back
+              </button>
+            </>
+          )}
           {clickedNodeGroupId && (
             <>
               <div className="my-1 h-px bg-slate-200" />
@@ -255,14 +309,32 @@ export default function CanvasContextMenu({
           Delete
         </button>
       ) : (
-        <button
-          className={menuItemClass}
-          type="button"
-          onClick={handleAddNode}
-        >
-          <Plus className="h-4 w-4" />
-          Add Node Here
-        </button>
+        <>
+          <button
+            className={menuItemClass}
+            type="button"
+            onClick={handleAddNode}
+          >
+            <Plus className="h-4 w-4" />
+            Add Node
+          </button>
+          <button
+            className={menuItemClass}
+            type="button"
+            onClick={handleAddTextNode}
+          >
+            <Type className="h-4 w-4" />
+            Add Text
+          </button>
+          <button
+            className={menuItemClass}
+            type="button"
+            onClick={handleAddShapeNode}
+          >
+            <Square className="h-4 w-4" />
+            Add Shape
+          </button>
+        </>
       )}
     </div>
   );

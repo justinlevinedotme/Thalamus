@@ -1,8 +1,26 @@
+import { Pipette } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
 import { Input } from "./input";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
+
+// Type for the EyeDropper API (not in all browsers)
+interface EyeDropperResult {
+  sRGBHex: string;
+}
+
+interface EyeDropperConstructor {
+  new(): {
+    open(): Promise<EyeDropperResult>;
+  };
+}
+
+declare global {
+  interface Window {
+    EyeDropper?: EyeDropperConstructor;
+  }
+}
 
 type ColorPickerProps = {
   value: string;
@@ -137,7 +155,7 @@ function rgbToHsv(r: number, g: number, b: number): { h: number; s: number; v: n
   return { h, s, v };
 }
 
-export function ColorPicker({ value, onChange, children, showAlpha = false }: ColorPickerProps) {
+export function ColorPicker({ value, onChange, children, showAlpha = true }: ColorPickerProps) {
   const [open, setOpen] = useState(false);
   const [hexInput, setHexInput] = useState(value);
   const [recentColors, setRecentColors] = useState<string[]>([]);
@@ -225,6 +243,23 @@ export function ColorPicker({ value, onChange, children, showAlpha = false }: Co
     setRecentColors(getRecentColors());
     setOpen(false);
   };
+
+  const handleEyeDropper = async () => {
+    if (!window.EyeDropper) {
+      return;
+    }
+    try {
+      const eyeDropper = new window.EyeDropper();
+      const result = await eyeDropper.open();
+      onChange(result.sRGBHex);
+      addRecentColor(result.sRGBHex);
+      setRecentColors(getRecentColors());
+    } catch {
+      // User cancelled or error occurred
+    }
+  };
+
+  const supportsEyeDropper = typeof window !== "undefined" && !!window.EyeDropper;
 
   // Save to recent colors when popover closes
   const handleOpenChange = (newOpen: boolean) => {
@@ -316,18 +351,24 @@ export function ColorPicker({ value, onChange, children, showAlpha = false }: Co
               </div>
             )}
 
-            {/* Color preview and hex input */}
+            {/* Color preview, hex input, and eyedropper */}
             <div className="flex items-center gap-2">
               <div
-                className="h-8 w-8 flex-shrink-0 rounded-md border border-slate-200 shadow-sm"
-                style={{
-                  backgroundColor: value,
-                  backgroundImage: showAlpha
-                    ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='4' height='4' fill='%23ccc'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%23ccc'/%3E%3C/svg%3E")`
-                    : undefined,
-                  backgroundBlendMode: "multiply",
-                }}
-              />
+                className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-md border border-slate-200 shadow-sm"
+              >
+                {/* Checkerboard background for transparency */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='4' height='4' fill='%23ccc'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%23ccc'/%3E%3C/svg%3E")`,
+                  }}
+                />
+                {/* Color overlay */}
+                <div
+                  className="absolute inset-0"
+                  style={{ backgroundColor: value }}
+                />
+              </div>
               <Input
                 type="text"
                 value={hexInput}
@@ -335,6 +376,16 @@ export function ColorPicker({ value, onChange, children, showAlpha = false }: Co
                 className="h-8 flex-1 font-mono text-xs"
                 placeholder="#000000"
               />
+              {supportsEyeDropper && (
+                <button
+                  type="button"
+                  onClick={handleEyeDropper}
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                  title="Pick color from screen"
+                >
+                  <Pipette className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             {/* RGBA inputs */}
@@ -430,7 +481,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = false }: Co
   );
 }
 
-// Simple color swatch trigger component
+// Simple color swatch trigger component with transparency support
 export function ColorSwatch({
   color,
   className = "",
@@ -438,10 +489,27 @@ export function ColorSwatch({
   color: string;
   className?: string;
 }) {
+  // Check if color has alpha (8-digit hex or rgba)
+  const hasAlpha = /^#[0-9a-fA-F]{8}$/.test(color) || color.includes("rgba");
+
   return (
     <span
-      className={`inline-block rounded-full border border-slate-300 shadow-sm ${className}`}
-      style={{ backgroundColor: color }}
-    />
+      className={`relative inline-block overflow-hidden rounded-full border border-slate-300 shadow-sm ${className}`}
+    >
+      {/* Checkerboard background for transparency */}
+      {hasAlpha && (
+        <span
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Crect width='4' height='4' fill='%23ccc'/%3E%3Crect x='4' y='4' width='4' height='4' fill='%23ccc'/%3E%3C/svg%3E")`,
+          }}
+        />
+      )}
+      {/* Color overlay */}
+      <span
+        className="absolute inset-0"
+        style={{ backgroundColor: color }}
+      />
+    </span>
   );
 }
