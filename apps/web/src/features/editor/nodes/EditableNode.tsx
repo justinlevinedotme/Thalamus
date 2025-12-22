@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "reactflow";
+import { NodeResizer } from "@reactflow/node-resizer";
+import "@reactflow/node-resizer/dist/style.css";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
@@ -10,6 +12,9 @@ import {
   type NodeStyle,
   useGraphStore,
 } from "../../../store/graphStore";
+
+const MIN_NODE_WIDTH = 100;
+const MIN_NODE_HEIGHT = 36;
 
 const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
   switch (padding) {
@@ -163,17 +168,25 @@ export default function EditableNode({
   const paddingOffset = edgePaddingToOffset(data.style?.edgePadding);
 
   return (
-    <div
-      className={`relative min-w-[120px] max-w-[300px] border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
-        selected ? "border-slate-500" : "border-slate-200"
-      }`}
-      onDoubleClick={handleDoubleClick}
-      onKeyDown={handleFocusKeyDown}
-      tabIndex={0}
-      aria-label={`Node ${stripHtml(data.label)}`}
-      style={nodeStyle}
-    >
-      {/* Target handles (left side) */}
+    <>
+      <NodeResizer
+        minWidth={MIN_NODE_WIDTH}
+        minHeight={MIN_NODE_HEIGHT}
+        isVisible={selected}
+        lineClassName="!border-slate-400"
+        handleClassName="!h-2 !w-2 !rounded-sm !border-slate-400 !bg-white"
+      />
+      <div
+        className={`relative h-full w-full overflow-hidden border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
+          selected ? "border-slate-500" : "border-slate-200"
+        }`}
+        onDoubleClick={handleDoubleClick}
+        onKeyDown={handleFocusKeyDown}
+        tabIndex={0}
+        aria-label={`Node ${stripHtml(data.label)}`}
+        style={nodeStyle}
+      >
+        {/* Target handles (left side) */}
       {targetHandles.map((handle, index) => (
         <Handle
           key={handle.id}
@@ -279,6 +292,7 @@ export default function EditableNode({
           }}
         />
       ))}
-    </div>
+      </div>
+    </>
   );
 }
