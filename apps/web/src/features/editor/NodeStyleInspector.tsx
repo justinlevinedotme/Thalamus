@@ -648,8 +648,8 @@ export default function NodeStyleInspector() {
               </AccordionItem>
             )}
 
-            {/* Border section - show for shape nodes */}
-            {(isShapeNode || allShapeNodes) && (
+            {/* Border section - show for all nodes except text */}
+            {!isTextNode && !allTextNodes && (
               <AccordionItem value="border" className="border-b-0 border-t border-slate-200">
                 <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
                   Border
@@ -659,7 +659,7 @@ export default function NodeStyleInspector() {
                     <div className="flex items-center justify-between gap-4">
                       <label className="text-xs text-slate-500">Color</label>
                       <ColorPicker
-                        value={currentBorderColor ?? "#3B82F6"}
+                        value={currentBorderColor ?? (isShapeNode || allShapeNodes ? "#3B82F6" : "#e2e8f0")}
                         onChange={(color) => handleStyleUpdate({ borderColor: color })}
                       >
                         <button
@@ -712,7 +712,7 @@ export default function NodeStyleInspector() {
                       <ToggleGroup
                         type="single"
                         className="h-7 rounded-md border border-slate-200 bg-white"
-                        value={String(currentBorderWidth ?? 2)}
+                        value={String(currentBorderWidth ?? (isShapeNode || allShapeNodes ? 2 : 1))}
                         onValueChange={(value) => {
                           if (!value) {
                             return;

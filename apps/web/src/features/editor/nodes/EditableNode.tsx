@@ -144,9 +144,18 @@ export default function EditableNode({
     }
   })();
 
+  // Get border properties with defaults
+  const borderWidth = data.style?.borderWidth ?? 1;
+  const borderStyle = data.style?.borderStyle ?? "solid";
+  const borderColor = selected
+    ? undefined  // Let CSS class handle selected state
+    : (data.style?.borderColor ?? "#e2e8f0");  // Default to slate-200
+
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color,
-    borderColor: selected ? undefined : data.style?.color,
+    borderColor,
+    borderWidth,
+    borderStyle,
   };
 
   const hasBody = isExpanded || Boolean(data.body);
@@ -157,8 +166,8 @@ export default function EditableNode({
 
   return (
     <div
-      className={`relative h-full w-full border px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
-        selected ? "border-slate-500" : "border-slate-200"
+      className={`relative h-full w-full px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
+        selected ? "!border-slate-500" : ""
       }`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}
