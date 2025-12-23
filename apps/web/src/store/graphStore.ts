@@ -171,6 +171,10 @@ type GraphState = {
   selectGroupNodes: (groupId: string) => void;
   undo: () => void;
   redo: () => void;
+  copySelectedNodes: () => void;
+  cutSelectedNodes: () => void;
+  pasteNodes: () => void;
+  getSelectedGroupId: () => string | undefined;
 };
 
 const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
@@ -1233,4 +1237,110 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         ...setHistory(nextPast, nextFuture),
       };
     }),
+  copySelectedNodes: () => {
+    const state = get();
+    const selectedNodes = state.nodes.filter((n) => n.selected);
+    if (selectedNodes.length === 0) {
+      return;
+    }
+    // Store copied nodes in localStorage for cross-tab support
+    const selectedNodeIds = new Set(selectedNodes.map((n) => n.id));
+    // Also copy edges that connect selected nodes
+    const relevantEdges = state.edges.filter(
+      (e) => selectedNodeIds.has(e.source) && selectedNodeIds.has(e.target)
+    );
+    const clipboard = {
+      nodes: structuredClone(selectedNodes),
+      edges: structuredClone(relevantEdges),
+    };
+    localStorage.setItem("thalamus-clipboard", JSON.stringify(clipboard));
+  },
+  cutSelectedNodes: () => {
+    const store = get();
+    store.copySelectedNodes();
+    store.deleteSelectedNodes();
+  },
+  pasteNodes: () => {
+    const clipboardData = localStorage.getItem("thalamus-clipboard");
+    if (!clipboardData) {
+      return;
+    }
+    try {
+      const clipboard = JSON.parse(clipboardData) as {
+        nodes: Node<GraphNodeData>[];
+        edges: Edge<RelationshipData>[];
+      };
+      if (!clipboard.nodes || clipboard.nodes.length === 0) {
+        return;
+      }
+      // Create new IDs for pasted nodes
+      const idMap = new Map<string, string>();
+      const offset = 50;
+      const newNodes = clipboard.nodes.map((node) => {
+        const newId = crypto.randomUUID();
+        idMap.set(node.id, newId);
+        return {
+          ...node,
+          id: newId,
+          position: {
+            x: node.position.x + offset,
+            y: node.position.y + offset,
+          },
+          selected: true,
+          // Clear groupId for pasted nodes (they won't belong to original group)
+          data: {
+            ...node.data,
+            groupId: undefined,
+          },
+        };
+      });
+      // Remap edge connections to new node IDs
+      const newEdges = clipboard.edges
+        .map((edge) => {
+          const newSource = idMap.get(edge.source);
+          const newTarget = idMap.get(edge.target);
+          if (!newSource || !newTarget) {
+            return null;
+          }
+          return {
+            ...edge,
+            id: `${newSource}-${newTarget}`,
+            source: newSource,
+            target: newTarget,
+          };
+        })
+        .filter((e): e is Edge<RelationshipData> => e !== null);
+
+      set((state) => ({
+        // Deselect existing nodes and add new ones
+        nodes: [
+          ...state.nodes.map((n) => ({ ...n, selected: false })),
+          ...newNodes,
+        ],
+        edges: [...state.edges, ...newEdges],
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      }));
+    } catch {
+      // Invalid clipboard data
+    }
+  },
+  getSelectedGroupId: () => {
+    const state = get();
+    const selectedNodes = state.nodes.filter((n) => n.selected);
+    if (selectedNodes.length === 0) {
+      return undefined;
+    }
+    // Get unique group IDs from selected nodes
+    const groupIds = new Set(
+      selectedNodes.map((n) => n.data.groupId).filter(Boolean)
+    );
+    // Return the group ID if all selected nodes are in the same group
+    if (groupIds.size === 1) {
+      return Array.from(groupIds)[0];
+    }
+    return undefined;
+  },
 }));

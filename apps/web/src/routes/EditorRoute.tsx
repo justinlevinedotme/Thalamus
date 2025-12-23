@@ -50,6 +50,15 @@ export default function EditorRoute() {
     isFocusMode,
     clearFocus,
     setFocusNode,
+    flowInstance,
+    groupSelectedNodes,
+    ungroupNodes,
+    getSelectedGroupId,
+    copySelectedNodes,
+    cutSelectedNodes,
+    pasteNodes,
+    undo,
+    redo,
   } = useGraphStore();
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -133,6 +142,36 @@ export default function EditorRoute() {
         return;
       }
 
+      // Cmd/Ctrl + Z - Undo (works even when editing text - browser handles text undo)
+      if (modKey && event.key === "z" && !event.shiftKey) {
+        // Only intercept if not editing text
+        if (
+          !(event.target instanceof HTMLInputElement) &&
+          !(event.target instanceof HTMLTextAreaElement) &&
+          !(event.target instanceof HTMLElement && event.target.isContentEditable) &&
+          !editingNodeId
+        ) {
+          event.preventDefault();
+          undo();
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + Shift + Z - Redo
+      if (modKey && event.key === "z" && event.shiftKey) {
+        // Only intercept if not editing text
+        if (
+          !(event.target instanceof HTMLInputElement) &&
+          !(event.target instanceof HTMLTextAreaElement) &&
+          !(event.target instanceof HTMLElement && event.target.isContentEditable) &&
+          !editingNodeId
+        ) {
+          event.preventDefault();
+          redo();
+        }
+        return;
+      }
+
       // Ignore other shortcuts if user is typing in an input or editing a node
       if (
         event.target instanceof HTMLInputElement ||
@@ -147,6 +186,62 @@ export default function EditorRoute() {
       if (modKey && event.key === "k") {
         event.preventDefault();
         setSearchOpen(true);
+        return;
+      }
+
+      // Cmd/Ctrl + G - Group selected nodes
+      if (modKey && event.key === "g" && !event.shiftKey) {
+        event.preventDefault();
+        groupSelectedNodes();
+        return;
+      }
+
+      // Cmd/Ctrl + Shift + G - Ungroup selected nodes
+      if (modKey && event.key === "g" && event.shiftKey) {
+        event.preventDefault();
+        const groupId = getSelectedGroupId();
+        if (groupId) {
+          ungroupNodes(groupId);
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + C - Copy selected nodes
+      if (modKey && event.key === "c") {
+        event.preventDefault();
+        copySelectedNodes();
+        return;
+      }
+
+      // Cmd/Ctrl + X - Cut selected nodes
+      if (modKey && event.key === "x") {
+        event.preventDefault();
+        cutSelectedNodes();
+        return;
+      }
+
+      // Cmd/Ctrl + V - Paste nodes
+      if (modKey && event.key === "v") {
+        event.preventDefault();
+        pasteNodes();
+        return;
+      }
+
+      // Cmd/Ctrl + = or Cmd/Ctrl + + - Zoom in
+      if (modKey && (event.key === "=" || event.key === "+")) {
+        event.preventDefault();
+        if (flowInstance) {
+          flowInstance.zoomIn();
+        }
+        return;
+      }
+
+      // Cmd/Ctrl + - - Zoom out
+      if (modKey && event.key === "-") {
+        event.preventDefault();
+        if (flowInstance) {
+          flowInstance.zoomOut();
+        }
         return;
       }
 
@@ -177,7 +272,22 @@ export default function EditorRoute() {
         return;
       }
     },
-    [addNodeAtCenter, searchOpen, canSave, handleSave, editingNodeId]
+    [
+      addNodeAtCenter,
+      searchOpen,
+      canSave,
+      handleSave,
+      editingNodeId,
+      groupSelectedNodes,
+      ungroupNodes,
+      getSelectedGroupId,
+      copySelectedNodes,
+      cutSelectedNodes,
+      pasteNodes,
+      flowInstance,
+      undo,
+      redo,
+    ]
   );
 
   useEffect(() => {
