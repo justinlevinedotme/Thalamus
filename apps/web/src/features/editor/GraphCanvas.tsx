@@ -335,6 +335,14 @@ export default function GraphCanvas() {
     });
   }, []);
 
+  const handleSelectionContextMenu = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    setContextMenu({
+      type: "selection",
+      position: { x: event.clientX, y: event.clientY },
+    });
+  }, []);
+
   const handleCloseContextMenu = useCallback(() => {
     setContextMenu(null);
   }, []);
@@ -757,6 +765,7 @@ export default function GraphCanvas() {
         onNodeContextMenu={handleNodeContextMenu}
         onEdgeContextMenu={handleEdgeContextMenu}
         onPaneContextMenu={handlePaneContextMenu}
+        onSelectionContextMenu={handleSelectionContextMenu}
         onInit={handleInit}
         nodeTypes={nodeTypes}
         selectionOnDrag
