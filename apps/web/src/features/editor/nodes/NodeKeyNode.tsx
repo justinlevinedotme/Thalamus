@@ -1,11 +1,12 @@
 import { NodeResizer } from "@reactflow/node-resizer";
 import "@reactflow/node-resizer/dist/style.css";
-import { Plus, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { type NodeProps } from "reactflow";
 
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
+import { Kbd } from "../../../components/ui/kbd";
 import {
   type NodeKind,
   type NodeStyle,
@@ -207,14 +208,14 @@ export default function NodeKeyNode({
       />
       <div
         ref={containerRef}
-        className={`h-full w-full rounded-lg p-3 transition ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
+        className={`relative h-full w-full flex flex-col rounded-lg p-3 transition ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
         style={nodeStyle}
         onMouseDown={handleMouseDown}
         tabIndex={0}
       >
         {/* Title with optional icon */}
         <div
-          className="mb-2 border-b pb-2"
+          className="mb-2 border-b pb-2 flex-shrink-0"
           style={{ borderColor: separatorColor }}
         >
           <div className="flex items-center gap-1.5">
@@ -250,7 +251,7 @@ export default function NodeKeyNode({
         </div>
 
         {/* Entries */}
-        <div className="space-y-1.5 overflow-y-auto" style={{ maxHeight: "calc(100% - 50px)" }}>
+        <div className="space-y-1.5 flex-1 overflow-y-auto">
           {entries.map((entry) => (
             <div key={entry.id} className="flex items-center gap-2 group">
               {/* Color picker */}
@@ -299,17 +300,14 @@ export default function NodeKeyNode({
           ))}
         </div>
 
-        {/* Add button - only visible when selected */}
+        {/* Tab hint popover when selected */}
         {selected && (
-          <button
-            type="button"
-            onClick={addEntry}
-            className="nodrag mt-2 flex items-center gap-1 text-[10px] hover:opacity-70"
-            style={{ color: bodyTextColor }}
-          >
-            <Plus className="h-3 w-3" />
-            Add node type
-          </button>
+          <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none z-50">
+            <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1 shadow-md text-[11px] text-slate-500 whitespace-nowrap">
+              <Kbd>Tab</Kbd>
+              <span>to add entry</span>
+            </div>
+          </div>
         )}
       </div>
     </>
