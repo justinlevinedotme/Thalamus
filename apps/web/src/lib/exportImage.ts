@@ -1,7 +1,13 @@
+// lib/exportImage.ts
+// exporting with edge labels doesn't work for some reason, we need to hide them during export
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
-
-const getExportElement = () => document.getElementById("graph-canvas");
+import {
+  getNodesBounds,
+  getViewportForBounds,
+  type Node as ReactFlowNode,
+  type Edge as ReactFlowEdge,
+} from "reactflow";
 
 const slugify = (value: string) =>
   value
@@ -17,41 +23,196 @@ const downloadDataUrl = (dataUrl: string, filename: string) => {
   anchor.click();
 };
 
-export async function exportGraphPng(title: string) {
-  const element = getExportElement();
-  if (!element) {
-    throw new Error("Graph canvas not found");
+export type ExportMargin = "none" | "small" | "medium" | "large";
+
+type ExportOptions = {
+  transparentBackground?: boolean;
+  margin?: ExportMargin;
+};
+
+const marginToPixels = (margin: ExportMargin): number => {
+  switch (margin) {
+    case "none":
+      return 0;
+    case "small":
+      return 20;
+    case "medium":
+      return 40;
+    case "large":
+      return 80;
+    default:
+      return 20;
+  }
+};
+
+// Get class name string from element (handles both HTML and SVG elements)
+function getClassName(element: Element): string {
+  const className = element.className;
+  if (typeof className === "string") {
+    return className;
+  }
+  // SVG elements have className as SVGAnimatedString
+  if (className && typeof className === "object" && "baseVal" in className) {
+    return (className as SVGAnimatedString).baseVal;
+  }
+  return "";
+}
+
+// Check if element should be filtered out from export
+function shouldFilterElement(element: Element): boolean {
+  const className = getClassName(element);
+
+  // Elements to hide during export
+  const hiddenClasses = [
+    "react-flow__controls",
+    "react-flow__minimap",
+    "helper-line",
+    "react-flow__handle",
+    "react-flow__resize-control",
+    "react-flow__nodesselection",
+    "react-flow__edgelabel-renderer",
+    "react-flow__edge-textwrapper",
+    "react-flow__edge-text",
+    "react-flow__edge-textbg",
+  ];
+
+  for (const hiddenClass of hiddenClasses) {
+    if (className.includes(hiddenClass)) {
+      return true;
+    }
   }
 
-  const dataUrl = await toPng(element, {
-    cacheBust: true,
-    pixelRatio: 2,
-    backgroundColor: "#ffffff",
+  return false;
+}
+
+async function captureGraphImage(
+  nodes: ReactFlowNode[],
+  _edges: ReactFlowEdge[],
+  options: ExportOptions = {}
+): Promise<{ dataUrl: string; width: number; height: number }> {
+  // Get the react-flow container
+  const reactFlow = document.querySelector(".react-flow") as HTMLElement;
+  if (!reactFlow) {
+    throw new Error("React Flow container not found");
+  }
+
+  const viewport = reactFlow.querySelector(
+    ".react-flow__viewport"
+  ) as HTMLElement;
+  if (!viewport) {
+    throw new Error("React Flow viewport not found");
+  }
+
+  // Get current container dimensions
+  const containerRect = reactFlow.getBoundingClientRect();
+  const exportWidth = containerRect.width;
+  const exportHeight = containerRect.height;
+
+  // Calculate margin
+  const margin = marginToPixels(options.margin ?? "small");
+
+  // Calculate bounds of all nodes
+  const nodesBounds = getNodesBounds(nodes);
+
+  // Calculate viewport transform to fit all nodes with margin
+  const { x, y, zoom } = getViewportForBounds(
+    nodesBounds,
+    exportWidth,
+    exportHeight,
+    0.1, // minZoom
+    2, // maxZoom
+    margin / Math.min(exportWidth, exportHeight) // padding as ratio
+  );
+
+  // Store original transform
+  const originalTransform = viewport.style.transform;
+
+  // Apply the calculated transform
+  viewport.style.transform = `translate(${x}px, ${y}px) scale(${zoom})`;
+
+  // Hide edge labels by setting inline styles directly on elements
+  const edgeLabelElements: HTMLElement[] = [];
+
+  // Find all text elements inside edges (SVG text elements for labels)
+  reactFlow
+    .querySelectorAll(
+      ".react-flow__edge text, .react-flow__edge-text, .react-flow__edge-textwrapper"
+    )
+    .forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      edgeLabelElements.push(htmlEl);
+      htmlEl.dataset.originalDisplay = htmlEl.style.display;
+      htmlEl.style.display = "none";
+    });
+
+  // Also hide the edge label background rectangles
+  reactFlow.querySelectorAll(".react-flow__edge rect").forEach((el) => {
+    const htmlEl = el as HTMLElement;
+    edgeLabelElements.push(htmlEl);
+    htmlEl.dataset.originalDisplay = htmlEl.style.display;
+    htmlEl.style.display = "none";
   });
 
+  try {
+    // Capture using html-to-image
+    const dataUrl = await toPng(reactFlow, {
+      cacheBust: true,
+      pixelRatio: 2,
+      backgroundColor: options.transparentBackground ? undefined : "#ffffff",
+      filter: (domNode) => {
+        if (domNode.nodeType !== 1) {
+          return true;
+        }
+        return !shouldFilterElement(domNode as Element);
+      },
+    });
+
+    return {
+      dataUrl,
+      width: exportWidth,
+      height: exportHeight,
+    };
+  } finally {
+    // Restore viewport transform
+    viewport.style.transform = originalTransform;
+
+    // Restore edge label elements
+    edgeLabelElements.forEach((el) => {
+      el.style.display = el.dataset.originalDisplay || "";
+      delete el.dataset.originalDisplay;
+    });
+  }
+}
+
+export async function exportGraphPng(
+  title: string,
+  nodes: ReactFlowNode[],
+  edges: ReactFlowEdge[],
+  options: ExportOptions = {}
+) {
+  const { dataUrl } = await captureGraphImage(nodes, edges, options);
   const fileName = `${slugify(title || "graph")}.png`;
   downloadDataUrl(dataUrl, fileName);
 }
 
-export async function exportGraphPdf(title: string) {
-  const element = getExportElement();
-  if (!element) {
-    throw new Error("Graph canvas not found");
-  }
-
-  const rect = element.getBoundingClientRect();
-  const dataUrl = await toPng(element, {
-    cacheBust: true,
-    pixelRatio: 2,
-    backgroundColor: "#ffffff",
-  });
+export async function exportGraphPdf(
+  title: string,
+  nodes: ReactFlowNode[],
+  edges: ReactFlowEdge[],
+  options: ExportOptions = {}
+) {
+  const { dataUrl, width, height } = await captureGraphImage(
+    nodes,
+    edges,
+    options
+  );
 
   const pdf = new jsPDF({
-    orientation: rect.width >= rect.height ? "landscape" : "portrait",
+    orientation: width >= height ? "landscape" : "portrait",
     unit: "px",
-    format: [rect.width, rect.height],
+    format: [width, height],
   });
 
-  pdf.addImage(dataUrl, "PNG", 0, 0, rect.width, rect.height);
+  pdf.addImage(dataUrl, "PNG", 0, 0, width, height);
   pdf.save(`${slugify(title || "graph")}.pdf`);
 }

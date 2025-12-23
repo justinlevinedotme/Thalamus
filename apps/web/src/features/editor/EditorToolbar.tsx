@@ -7,6 +7,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import {
@@ -23,7 +27,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
-import { exportGraphPdf, exportGraphPng } from "../../lib/exportImage";
+import { exportGraphPdf, exportGraphPng, type ExportMargin } from "../../lib/exportImage";
 import { exportGraphJson } from "../../lib/exportJson";
 import { useGraphStore } from "../../store/graphStore";
 
@@ -70,6 +74,7 @@ export default function EditorToolbar({
     canRedo,
   } = useGraphStore();
   const [exporting, setExporting] = useState<"png" | "pdf" | null>(null);
+  const [exportMargin, setExportMargin] = useState<ExportMargin>("small");
 
   const isMac =
     typeof navigator !== "undefined" &&
@@ -82,10 +87,11 @@ export default function EditorToolbar({
   const handleExportImage = async (format: "png" | "pdf") => {
     try {
       setExporting(format);
+      const options = { margin: exportMargin };
       if (format === "png") {
-        await exportGraphPng(graphTitle);
+        await exportGraphPng(graphTitle, nodes, edges, options);
       } else {
-        await exportGraphPdf(graphTitle);
+        await exportGraphPdf(graphTitle, nodes, edges, options);
       }
     } catch (error) {
       console.error("Export failed", error);
@@ -249,6 +255,14 @@ export default function EditorToolbar({
                   <FileText className="mr-2 h-4 w-4" />
                   Export as PDF
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="text-xs text-slate-500">Margin</DropdownMenuLabel>
+                <DropdownMenuRadioGroup value={exportMargin} onValueChange={(v) => setExportMargin(v as ExportMargin)}>
+                  <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="small">Small</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="medium">Medium</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="large">Large</DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
