@@ -4,6 +4,7 @@ import { BezierIcon } from "../../components/icons/BezierIcon";
 import { SmoothStepIcon } from "../../components/icons/SmoothStepIcon";
 import { StraightIcon } from "../../components/icons/StraightIcon";
 
+import { ColorPicker, ColorSwatch } from "../../components/ui/color-picker";
 import { Input } from "../../components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 import {
@@ -188,14 +189,19 @@ export default function MapStyleInspector() {
             <label className="text-xs font-semibold uppercase text-slate-500">
               Background
             </label>
-            <Input
-              type="color"
-              className="h-8 w-36 cursor-pointer"
-              defaultValue="#E2E8F0"
-              onChange={(event) =>
-                updateAllNodeStyles({ color: event.target.value })
-              }
-            />
+            <ColorPicker
+              value="#E2E8F0"
+              onChange={(color) => updateAllNodeStyles({ color })}
+              showAlpha={false}
+            >
+              <button
+                type="button"
+                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+              >
+                <ColorSwatch color="#E2E8F0" className="h-5 w-5" />
+                <span className="text-xs text-slate-600">Set color</span>
+              </button>
+            </ColorPicker>
           </div>
 
           <div className="flex items-center justify-between gap-4">
@@ -266,28 +272,38 @@ export default function MapStyleInspector() {
             <label className="text-xs font-semibold uppercase text-slate-500">
               Title Text
             </label>
-            <Input
-              type="color"
-              className="h-8 w-36 cursor-pointer"
-              defaultValue="#1e293b"
-              onChange={(event) =>
-                updateAllNodeStyles({ textColor: event.target.value })
-              }
-            />
+            <ColorPicker
+              value="#1e293b"
+              onChange={(color) => updateAllNodeStyles({ textColor: color })}
+              showAlpha={false}
+            >
+              <button
+                type="button"
+                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+              >
+                <ColorSwatch color="#1e293b" className="h-5 w-5" />
+                <span className="text-xs text-slate-600">Set color</span>
+              </button>
+            </ColorPicker>
           </div>
 
           <div className="flex items-center justify-between gap-4">
             <label className="text-xs font-semibold uppercase text-slate-500">
               Body Text
             </label>
-            <Input
-              type="color"
-              className="h-8 w-36 cursor-pointer"
-              defaultValue="#475569"
-              onChange={(event) =>
-                updateAllNodeStyles({ bodyTextColor: event.target.value })
-              }
-            />
+            <ColorPicker
+              value="#475569"
+              onChange={(color) => updateAllNodeStyles({ bodyTextColor: color })}
+              showAlpha={false}
+            >
+              <button
+                type="button"
+                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+              >
+                <ColorSwatch color="#475569" className="h-5 w-5" />
+                <span className="text-xs text-slate-600">Set color</span>
+              </button>
+            </ColorPicker>
           </div>
         </div>
 
@@ -305,14 +321,19 @@ export default function MapStyleInspector() {
             <label className="text-xs font-semibold uppercase text-slate-500">
               Color
             </label>
-            <Input
-              type="color"
-              className="h-8 w-36 cursor-pointer"
-              defaultValue="#94A3B8"
-              onChange={(event) =>
-                updateAllEdgeStyles({ color: event.target.value })
-              }
-            />
+            <ColorPicker
+              value="#94A3B8"
+              onChange={(color) => updateAllEdgeStyles({ color })}
+              showAlpha={false}
+            >
+              <button
+                type="button"
+                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+              >
+                <ColorSwatch color="#94A3B8" className="h-5 w-5" />
+                <span className="text-xs text-slate-600">Set color</span>
+              </button>
+            </ColorPicker>
           </div>
 
           <div className="flex items-center justify-between gap-4">

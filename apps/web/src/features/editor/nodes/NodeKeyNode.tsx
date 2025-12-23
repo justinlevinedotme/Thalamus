@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { type NodeProps } from "reactflow";
 
+import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
 import { Kbd } from "../../../components/ui/kbd";
 import {
@@ -188,7 +189,8 @@ export default function NodeKeyNode({
   // Text colors from style
   const titleColor = data.style?.textColor ?? "#334155";
   const bodyTextColor = data.style?.bodyTextColor ?? "#64748b";
-  const separatorColor = data.style?.iconColor ?? "#e2e8f0"; // Reusing iconColor for separator
+  const separatorColor = data.style?.separatorColor ?? "#e2e8f0";
+  const iconColor = data.style?.iconColor ?? "#64748b";
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color ?? "#FFFFFF",
@@ -222,7 +224,7 @@ export default function NodeKeyNode({
             {data.style?.icon && (
               <span
                 className="flex-shrink-0 flex items-center"
-                style={{ color: separatorColor }}
+                style={{ color: iconColor }}
               >
                 <NodeIconDisplay icon={data.style.icon} className="h-3.5 w-3.5" />
               </span>
@@ -254,29 +256,39 @@ export default function NodeKeyNode({
         <div className="space-y-1.5 flex-1 overflow-y-auto">
           {entries.map((entry) => (
             <div key={entry.id} className="flex items-center gap-2 group">
-              {/* Color picker */}
-              <input
-                type="color"
-                value={entry.color}
-                onChange={(e) => handleEntryColorChange(entry.id, e.target.value)}
-                className="nodrag h-4 w-4 cursor-pointer rounded border-0 p-0"
-                title="Change color"
-              />
+              {/* Color picker - only show when selected */}
+              {selected && (
+                <ColorPicker
+                  value={entry.color}
+                  onChange={(color) => handleEntryColorChange(entry.id, color)}
+                  showAlpha={false}
+                >
+                  <button
+                    type="button"
+                    className="nodrag flex h-4 w-4 cursor-pointer items-center justify-center"
+                    title="Change color"
+                  >
+                    <ColorSwatch color={entry.color} className="h-4 w-4" />
+                  </button>
+                </ColorPicker>
+              )}
               {/* Node shape preview */}
               <div
                 className={`w-5 h-5 flex items-center justify-center border ${getShapeClass(entry.shape)}`}
                 style={{ backgroundColor: entry.color, borderColor: separatorColor }}
               />
-              {/* Shape toggle */}
-              <button
-                type="button"
-                onClick={() => handleEntryShapeChange(entry.id, cycleShape(entry.shape))}
-                className="nodrag text-[10px] w-4 hover:opacity-70"
-                style={{ color: bodyTextColor }}
-                title="Toggle shape"
-              >
-                {getShapeLabel(entry.shape)}
-              </button>
+              {/* Shape toggle - only show when selected */}
+              {selected && (
+                <button
+                  type="button"
+                  onClick={() => handleEntryShapeChange(entry.id, cycleShape(entry.shape))}
+                  className="nodrag text-[10px] w-4 hover:opacity-70"
+                  style={{ color: bodyTextColor }}
+                  title="Toggle shape"
+                >
+                  {getShapeLabel(entry.shape)}
+                </button>
+              )}
               {/* Label */}
               <input
                 type="text"
@@ -286,16 +298,18 @@ export default function NodeKeyNode({
                 style={{ color: bodyTextColor }}
                 placeholder="Label"
               />
-              {/* Delete button */}
-              <button
-                type="button"
-                onClick={() => removeEntry(entry.id)}
-                className="nodrag opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"
-                style={{ color: bodyTextColor }}
-                title="Remove entry"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
+              {/* Delete button - only show when selected */}
+              {selected && (
+                <button
+                  type="button"
+                  onClick={() => removeEntry(entry.id)}
+                  className="nodrag opacity-0 group-hover:opacity-100 hover:text-red-500 transition-opacity"
+                  style={{ color: bodyTextColor }}
+                  title="Remove entry"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              )}
             </div>
           ))}
         </div>

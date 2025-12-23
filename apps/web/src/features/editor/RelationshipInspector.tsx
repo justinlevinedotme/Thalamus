@@ -11,6 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../components/ui/accordion";
+import { ColorPicker, ColorSwatch } from "../../components/ui/color-picker";
 import { Input } from "../../components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 import {
@@ -199,14 +200,19 @@ export default function RelationshipInspector() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
                   <label className="text-xs text-slate-500">Color</label>
-                  <Input
-                    type="color"
-                    className="h-7 w-24 cursor-pointer"
+                  <ColorPicker
                     value={selectedEdge.data?.style?.color ?? "#94A3B8"}
-                    onChange={(event) =>
-                      updateEdgeStyle(selectedEdge.id, { color: event.target.value })
-                    }
-                  />
+                    onChange={(color) => updateEdgeStyle(selectedEdge.id, { color })}
+                    showAlpha={false}
+                  >
+                    <button
+                      type="button"
+                      className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                    >
+                      <ColorSwatch color={selectedEdge.data?.style?.color ?? "#94A3B8"} className="h-4 w-4" />
+                      <span className="text-[10px] text-slate-500">Color</span>
+                    </button>
+                  </ColorPicker>
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
@@ -442,44 +448,64 @@ export default function RelationshipInspector() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
                     <label className="text-xs text-slate-500">Background</label>
-                    <Input
-                      type="color"
-                      className="h-7 w-24 cursor-pointer"
+                    <ColorPicker
                       value={labelStyle.backgroundColor}
-                      onChange={(event) =>
+                      onChange={(color) =>
                         updateEdgeStyle(selectedEdge.id, {
-                          labelStyle: { ...labelStyle, backgroundColor: event.target.value },
+                          labelStyle: { ...labelStyle, backgroundColor: color },
                         })
                       }
-                    />
+                      showAlpha={false}
+                    >
+                      <button
+                        type="button"
+                        className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                      >
+                        <ColorSwatch color={labelStyle.backgroundColor} className="h-4 w-4" />
+                        <span className="text-[10px] text-slate-500">Color</span>
+                      </button>
+                    </ColorPicker>
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <label className="text-xs text-slate-500">Text Color</label>
-                    <Input
-                      type="color"
-                      className="h-7 w-24 cursor-pointer"
+                    <ColorPicker
                       value={labelStyle.textColor}
-                      onChange={(event) =>
+                      onChange={(color) =>
                         updateEdgeStyle(selectedEdge.id, {
-                          labelStyle: { ...labelStyle, textColor: event.target.value },
+                          labelStyle: { ...labelStyle, textColor: color },
                         })
                       }
-                    />
+                      showAlpha={false}
+                    >
+                      <button
+                        type="button"
+                        className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                      >
+                        <ColorSwatch color={labelStyle.textColor} className="h-4 w-4" />
+                        <span className="text-[10px] text-slate-500">Color</span>
+                      </button>
+                    </ColorPicker>
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <label className="text-xs text-slate-500">Border</label>
                     <div className="flex items-center gap-2">
-                      <Input
-                        type="color"
-                        className="h-7 w-16 cursor-pointer"
+                      <ColorPicker
                         value={labelStyle.borderColor}
-                        onChange={(event) =>
+                        onChange={(color) =>
                           updateEdgeStyle(selectedEdge.id, {
-                            labelStyle: { ...labelStyle, borderColor: event.target.value },
+                            labelStyle: { ...labelStyle, borderColor: color },
                           })
                         }
-                        disabled={!labelStyle.showBorder}
-                      />
+                        showAlpha={false}
+                      >
+                        <button
+                          type="button"
+                          className={`flex h-7 w-16 cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 ${!labelStyle.showBorder ? "opacity-50" : ""}`}
+                          disabled={!labelStyle.showBorder}
+                        >
+                          <ColorSwatch color={labelStyle.borderColor} className="h-4 w-4" />
+                        </button>
+                      </ColorPicker>
                       <button
                         className={`rounded border px-2 py-1 text-xs transition ${
                           labelStyle.showBorder

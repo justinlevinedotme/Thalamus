@@ -49,6 +49,7 @@ export type NodeStyle = {
   bodyTextColor?: string;
   icon?: NodeIcon;
   iconColor?: string;
+  separatorColor?: string; // For key nodes separator line
   // Border properties
   borderColor?: string;
   borderWidth?: number;

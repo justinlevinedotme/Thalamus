@@ -166,6 +166,7 @@ export default function NodeStyleInspector() {
       bodyTextColor: getCommonValue(styles.map((s) => s?.bodyTextColor)),
       icon: getCommonValue(styles.map((s) => JSON.stringify(s?.icon))),
       iconColor: getCommonValue(styles.map((s) => s?.iconColor)),
+      separatorColor: getCommonValue(styles.map((s) => s?.separatorColor)),
       borderColor: getCommonValue(styles.map((s) => s?.borderColor)),
       borderWidth: getCommonValue(styles.map((s) => s?.borderWidth)),
       borderStyle: getCommonValue(styles.map((s) => s?.borderStyle)),
@@ -200,6 +201,7 @@ export default function NodeStyleInspector() {
   const currentTextColor = isMultiSelect ? commonStyles?.textColor : selectedNode?.data?.style?.textColor;
   const currentBodyTextColor = isMultiSelect ? commonStyles?.bodyTextColor : selectedNode?.data?.style?.bodyTextColor;
   const currentIconColor = isMultiSelect ? commonStyles?.iconColor : selectedNode?.data?.style?.iconColor;
+  const currentSeparatorColor = isMultiSelect ? commonStyles?.separatorColor : selectedNode?.data?.style?.separatorColor;
   const currentBorderColor = isMultiSelect ? commonStyles?.borderColor : selectedNode?.data?.style?.borderColor;
   const currentBorderWidth = isMultiSelect ? commonStyles?.borderWidth : selectedNode?.data?.style?.borderWidth;
   const currentBorderStyle = isMultiSelect ? commonStyles?.borderStyle : selectedNode?.data?.style?.borderStyle;
@@ -500,9 +502,18 @@ export default function NodeStyleInspector() {
                       </button>
                     </ColorPicker>
                   </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
 
+            <AccordionItem value="border" className="border-b-0 border-t border-slate-200">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+                Border
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3 pt-0">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Border</label>
+                    <label className="text-xs text-slate-500">Color</label>
                     <ColorPicker
                       value={currentBorderColor ?? "#e2e8f0"}
                       onChange={(color) => handleStyleUpdate({ borderColor: color })}
@@ -519,6 +530,68 @@ export default function NodeStyleInspector() {
                         )}
                       </button>
                     </ColorPicker>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Style</label>
+                    <ToggleGroup
+                      type="single"
+                      className="h-7 rounded-md border border-slate-200 bg-white"
+                      value={currentBorderStyle ?? "solid"}
+                      onValueChange={(value) => {
+                        if (!value) {
+                          return;
+                        }
+                        handleStyleUpdate({ borderStyle: value as NodeBorderStyle });
+                      }}
+                      aria-label="Border style"
+                    >
+                      {borderStyles.map((style) => (
+                        <Tooltip key={style.value}>
+                          <TooltipTrigger asChild>
+                            <ToggleGroupItem
+                              value={style.value}
+                              className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                              variant="ghost"
+                            >
+                              {style.icon}
+                            </ToggleGroupItem>
+                          </TooltipTrigger>
+                          <TooltipContent>{style.label}</TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </ToggleGroup>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Width</label>
+                    <ToggleGroup
+                      type="single"
+                      className="h-7 rounded-md border border-slate-200 bg-white"
+                      value={String(currentBorderWidth ?? 1)}
+                      onValueChange={(value) => {
+                        if (!value) {
+                          return;
+                        }
+                        handleStyleUpdate({ borderWidth: Number(value) });
+                      }}
+                      aria-label="Border width"
+                    >
+                      {borderWidths.map((width) => (
+                        <Tooltip key={width.value}>
+                          <TooltipTrigger asChild>
+                            <ToggleGroupItem
+                              value={String(width.value)}
+                              className="h-full w-8 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                              variant="ghost"
+                            >
+                              {width.value}
+                            </ToggleGroupItem>
+                          </TooltipTrigger>
+                          <TooltipContent>{width.label}</TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </ToggleGroup>
                   </div>
                 </div>
               </AccordionContent>
@@ -573,16 +646,16 @@ export default function NodeStyleInspector() {
                   <div className="flex items-center justify-between gap-4">
                     <label className="text-xs text-slate-500">Separator</label>
                     <ColorPicker
-                      value={currentIconColor ?? "#e2e8f0"}
-                      onChange={(color) => handleStyleUpdate({ iconColor: color })}
+                      value={currentSeparatorColor ?? "#e2e8f0"}
+                      onChange={(color) => handleStyleUpdate({ separatorColor: color })}
                     >
                       <button
                         type="button"
                         className="flex h-7 w-7 cursor-pointer items-center justify-center"
-                        title="Separator & icon color"
+                        title="Separator color"
                       >
-                        {currentIconColor ? (
-                          <ColorSwatch color={currentIconColor} className="h-5 w-5" />
+                        {currentSeparatorColor ? (
+                          <ColorSwatch color={currentSeparatorColor} className="h-5 w-5" />
                         ) : (
                           <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
                         )}
@@ -600,7 +673,7 @@ export default function NodeStyleInspector() {
                         <button
                           type="button"
                           className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
-                          style={{ color: currentIconColor ?? "#e2e8f0" }}
+                          style={{ color: currentIconColor ?? "#64748b" }}
                         >
                           {currentIcon ? (
                             <NodeIconDisplay icon={currentIcon} className="h-4 w-4" />
@@ -609,11 +682,28 @@ export default function NodeStyleInspector() {
                           )}
                         </button>
                       </IconPicker>
+                      {currentIcon && currentIcon.type !== "emoji" && (
+                        <ColorPicker
+                          value={currentIconColor ?? "#64748b"}
+                          onChange={(color) => handleStyleUpdate({ iconColor: color })}
+                        >
+                          <button
+                            type="button"
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                            title="Icon color"
+                          >
+                            <ColorSwatch
+                              color={currentIconColor ?? "#64748b"}
+                              className="h-5 w-5"
+                            />
+                          </button>
+                        </ColorPicker>
+                      )}
                       {currentIcon && (
                         <button
                           className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
                           type="button"
-                          onClick={() => handleStyleUpdate({ icon: undefined })}
+                          onClick={() => handleStyleUpdate({ icon: undefined, iconColor: undefined })}
                           aria-label="Clear icon"
                         >
                           ×
