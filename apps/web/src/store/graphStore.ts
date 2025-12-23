@@ -166,6 +166,12 @@ type GraphState = {
   setGroups: (groups: NodeGroup[]) => void;
   distributeNodesHorizontally: () => void;
   distributeNodesVertically: () => void;
+  alignNodesLeft: () => void;
+  alignNodesRight: () => void;
+  alignNodesCenter: () => void;
+  alignNodesTop: () => void;
+  alignNodesBottom: () => void;
+  alignNodesMiddle: () => void;
   sendNodeToFront: (nodeId: string) => void;
   sendNodeToBack: (nodeId: string) => void;
   selectGroupNodes: (groupId: string) => void;
@@ -1137,6 +1143,132 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         nodes: state.nodes.map((node) =>
           newPositions[node.id] !== undefined
             ? { ...node, position: { ...node.position, y: newPositions[node.id] } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  alignNodesLeft: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) return {};
+
+      // Find the leftmost x position
+      const minX = Math.min(...selectedNodes.map((n) => n.position.x));
+
+      return {
+        nodes: state.nodes.map((node) =>
+          node.selected
+            ? { ...node, position: { ...node.position, x: minX } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  alignNodesRight: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) return {};
+
+      // Find the rightmost edge (x + width)
+      const maxRight = Math.max(
+        ...selectedNodes.map((n) => n.position.x + (n.width ?? 150))
+      );
+
+      return {
+        nodes: state.nodes.map((node) =>
+          node.selected
+            ? { ...node, position: { ...node.position, x: maxRight - (node.width ?? 150) } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  alignNodesCenter: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) return {};
+
+      // Find the average center x position
+      const centers = selectedNodes.map((n) => n.position.x + (n.width ?? 150) / 2);
+      const avgCenter = centers.reduce((a, b) => a + b, 0) / centers.length;
+
+      return {
+        nodes: state.nodes.map((node) =>
+          node.selected
+            ? { ...node, position: { ...node.position, x: avgCenter - (node.width ?? 150) / 2 } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  alignNodesTop: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) return {};
+
+      // Find the topmost y position
+      const minY = Math.min(...selectedNodes.map((n) => n.position.y));
+
+      return {
+        nodes: state.nodes.map((node) =>
+          node.selected
+            ? { ...node, position: { ...node.position, y: minY } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  alignNodesBottom: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) return {};
+
+      // Find the bottommost edge (y + height)
+      const maxBottom = Math.max(
+        ...selectedNodes.map((n) => n.position.y + (n.height ?? 50))
+      );
+
+      return {
+        nodes: state.nodes.map((node) =>
+          node.selected
+            ? { ...node, position: { ...node.position, y: maxBottom - (node.height ?? 50) } }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
+  alignNodesMiddle: () =>
+    set((state) => {
+      const selectedNodes = state.nodes.filter((n) => n.selected);
+      if (selectedNodes.length < 2) return {};
+
+      // Find the average center y position
+      const centers = selectedNodes.map((n) => n.position.y + (n.height ?? 50) / 2);
+      const avgCenter = centers.reduce((a, b) => a + b, 0) / centers.length;
+
+      return {
+        nodes: state.nodes.map((node) =>
+          node.selected
+            ? { ...node, position: { ...node.position, y: avgCenter - (node.height ?? 50) / 2 } }
             : node
         ),
         ...setHistory(

@@ -1,6 +1,31 @@
-import { AlignHorizontalSpaceAround, AlignVerticalSpaceAround, ArrowDownToLine, ArrowUpToLine, Copy, Focus, Group, Pencil, Plus, Square, Trash2, Type, Ungroup } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  AlignCenterHorizontal,
+  AlignCenterVertical,
+  AlignEndHorizontal,
+  AlignEndVertical,
+  AlignHorizontalSpaceAround,
+  AlignStartHorizontal,
+  AlignStartVertical,
+  AlignVerticalSpaceAround,
+  ArrowDownToLine,
+  ArrowUpToLine,
+  ChevronRight,
+  Clipboard,
+  ClipboardCopy,
+  Copy,
+  Focus,
+  Group,
+  Pencil,
+  Plus,
+  Scissors,
+  Square,
+  Trash2,
+  Type,
+  Ungroup,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { Kbd } from "../../components/ui/kbd";
 import { useGraphStore } from "../../store/graphStore";
 
 type ContextMenuState = {
@@ -14,6 +39,8 @@ type CanvasContextMenuProps = {
   menu: ContextMenuState;
   onClose: () => void;
 };
+
+type SubMenuType = "group" | "align" | "distribute" | null;
 
 export default function CanvasContextMenu({
   menu,
@@ -33,10 +60,20 @@ export default function CanvasContextMenu({
     ungroupNodes,
     distributeNodesHorizontally,
     distributeNodesVertically,
+    alignNodesLeft,
+    alignNodesRight,
+    alignNodesCenter,
+    alignNodesTop,
+    alignNodesBottom,
+    alignNodesMiddle,
     sendNodeToFront,
     sendNodeToBack,
+    copySelectedNodes,
+    cutSelectedNodes,
+    pasteNodes,
   } = useGraphStore();
   const menuRef = useRef<HTMLDivElement>(null);
+  const [openSubMenu, setOpenSubMenu] = useState<SubMenuType>(null);
 
   // Get info about selected nodes for group/ungroup logic
   const selectedNodes = useMemo(
@@ -84,6 +121,13 @@ export default function CanvasContextMenu({
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [onClose]);
+
+  // Reset submenu when menu closes
+  useEffect(() => {
+    if (!menu) {
+      setOpenSubMenu(null);
+    }
+  }, [menu]);
 
   const handleDuplicate = useCallback(() => {
     if (menu?.type === "node" && menu.nodeId) {
@@ -169,6 +213,36 @@ export default function CanvasContextMenu({
     onClose();
   }, [distributeNodesVertically, onClose]);
 
+  const handleAlignLeft = useCallback(() => {
+    alignNodesLeft();
+    onClose();
+  }, [alignNodesLeft, onClose]);
+
+  const handleAlignRight = useCallback(() => {
+    alignNodesRight();
+    onClose();
+  }, [alignNodesRight, onClose]);
+
+  const handleAlignCenter = useCallback(() => {
+    alignNodesCenter();
+    onClose();
+  }, [alignNodesCenter, onClose]);
+
+  const handleAlignTop = useCallback(() => {
+    alignNodesTop();
+    onClose();
+  }, [alignNodesTop, onClose]);
+
+  const handleAlignBottom = useCallback(() => {
+    alignNodesBottom();
+    onClose();
+  }, [alignNodesBottom, onClose]);
+
+  const handleAlignMiddle = useCallback(() => {
+    alignNodesMiddle();
+    onClose();
+  }, [alignNodesMiddle, onClose]);
+
   const handleDeleteSelection = useCallback(() => {
     deleteSelectedNodes();
     onClose();
@@ -188,19 +262,55 @@ export default function CanvasContextMenu({
     onClose();
   }, [menu, onClose, sendNodeToBack]);
 
+  const handleCopy = useCallback(() => {
+    copySelectedNodes();
+    onClose();
+  }, [copySelectedNodes, onClose]);
+
+  const handleCut = useCallback(() => {
+    cutSelectedNodes();
+    onClose();
+  }, [cutSelectedNodes, onClose]);
+
+  const handlePaste = useCallback(() => {
+    pasteNodes();
+    onClose();
+  }, [pasteNodes, onClose]);
+
   if (!menu) {
     return null;
   }
 
+  const isMac =
+    typeof navigator !== "undefined" &&
+    navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+  const modKeyLabel = isMac ? "⌘" : "Ctrl";
+
   const menuItemClass =
     "flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 transition cursor-pointer";
+  const menuItemWithSubmenuClass =
+    "flex w-full items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 transition cursor-pointer";
+  const disabledItemClass =
+    "flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-400 cursor-not-allowed";
   const dangerItemClass =
     "flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition cursor-pointer";
+  const subMenuClass =
+    "absolute left-full top-0 ml-1 min-w-[160px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg";
+
+  const renderKbd = (keys: string) => (
+    <span className="ml-auto flex items-center gap-0.5 text-xs text-slate-400">
+      {keys.split("+").map((key, i) => (
+        <Kbd key={i} className="text-[10px] px-1 py-0.5">
+          {key}
+        </Kbd>
+      ))}
+    </span>
+  );
 
   return (
     <div
       ref={menuRef}
-      className="fixed z-50 min-w-[160px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+      className="fixed z-50 min-w-[200px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
       style={{
         left: menu.position.x,
         top: menu.position.y,
@@ -208,31 +318,142 @@ export default function CanvasContextMenu({
     >
       {menu.type === "selection" ? (
         <>
-          {canGroup && (
-            <button className={menuItemClass} type="button" onClick={handleGroup}>
-              <Group className="h-4 w-4" />
-              Group ({selectedCount} nodes)
-            </button>
-          )}
-          {canUngroup && (
-            <button className={menuItemClass} type="button" onClick={handleUngroup}>
-              <Ungroup className="h-4 w-4" />
-              Ungroup
-            </button>
-          )}
+          {/* Clipboard actions */}
+          <button className={menuItemClass} type="button" onClick={handleCopy}>
+            <ClipboardCopy className="h-4 w-4" />
+            Copy
+            {renderKbd(`${modKeyLabel}+C`)}
+          </button>
+          <button className={menuItemClass} type="button" onClick={handlePaste}>
+            <Clipboard className="h-4 w-4" />
+            Paste
+            {renderKbd(`${modKeyLabel}+V`)}
+          </button>
+          <button className={menuItemClass} type="button" onClick={handleCut}>
+            <Scissors className="h-4 w-4" />
+            Cut
+            {renderKbd(`${modKeyLabel}+X`)}
+          </button>
+
+          <div className="my-1 h-px bg-slate-200" />
+
+          {/* Group submenu */}
           {selectedCount >= 2 && (
-            <>
-              <button className={menuItemClass} type="button" onClick={handleDistributeHorizontally}>
-                <AlignHorizontalSpaceAround className="h-4 w-4" />
-                Distribute Horizontally
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenSubMenu("group")}
+              onMouseLeave={() => setOpenSubMenu(null)}
+            >
+              <button className={menuItemWithSubmenuClass} type="button">
+                <span className="flex items-center gap-2">
+                  <Group className="h-4 w-4" />
+                  Group
+                </span>
+                <ChevronRight className="h-4 w-4" />
               </button>
-              <button className={menuItemClass} type="button" onClick={handleDistributeVertically}>
-                <AlignVerticalSpaceAround className="h-4 w-4" />
-                Distribute Vertically
-              </button>
-            </>
+              {openSubMenu === "group" && (
+                <div className={subMenuClass}>
+                  <button
+                    className={canGroup ? menuItemClass : disabledItemClass}
+                    type="button"
+                    onClick={canGroup ? handleGroup : undefined}
+                    disabled={!canGroup}
+                  >
+                    <Group className="h-4 w-4" />
+                    Group
+                    {renderKbd(`${modKeyLabel}+G`)}
+                  </button>
+                  <button
+                    className={canUngroup ? menuItemClass : disabledItemClass}
+                    type="button"
+                    onClick={canUngroup ? handleUngroup : undefined}
+                    disabled={!canUngroup}
+                  >
+                    <Ungroup className="h-4 w-4" />
+                    Ungroup
+                    {renderKbd(`${modKeyLabel}+⇧+G`)}
+                  </button>
+                </div>
+              )}
+            </div>
           )}
-          {(canGroup || canUngroup || selectedCount >= 2) && <div className="my-1 h-px bg-slate-200" />}
+
+          {/* Align submenu */}
+          {selectedCount >= 2 && (
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenSubMenu("align")}
+              onMouseLeave={() => setOpenSubMenu(null)}
+            >
+              <button className={menuItemWithSubmenuClass} type="button">
+                <span className="flex items-center gap-2">
+                  <AlignCenterHorizontal className="h-4 w-4" />
+                  Align
+                </span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              {openSubMenu === "align" && (
+                <div className={subMenuClass}>
+                  <button className={menuItemClass} type="button" onClick={handleAlignLeft}>
+                    <AlignStartHorizontal className="h-4 w-4" />
+                    Left
+                  </button>
+                  <button className={menuItemClass} type="button" onClick={handleAlignCenter}>
+                    <AlignCenterHorizontal className="h-4 w-4" />
+                    Center
+                  </button>
+                  <button className={menuItemClass} type="button" onClick={handleAlignRight}>
+                    <AlignEndHorizontal className="h-4 w-4" />
+                    Right
+                  </button>
+                  <div className="my-1 h-px bg-slate-200" />
+                  <button className={menuItemClass} type="button" onClick={handleAlignTop}>
+                    <AlignStartVertical className="h-4 w-4" />
+                    Top
+                  </button>
+                  <button className={menuItemClass} type="button" onClick={handleAlignMiddle}>
+                    <AlignCenterVertical className="h-4 w-4" />
+                    Middle
+                  </button>
+                  <button className={menuItemClass} type="button" onClick={handleAlignBottom}>
+                    <AlignEndVertical className="h-4 w-4" />
+                    Bottom
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Distribute submenu */}
+          {selectedCount >= 2 && (
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenSubMenu("distribute")}
+              onMouseLeave={() => setOpenSubMenu(null)}
+            >
+              <button className={menuItemWithSubmenuClass} type="button">
+                <span className="flex items-center gap-2">
+                  <AlignHorizontalSpaceAround className="h-4 w-4" />
+                  Distribute
+                </span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+              {openSubMenu === "distribute" && (
+                <div className={subMenuClass}>
+                  <button className={menuItemClass} type="button" onClick={handleDistributeHorizontally}>
+                    <AlignHorizontalSpaceAround className="h-4 w-4" />
+                    Horizontally
+                  </button>
+                  <button className={menuItemClass} type="button" onClick={handleDistributeVertically}>
+                    <AlignVerticalSpaceAround className="h-4 w-4" />
+                    Vertically
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="my-1 h-px bg-slate-200" />
           <button
             className={dangerItemClass}
             type="button"
@@ -244,6 +465,25 @@ export default function CanvasContextMenu({
         </>
       ) : menu.type === "node" ? (
         <>
+          {/* Clipboard actions */}
+          <button className={menuItemClass} type="button" onClick={handleCopy}>
+            <ClipboardCopy className="h-4 w-4" />
+            Copy
+            {renderKbd(`${modKeyLabel}+C`)}
+          </button>
+          <button className={menuItemClass} type="button" onClick={handlePaste}>
+            <Clipboard className="h-4 w-4" />
+            Paste
+            {renderKbd(`${modKeyLabel}+V`)}
+          </button>
+          <button className={menuItemClass} type="button" onClick={handleCut}>
+            <Scissors className="h-4 w-4" />
+            Cut
+            {renderKbd(`${modKeyLabel}+X`)}
+          </button>
+
+          <div className="my-1 h-px bg-slate-200" />
+
           {/* Edit option - only for non-shape nodes */}
           {clickedNodeKind !== "shape" && (
             <button className={menuItemClass} type="button" onClick={handleEdit}>
@@ -310,6 +550,16 @@ export default function CanvasContextMenu({
         </button>
       ) : (
         <>
+          <button
+            className={menuItemClass}
+            type="button"
+            onClick={handlePaste}
+          >
+            <Clipboard className="h-4 w-4" />
+            Paste
+            {renderKbd(`${modKeyLabel}+V`)}
+          </button>
+          <div className="my-1 h-px bg-slate-200" />
           <button
             className={menuItemClass}
             type="button"
