@@ -421,7 +421,16 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   setGraphTitle: (graphTitle) => set({ graphTitle }),
   selectEdge: (edgeId) => set({ selectedEdgeId: edgeId }),
   selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
-  startEditingNode: (nodeId) => set({ editingNodeId: nodeId }),
+  startEditingNode: (nodeId) =>
+    set((state) => ({
+      editingNodeId: nodeId,
+      selectedNodeId: nodeId,
+      // Ensure the node is selected in React Flow's state
+      nodes: state.nodes.map((node) => ({
+        ...node,
+        selected: node.id === nodeId,
+      })),
+    })),
   stopEditingNode: () => set({ editingNodeId: undefined }),
   setFlowInstance: (instance) => set({ flowInstance: instance }),
   setFocusNode: (nodeId) =>
