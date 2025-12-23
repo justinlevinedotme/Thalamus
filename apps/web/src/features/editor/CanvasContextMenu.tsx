@@ -161,7 +161,9 @@ export default function CanvasContextMenu({
 
   const handleAddNode = useCallback(() => {
     if (menu?.type === "pane" && flowInstance) {
-      const position = flowInstance.screenToFlowPosition(menu.position);
+      const flowPos = flowInstance.screenToFlowPosition(menu.position);
+      // Offset so node center is at cursor (typical node is ~150x50)
+      const position = { x: flowPos.x - 75, y: flowPos.y - 25 };
       addNode({ position });
     }
     onClose();
@@ -169,7 +171,9 @@ export default function CanvasContextMenu({
 
   const handleAddTextNode = useCallback(() => {
     if (menu?.type === "pane" && flowInstance) {
-      const position = flowInstance.screenToFlowPosition(menu.position);
+      const flowPos = flowInstance.screenToFlowPosition(menu.position);
+      // Offset so text node center is at cursor (text nodes are smaller)
+      const position = { x: flowPos.x - 50, y: flowPos.y - 15 };
       addNode({ position, kind: "text" });
     }
     onClose();
@@ -177,7 +181,9 @@ export default function CanvasContextMenu({
 
   const handleAddShapeNode = useCallback(() => {
     if (menu?.type === "pane" && flowInstance) {
-      const position = flowInstance.screenToFlowPosition(menu.position);
+      const flowPos = flowInstance.screenToFlowPosition(menu.position);
+      // Offset so shape center is at cursor (shapes default to 200x120)
+      const position = { x: flowPos.x - 100, y: flowPos.y - 60 };
       addNode({ position, kind: "shape" });
     }
     onClose();

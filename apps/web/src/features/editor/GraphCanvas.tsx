@@ -772,7 +772,7 @@ export default function GraphCanvas() {
         nodeTypes={nodeTypes}
         selectionOnDrag
         multiSelectionKeyCode={editingNodeId ? null : "Shift"}
-        deleteKeyCode={editingNodeId ? null : ["Backspace", "Delete"]}
+        deleteKeyCode={null}
         selectionKeyCode={editingNodeId ? null : "Shift"}
         panActivationKeyCode={editingNodeId ? null : "Space"}
         disableKeyboardA11y={!!editingNodeId}

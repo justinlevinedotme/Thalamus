@@ -38,6 +38,8 @@ export type NodeGroup = {
   color: string;
 };
 
+export type NodeBorderStyle = "solid" | "dashed" | "dotted";
+
 export type NodeStyle = {
   color: string;
   shape: NodeShape;
@@ -47,6 +49,10 @@ export type NodeStyle = {
   bodyTextColor?: string;
   icon?: NodeIcon;
   iconColor?: string;
+  // Border properties
+  borderColor?: string;
+  borderWidth?: number;
+  borderStyle?: NodeBorderStyle;
 };
 
 export type EdgeCurvature = "bezier" | "smoothstep" | "straight";
@@ -189,7 +195,7 @@ const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
   evidence: { color: "#BBF7D0", shape: "rounded", size: "sm" },
   goal: { color: "#BFDBFE", shape: "pill", size: "lg" },
   text: { color: "transparent", shape: "rounded", size: "md" },
-  shape: { color: "#F1F5F9", shape: "rounded", size: "lg" },
+  shape: { color: "#DBEAFE", shape: "rounded", size: "lg", borderColor: "#3B82F6", borderWidth: 2, borderStyle: "solid" },
 };
 
 const defaultEdgeStyle: EdgeStyle = {

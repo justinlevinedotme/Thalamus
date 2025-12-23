@@ -18,6 +18,7 @@ import {
 import { Smile } from "lucide-react";
 import {
   type EdgePadding,
+  type NodeBorderStyle,
   type NodeShape,
   type NodeSize,
   type NodeStyle,
@@ -88,6 +89,43 @@ const nodeSizes: Array<{ value: NodeSize; label: string }> = [
   { value: "lg", label: "Large" },
 ];
 
+const borderStyles: Array<{ value: NodeBorderStyle; label: string; icon: ReactNode }> = [
+  {
+    value: "solid",
+    label: "Solid",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+        <line x1="2" y1="8" x2="14" y2="8" />
+      </svg>
+    ),
+  },
+  {
+    value: "dashed",
+    label: "Dashed",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 2">
+        <line x1="2" y1="8" x2="14" y2="8" />
+      </svg>
+    ),
+  },
+  {
+    value: "dotted",
+    label: "Dotted",
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="1 2" strokeLinecap="round">
+        <line x1="2" y1="8" x2="14" y2="8" />
+      </svg>
+    ),
+  },
+];
+
+const borderWidths: Array<{ value: number; label: string }> = [
+  { value: 1, label: "Thin" },
+  { value: 2, label: "Regular" },
+  { value: 3, label: "Medium" },
+  { value: 4, label: "Thick" },
+];
+
 export default function NodeStyleInspector() {
   const {
     nodes,
@@ -125,6 +163,9 @@ export default function NodeStyleInspector() {
       bodyTextColor: getCommonValue(styles.map((s) => s?.bodyTextColor)),
       icon: getCommonValue(styles.map((s) => JSON.stringify(s?.icon))),
       iconColor: getCommonValue(styles.map((s) => s?.iconColor)),
+      borderColor: getCommonValue(styles.map((s) => s?.borderColor)),
+      borderWidth: getCommonValue(styles.map((s) => s?.borderWidth)),
+      borderStyle: getCommonValue(styles.map((s) => s?.borderStyle)),
     };
   }, [selectedNodes]);
 
@@ -156,6 +197,9 @@ export default function NodeStyleInspector() {
   const currentTextColor = isMultiSelect ? commonStyles?.textColor : selectedNode?.data?.style?.textColor;
   const currentBodyTextColor = isMultiSelect ? commonStyles?.bodyTextColor : selectedNode?.data?.style?.bodyTextColor;
   const currentIconColor = isMultiSelect ? commonStyles?.iconColor : selectedNode?.data?.style?.iconColor;
+  const currentBorderColor = isMultiSelect ? commonStyles?.borderColor : selectedNode?.data?.style?.borderColor;
+  const currentBorderWidth = isMultiSelect ? commonStyles?.borderWidth : selectedNode?.data?.style?.borderWidth;
+  const currentBorderStyle = isMultiSelect ? commonStyles?.borderStyle : selectedNode?.data?.style?.borderStyle;
 
   // For icon, we need to parse the JSON back
   const currentIcon = isMultiSelect
@@ -598,6 +642,100 @@ export default function NodeStyleInspector() {
                           )}
                         </button>
                       </ColorPicker>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )}
+
+            {/* Border section - show for shape nodes */}
+            {(isShapeNode || allShapeNodes) && (
+              <AccordionItem value="border" className="border-b-0 border-t border-slate-200">
+                <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+                  Border
+                </AccordionTrigger>
+                <AccordionContent className="px-3 pb-3 pt-0">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <label className="text-xs text-slate-500">Color</label>
+                      <ColorPicker
+                        value={currentBorderColor ?? "#3B82F6"}
+                        onChange={(color) => handleStyleUpdate({ borderColor: color })}
+                      >
+                        <button
+                          type="button"
+                          className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                          title="Border color"
+                        >
+                          {currentBorderColor ? (
+                            <ColorSwatch color={currentBorderColor} className="h-5 w-5" />
+                          ) : (
+                            <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          )}
+                        </button>
+                      </ColorPicker>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4">
+                      <label className="text-xs text-slate-500">Style</label>
+                      <ToggleGroup
+                        type="single"
+                        className="h-7 rounded-md border border-slate-200 bg-white"
+                        value={currentBorderStyle ?? "solid"}
+                        onValueChange={(value) => {
+                          if (!value) {
+                            return;
+                          }
+                          handleStyleUpdate({ borderStyle: value as NodeBorderStyle });
+                        }}
+                        aria-label="Border style"
+                      >
+                        {borderStyles.map((style) => (
+                          <Tooltip key={style.value}>
+                            <TooltipTrigger asChild>
+                              <ToggleGroupItem
+                                value={style.value}
+                                className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                                variant="ghost"
+                              >
+                                {style.icon}
+                              </ToggleGroupItem>
+                            </TooltipTrigger>
+                            <TooltipContent>{style.label}</TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </ToggleGroup>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4">
+                      <label className="text-xs text-slate-500">Width</label>
+                      <ToggleGroup
+                        type="single"
+                        className="h-7 rounded-md border border-slate-200 bg-white"
+                        value={String(currentBorderWidth ?? 2)}
+                        onValueChange={(value) => {
+                          if (!value) {
+                            return;
+                          }
+                          handleStyleUpdate({ borderWidth: Number(value) });
+                        }}
+                        aria-label="Border width"
+                      >
+                        {borderWidths.map((width) => (
+                          <Tooltip key={width.value}>
+                            <TooltipTrigger asChild>
+                              <ToggleGroupItem
+                                value={String(width.value)}
+                                className="h-full w-8 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                                variant="ghost"
+                              >
+                                {width.value}
+                              </ToggleGroupItem>
+                            </TooltipTrigger>
+                            <TooltipContent>{width.label}</TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </ToggleGroup>
                     </div>
                   </div>
                 </AccordionContent>
