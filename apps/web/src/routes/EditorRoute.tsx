@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Focus, LayoutGrid, Paintbrush, Plus, Search, Settings, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Focus, Heading, LayoutGrid, Paintbrush, Search, Settings, Square, StickyNote, X } from "lucide-react";
 
 import { Card } from "../components/ui/card";
 import {
@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../components/ui/tooltip";
+import { SpeedDial, type SpeedDialAction } from "../components/ui/speed-dial";
 import EditorSettingsInspector from "../features/editor/EditorSettingsInspector";
 import EditorToolbar from "../features/editor/EditorToolbar";
 import GraphCanvas from "../features/editor/GraphCanvas";
@@ -68,6 +69,31 @@ export default function EditorRoute() {
 
   const canSave = Boolean(user);
   const payload = useMemo(() => ({ nodes, edges, groups }), [edges, groups, nodes]);
+
+  // Speed dial actions for adding different node types
+  const speedDialActions: SpeedDialAction[] = useMemo(
+    () => [
+      {
+        icon: <StickyNote className="h-5 w-5" />,
+        label: "Add Node",
+        onClick: () => addNodeAtCenter("idea"),
+        kbd: "⌥N",
+      },
+      {
+        icon: <Heading className="h-5 w-5" />,
+        label: "Add Heading",
+        onClick: () => addNodeAtCenter("text"),
+        kbd: "⌥H",
+      },
+      {
+        icon: <Square className="h-5 w-5" />,
+        label: "Add Shape",
+        onClick: () => addNodeAtCenter("shape"),
+        kbd: "⌥S",
+      },
+    ],
+    [addNodeAtCenter]
+  );
 
   // Define handleSave first so it can be used in handleKeyDown
   const handleSave = useCallback(async () => {
@@ -124,10 +150,24 @@ export default function EditorRoute() {
         return;
       }
 
-      // N - Add node
-      if (event.key === "n" && !modKey) {
+      // Option/Alt + N - Add node
+      if (event.code === "KeyN" && event.altKey && !modKey) {
         event.preventDefault();
         addNodeAtCenter("idea");
+        return;
+      }
+
+      // Option/Alt + H - Add heading (text node)
+      if (event.code === "KeyH" && event.altKey && !modKey) {
+        event.preventDefault();
+        addNodeAtCenter("text");
+        return;
+      }
+
+      // Option/Alt + S - Add shape
+      if (event.code === "KeyS" && event.altKey && !modKey) {
+        event.preventDefault();
+        addNodeAtCenter("shape");
         return;
       }
 
@@ -246,21 +286,7 @@ export default function EditorRoute() {
           {showLeftPanel ? (
             <div className="flex items-start gap-2">
               <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-900 text-white transition hover:bg-slate-800"
-                      type="button"
-                      onClick={() => addNodeAtCenter("idea")}
-                      aria-label="Add node"
-                    >
-                      <Plus className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Add Node <Kbd className="ml-1.5">N</Kbd>
-                  </TooltipContent>
-                </Tooltip>
+                <SpeedDial actions={speedDialActions} />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -437,7 +463,16 @@ export default function EditorRoute() {
         <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2">
           <Card className="flex items-center gap-4 px-4 py-2 text-xs text-slate-500">
             <span className="flex items-center gap-1.5">
+              <Kbd>⌥</Kbd>
               <Kbd>N</Kbd> Add node
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Kbd>⌥</Kbd>
+              <Kbd>H</Kbd> Heading
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Kbd>⌥</Kbd>
+              <Kbd>S</Kbd> Shape
             </span>
             <span className="flex items-center gap-1.5">
               <Kbd>{modKeyLabel}</Kbd>

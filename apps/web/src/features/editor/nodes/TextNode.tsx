@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { type NodeProps } from "reactflow";
 
 import RichTextEditor from "../../../components/RichTextEditor";
