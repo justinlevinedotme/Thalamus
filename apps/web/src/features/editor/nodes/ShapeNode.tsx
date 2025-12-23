@@ -53,15 +53,16 @@ export default function ShapeNode({
   // Get border properties with defaults
   const borderWidth = data.style?.borderWidth ?? 2;
   const borderStyle = data.style?.borderStyle ?? "solid";
-  const borderColor = selected
+  const hasBorder = borderWidth > 0;
+  const borderColor = selected && hasBorder
     ? "#64748b"
     : (data.style?.borderColor ?? (data.style?.color === "transparent" ? "#e2e8f0" : data.style?.color ?? "#3B82F6"));
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color ?? "#DBEAFE",
-    borderColor,
-    borderWidth,
-    borderStyle,
+    borderColor: hasBorder ? borderColor : "transparent",
+    borderWidth: hasBorder ? borderWidth : 0,
+    borderStyle: hasBorder ? borderStyle : "none",
   };
 
   return (
@@ -74,7 +75,7 @@ export default function ShapeNode({
         handleClassName="!w-2.5 !h-2.5 !bg-white !border-slate-400"
       />
       <div
-        className={`h-full w-full transition ${shapeClass}`}
+        className={`h-full w-full transition ${shapeClass} ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
         style={nodeStyle}
         aria-label="Shape container"
         onMouseDown={handleMouseDown}

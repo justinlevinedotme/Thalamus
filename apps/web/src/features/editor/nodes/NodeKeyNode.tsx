@@ -179,7 +179,8 @@ export default function NodeKeyNode({
 
   const borderWidth = data.style?.borderWidth ?? 1;
   const borderStyle = data.style?.borderStyle ?? "solid";
-  const borderColor = selected
+  const hasBorder = borderWidth > 0;
+  const borderColor = selected && hasBorder
     ? "#64748b"
     : (data.style?.borderColor ?? "#e2e8f0");
 
@@ -190,9 +191,9 @@ export default function NodeKeyNode({
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color ?? "#FFFFFF",
-    borderColor,
-    borderWidth,
-    borderStyle,
+    borderColor: hasBorder ? borderColor : "transparent",
+    borderWidth: hasBorder ? borderWidth : 0,
+    borderStyle: hasBorder ? borderStyle : "none",
   };
 
   return (
@@ -206,7 +207,7 @@ export default function NodeKeyNode({
       />
       <div
         ref={containerRef}
-        className="h-full w-full rounded-lg p-3 transition"
+        className={`h-full w-full rounded-lg p-3 transition ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
         style={nodeStyle}
         onMouseDown={handleMouseDown}
         tabIndex={0}

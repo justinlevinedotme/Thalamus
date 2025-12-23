@@ -147,15 +147,16 @@ export default function EditableNode({
   // Get border properties with defaults
   const borderWidth = data.style?.borderWidth ?? 1;
   const borderStyle = data.style?.borderStyle ?? "solid";
+  const hasBorder = borderWidth > 0;
   const borderColor = selected
-    ? undefined  // Let CSS class handle selected state
+    ? (hasBorder ? undefined : undefined)  // Let CSS class handle selected state
     : (data.style?.borderColor ?? "#e2e8f0");  // Default to slate-200
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color,
-    borderColor,
-    borderWidth,
-    borderStyle,
+    borderColor: hasBorder ? borderColor : "transparent",
+    borderWidth: hasBorder ? borderWidth : 0,
+    borderStyle: hasBorder ? borderStyle : "none",
   };
 
   const hasBody = isExpanded || Boolean(data.body);
@@ -167,8 +168,8 @@ export default function EditableNode({
   return (
     <div
       className={`relative h-full w-full px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
-        selected ? "!border-slate-500" : ""
-      }`}
+        selected && hasBorder ? "!border-slate-500" : ""
+      } ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}
       tabIndex={0}

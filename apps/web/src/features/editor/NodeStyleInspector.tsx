@@ -120,6 +120,7 @@ const borderStyles: Array<{ value: NodeBorderStyle; label: string; icon: ReactNo
 ];
 
 const borderWidths: Array<{ value: number; label: string }> = [
+  { value: 0, label: "None" },
   { value: 1, label: "Thin" },
   { value: 2, label: "Regular" },
   { value: 3, label: "Medium" },
