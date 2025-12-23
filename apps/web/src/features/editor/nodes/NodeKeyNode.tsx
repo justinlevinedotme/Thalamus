@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { type NodeProps } from "reactflow";
 
+import RichTextEditor from "../../../components/RichTextEditor";
 import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
 import { Kbd } from "../../../components/ui/kbd";
@@ -13,6 +14,12 @@ import {
   type NodeStyle,
   useGraphStore,
 } from "../../../store/graphStore";
+
+// Strip HTML tags for plain text comparison
+const stripHtml = (html: string): string => {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  return doc.body.textContent || "";
+};
 
 const MIN_WIDTH = 150;
 const MIN_HEIGHT = 100;
@@ -43,6 +50,8 @@ export default function NodeKeyNode({
   const { selectGroupNodes, updateNodeLabel, updateNodeBody } = useGraphStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(data.label);
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [draftEntryLabel, setDraftEntryLabel] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Parse entries from body or use defaults
@@ -85,18 +94,9 @@ export default function NodeKeyNode({
 
   const handleTitleBlur = () => {
     setIsEditingTitle(false);
-    if (draftTitle.trim()) {
-      updateNodeLabel(id, draftTitle.trim());
-    }
-  };
-
-  const handleTitleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleTitleBlur();
-    } else if (event.key === "Escape") {
-      setIsEditingTitle(false);
-      setDraftTitle(data.label);
+    const plainText = stripHtml(draftTitle);
+    if (plainText.trim()) {
+      updateNodeLabel(id, draftTitle);
     }
   };
 
@@ -105,6 +105,18 @@ export default function NodeKeyNode({
       e.id === entryId ? { ...e, label: newLabel } : e
     );
     saveEntries(newEntries);
+  };
+
+  const handleEntryLabelCommit = (entryId: string) => {
+    const plainText = stripHtml(draftEntryLabel);
+    const finalLabel = plainText.trim() ? draftEntryLabel : "Label";
+    handleEntryLabelChange(entryId, finalLabel);
+    setEditingEntryId(null);
+  };
+
+  const startEditingEntry = (entryId: string, currentLabel: string) => {
+    setEditingEntryId(entryId);
+    setDraftEntryLabel(currentLabel);
   };
 
   const handleEntryColorChange = (entryId: string, newColor: string) => {
@@ -230,24 +242,28 @@ export default function NodeKeyNode({
               </span>
             )}
             {isEditingTitle ? (
-              <input
-                type="text"
+              <RichTextEditor
                 value={draftTitle}
-                onChange={(e) => setDraftTitle(e.target.value)}
+                onChange={setDraftTitle}
                 onBlur={handleTitleBlur}
-                onKeyDown={handleTitleKeyDown}
-                className="w-full bg-transparent text-xs font-semibold outline-none"
-                style={{ color: titleColor }}
+                onEscape={() => {
+                  setIsEditingTitle(false);
+                  setDraftTitle(data.label);
+                }}
+                onEnter={handleTitleBlur}
+                placeholder="Title"
+                className="w-full bg-transparent text-xs font-semibold"
+                textColor={titleColor}
+                singleLine
                 autoFocus
               />
             ) : (
               <div
-                className="text-xs font-semibold cursor-text"
+                className="node-rich-text text-xs font-semibold cursor-text"
                 style={{ color: titleColor }}
                 onDoubleClick={handleTitleDoubleClick}
-              >
-                {data.label}
-              </div>
+                dangerouslySetInnerHTML={{ __html: data.label }}
+              />
             )}
           </div>
         </div>
@@ -290,14 +306,35 @@ export default function NodeKeyNode({
                 </button>
               )}
               {/* Label */}
-              <input
-                type="text"
-                value={entry.label}
-                onChange={(e) => handleEntryLabelChange(entry.id, e.target.value)}
-                className="nodrag flex-1 bg-transparent text-[11px] outline-none min-w-0"
-                style={{ color: bodyTextColor }}
-                placeholder="Label"
-              />
+              {editingEntryId === entry.id ? (
+                <div className="flex-1 min-w-0">
+                  <RichTextEditor
+                    value={draftEntryLabel}
+                    onChange={setDraftEntryLabel}
+                    onBlur={() => handleEntryLabelCommit(entry.id)}
+                    onEscape={() => {
+                      setEditingEntryId(null);
+                      setDraftEntryLabel(entry.label);
+                    }}
+                    onEnter={() => handleEntryLabelCommit(entry.id)}
+                    placeholder="Label"
+                    className="nodrag bg-transparent text-[11px]"
+                    textColor={bodyTextColor}
+                    singleLine
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <div
+                  className="nodrag node-rich-text flex-1 min-w-0 text-[11px] cursor-text"
+                  style={{ color: bodyTextColor }}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation();
+                    startEditingEntry(entry.id, entry.label);
+                  }}
+                  dangerouslySetInnerHTML={{ __html: entry.label }}
+                />
+              )}
               {/* Delete button - only show when selected */}
               {selected && (
                 <button
