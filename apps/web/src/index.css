@@ -164,10 +164,8 @@
   border-radius: 4px !important;
 }
 
-/* Selection rectangle around multiple selected nodes */
+/* Selection rectangle around multiple selected nodes - hidden */
 .react-flow__nodesselection-rect {
-  background: rgba(100, 116, 139, 0.08) !important;
-  border: 1px solid #64748b !important;
-  border-radius: 4px !important;
+  display: none !important;
 }
 

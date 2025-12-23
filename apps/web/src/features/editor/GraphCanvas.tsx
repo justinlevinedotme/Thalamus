@@ -733,7 +733,9 @@ export default function GraphCanvas() {
         }
       }
 
-      if (helperLinesEnabled) {
+      // Apply helper lines snapping, but skip if we're dragging a group
+      // (group nodes should move together without individual snapping)
+      if (helperLinesEnabled && !groupDragRef.current) {
         modifiedChanges = applyHelperLines(modifiedChanges, nodes);
       }
 
