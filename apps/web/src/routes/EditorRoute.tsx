@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Focus, Heading, LayoutGrid, Paintbrush, Search, Settings, Square, StickyNote, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Focus, Heading, LayoutGrid, Paintbrush, Palette, Route, Search, Settings, Square, StickyNote, X } from "lucide-react";
 
 import { Card } from "../components/ui/card";
 import {
@@ -99,6 +99,16 @@ export default function EditorRoute() {
         label: "Add Shape",
         onClick: () => addNodeAtCenter("shape"),
         kbd: "⌥S",
+      },
+      {
+        icon: <Route className="h-5 w-5" />,
+        label: "Path Key",
+        onClick: () => addNodeAtCenter("pathKey"),
+      },
+      {
+        icon: <Palette className="h-5 w-5" />,
+        label: "Node Key",
+        onClick: () => addNodeAtCenter("nodeKey"),
       },
     ],
     [addNodeAtCenter]

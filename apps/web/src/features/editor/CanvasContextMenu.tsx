@@ -15,8 +15,10 @@ import {
   Copy,
   Focus,
   Group,
+  Palette,
   Pencil,
   Plus,
+  Route,
   Scissors,
   Square,
   Trash2,
@@ -185,6 +187,26 @@ export default function CanvasContextMenu({
       // Offset so shape center is at cursor (shapes default to 200x120)
       const position = { x: flowPos.x - 100, y: flowPos.y - 60 };
       addNode({ position, kind: "shape" });
+    }
+    onClose();
+  }, [addNode, flowInstance, menu, onClose]);
+
+  const handleAddPathKey = useCallback(() => {
+    if (menu?.type === "pane" && flowInstance) {
+      const flowPos = flowInstance.screenToFlowPosition(menu.position);
+      // Offset so key center is at cursor (key nodes default to 180x140)
+      const position = { x: flowPos.x - 90, y: flowPos.y - 70 };
+      addNode({ position, kind: "pathKey" });
+    }
+    onClose();
+  }, [addNode, flowInstance, menu, onClose]);
+
+  const handleAddNodeKey = useCallback(() => {
+    if (menu?.type === "pane" && flowInstance) {
+      const flowPos = flowInstance.screenToFlowPosition(menu.position);
+      // Offset so key center is at cursor (key nodes default to 180x140)
+      const position = { x: flowPos.x - 90, y: flowPos.y - 70 };
+      addNode({ position, kind: "nodeKey" });
     }
     onClose();
   }, [addNode, flowInstance, menu, onClose]);
@@ -589,6 +611,23 @@ export default function CanvasContextMenu({
           >
             <Square className="h-4 w-4" />
             Add Shape
+          </button>
+          <div className="my-1 h-px bg-slate-200" />
+          <button
+            className={menuItemClass}
+            type="button"
+            onClick={handleAddPathKey}
+          >
+            <Route className="h-4 w-4" />
+            Add Path Key
+          </button>
+          <button
+            className={menuItemClass}
+            type="button"
+            onClick={handleAddNodeKey}
+          >
+            <Palette className="h-4 w-4" />
+            Add Node Key
           </button>
         </>
       )}

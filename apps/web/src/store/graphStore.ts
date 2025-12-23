@@ -16,7 +16,7 @@ import { getLayoutedElements, type LayoutOptions } from "../lib/autoLayout";
 
 export type RelationshipDirection = "forward" | "backward" | "both" | "none";
 export type RelationshipType = "causes" | "supports" | "contradicts" | "related";
-export type NodeKind = "idea" | "question" | "evidence" | "goal" | "text" | "shape";
+export type NodeKind = "idea" | "question" | "evidence" | "goal" | "text" | "shape" | "pathKey" | "nodeKey";
 
 export type NodeShape = "rounded" | "pill" | "circle" | "square";
 export type NodeSize = "sm" | "md" | "lg";
@@ -196,6 +196,8 @@ const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
   goal: { color: "#BFDBFE", shape: "pill", size: "lg" },
   text: { color: "transparent", shape: "rounded", size: "md" },
   shape: { color: "#DBEAFE", shape: "rounded", size: "lg", borderColor: "#3B82F6", borderWidth: 2, borderStyle: "solid" },
+  pathKey: { color: "#FFFFFF", shape: "rounded", size: "md", borderColor: "#e2e8f0", borderWidth: 1, borderStyle: "solid" },
+  nodeKey: { color: "#FFFFFF", shape: "rounded", size: "md", borderColor: "#e2e8f0", borderWidth: 1, borderStyle: "solid" },
 };
 
 const defaultEdgeStyle: EdgeStyle = {
@@ -217,11 +219,26 @@ const cloneGraph = (
   groups: NodeGroup[]
 ): GraphSnapshot => structuredClone({ nodes, edges, groups });
 
+const getNodeType = (kind: NodeKind): string => {
+  switch (kind) {
+    case "text":
+      return "text";
+    case "shape":
+      return "shape";
+    case "pathKey":
+      return "pathKey";
+    case "nodeKey":
+      return "nodeKey";
+    default:
+      return "editable";
+  }
+};
+
 const normalizeNodes = (nodes: Node<GraphNodeData>[]) =>
   nodes.map((node) => {
     const kind = node.data?.kind ?? "idea";
     // Map kind to React Flow node type
-    const nodeType = node.type ?? (kind === "text" ? "text" : kind === "shape" ? "shape" : "editable");
+    const nodeType = node.type ?? getNodeType(kind);
     return {
       ...node,
       type: nodeType,
@@ -673,16 +690,32 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     const id = crypto.randomUUID();
     const kind = input?.kind ?? "idea";
     // Map kind to React Flow node type
-    const nodeType = kind === "text" ? "text" : kind === "shape" ? "shape" : "editable";
-    const defaultLabel = kind === "text" ? "Heading" : kind === "shape" ? "" : "New node";
+    const nodeType = getNodeType(kind);
+    const getDefaultLabel = () => {
+      switch (kind) {
+        case "text": return "Heading";
+        case "shape": return "";
+        case "pathKey": return "Path Key";
+        case "nodeKey": return "Node Key";
+        default: return "New node";
+      }
+    };
+    // Get initial dimensions for resizable nodes
+    const getInitialStyle = () => {
+      switch (kind) {
+        case "shape": return { width: 200, height: 120 };
+        case "pathKey": return { width: 200, height: 150 };
+        case "nodeKey": return { width: 200, height: 150 };
+        default: return undefined;
+      }
+    };
     const nextNode: Node<GraphNodeData> = {
       id,
       type: nodeType,
       position: input?.position ?? { x: 0, y: 0 },
-      // Shape nodes need initial dimensions for resizing
-      ...(kind === "shape" ? { style: { width: 200, height: 120 } } : {}),
+      style: getInitialStyle(),
       data: {
-        label: input?.label ?? defaultLabel,
+        label: input?.label ?? getDefaultLabel(),
         kind,
         style: nodeStyleDefaults[kind],
       },

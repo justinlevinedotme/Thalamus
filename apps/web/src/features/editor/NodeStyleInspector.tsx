@@ -146,9 +146,11 @@ export default function NodeStyleInspector() {
   // Check if we're dealing with text nodes (headings)
   const isTextNode = selectedNode?.data?.kind === "text";
   const isShapeNode = selectedNode?.data?.kind === "shape";
-  // For multi-select, check if all selected are text/shape nodes
+  const isKeyNode = selectedNode?.data?.kind === "pathKey" || selectedNode?.data?.kind === "nodeKey";
+  // For multi-select, check if all selected are text/shape/key nodes
   const allTextNodes = selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "text");
   const allShapeNodes = selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "shape");
+  const allKeyNodes = selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "pathKey" || n.data?.kind === "nodeKey");
 
   // For multi-selection, compute common values
   const commonStyles = useMemo(() => {
@@ -213,11 +215,12 @@ export default function NodeStyleInspector() {
     }
     if (isTextNode) return "Text Style";
     if (isShapeNode) return "Shape Style";
+    if (isKeyNode) return "Key Style";
     return "Node Style";
   };
 
-  // Should show handles section (not for text/shape nodes)
-  const showHandles = !isMultiSelect && selectedNode && !isTextNode && !isShapeNode;
+  // Should show handles section (not for text/shape/key nodes)
+  const showHandles = !isMultiSelect && selectedNode && !isTextNode && !isShapeNode && !isKeyNode;
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -468,6 +471,159 @@ export default function NodeStyleInspector() {
               </div>
             </div>
           </div>
+        ) : (isKeyNode || allKeyNodes) ? (
+          /* Key node controls - background, border, title color, body color, separator/icon color, icon */
+          <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
+            <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+                Appearance
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3 pt-0">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Background</label>
+                    <ColorPicker
+                      value={currentColor ?? "#FFFFFF"}
+                      onChange={(color) => handleStyleUpdate({ color })}
+                    >
+                      <button
+                        type="button"
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                        title="Background color"
+                      >
+                        {currentColor ? (
+                          <ColorSwatch color={currentColor} className="h-5 w-5" />
+                        ) : (
+                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                        )}
+                      </button>
+                    </ColorPicker>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Border</label>
+                    <ColorPicker
+                      value={currentBorderColor ?? "#e2e8f0"}
+                      onChange={(color) => handleStyleUpdate({ borderColor: color })}
+                    >
+                      <button
+                        type="button"
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                        title="Border color"
+                      >
+                        {currentBorderColor ? (
+                          <ColorSwatch color={currentBorderColor} className="h-5 w-5" />
+                        ) : (
+                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                        )}
+                      </button>
+                    </ColorPicker>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="text" className="border-b-0 border-t border-slate-200">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+                Text & Icon
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3 pt-0">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Title</label>
+                    <ColorPicker
+                      value={currentTextColor ?? "#334155"}
+                      onChange={(color) => handleStyleUpdate({ textColor: color })}
+                    >
+                      <button
+                        type="button"
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                        title="Title color"
+                      >
+                        {currentTextColor ? (
+                          <ColorSwatch color={currentTextColor} className="h-5 w-5" />
+                        ) : (
+                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                        )}
+                      </button>
+                    </ColorPicker>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Body</label>
+                    <ColorPicker
+                      value={currentBodyTextColor ?? "#64748b"}
+                      onChange={(color) => handleStyleUpdate({ bodyTextColor: color })}
+                    >
+                      <button
+                        type="button"
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                        title="Body text color"
+                      >
+                        {currentBodyTextColor ? (
+                          <ColorSwatch color={currentBodyTextColor} className="h-5 w-5" />
+                        ) : (
+                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                        )}
+                      </button>
+                    </ColorPicker>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Separator</label>
+                    <ColorPicker
+                      value={currentIconColor ?? "#e2e8f0"}
+                      onChange={(color) => handleStyleUpdate({ iconColor: color })}
+                    >
+                      <button
+                        type="button"
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center"
+                        title="Separator & icon color"
+                      >
+                        {currentIconColor ? (
+                          <ColorSwatch color={currentIconColor} className="h-5 w-5" />
+                        ) : (
+                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                        )}
+                      </button>
+                    </ColorPicker>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4">
+                    <label className="text-xs text-slate-500">Icon</label>
+                    <div className="flex items-center gap-1">
+                      <IconPicker
+                        value={currentIcon}
+                        onChange={(icon) => handleStyleUpdate({ icon })}
+                      >
+                        <button
+                          type="button"
+                          className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
+                          style={{ color: currentIconColor ?? "#e2e8f0" }}
+                        >
+                          {currentIcon ? (
+                            <NodeIconDisplay icon={currentIcon} className="h-4 w-4" />
+                          ) : (
+                            <Smile className="h-4 w-4 text-slate-400" />
+                          )}
+                        </button>
+                      </IconPicker>
+                      {currentIcon && (
+                        <button
+                          className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                          type="button"
+                          onClick={() => handleStyleUpdate({ icon: undefined })}
+                          aria-label="Clear icon"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         ) : (
           /* Regular node controls */
           <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
@@ -559,8 +715,8 @@ export default function NodeStyleInspector() {
                     </ToggleGroup>
                   </div>
 
-                  {/* Edge padding - hide for shape nodes */}
-                  {!isShapeNode && !allShapeNodes && (
+                  {/* Edge padding - hide for shape and key nodes */}
+                  {!isShapeNode && !allShapeNodes && !isKeyNode && !allKeyNodes && (
                     <div className="flex items-center justify-between gap-4">
                       <label className="text-xs text-slate-500">Edge Padding</label>
                       <ToggleGroup
@@ -596,8 +752,8 @@ export default function NodeStyleInspector() {
               </AccordionContent>
             </AccordionItem>
 
-            {/* Text section - hide for shape nodes */}
-            {!isShapeNode && !allShapeNodes && (
+            {/* Text section - hide for shape and key nodes */}
+            {!isShapeNode && !allShapeNodes && !isKeyNode && !allKeyNodes && (
               <AccordionItem value="text" className="border-b-0 border-t border-slate-200">
                 <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
                   Text
