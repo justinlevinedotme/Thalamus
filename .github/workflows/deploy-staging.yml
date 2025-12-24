@@ -52,8 +52,15 @@ jobs:
         env:
           VITE_API_URL: ${{ env.VITE_API_URL }}
 
+      - name: Ensure Pages project exists
+        uses: cloudflare/wrangler-action@v3
+        continue-on-error: true
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages project create thalamus-staging --production-branch=staging
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy apps/web/dist --project-name=thalamus-staging
+          command: pages deploy apps/web/dist --project-name=thalamus-staging --commit-dirty=true
