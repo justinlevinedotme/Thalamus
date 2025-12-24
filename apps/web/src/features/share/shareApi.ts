@@ -1,50 +1,31 @@
-import { supabase } from "../../lib/supabaseClient";
+import { apiFetch, ApiError } from "../../lib/apiClient";
 
 export type ShareLinkRecord = {
   token: string;
   expires_at: string;
 };
 
-export async function createShareLink(graphId: string) {
-  const { data, error } = await supabase
-    .from("share_links")
-    .insert({ graph_id: graphId })
-    .select("token,expires_at")
-    .single();
+export type SharedGraphData = {
+  id: string;
+  title: string;
+  data: unknown;
+  updated_at: string;
+};
 
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data as ShareLinkRecord;
+export async function createShareLink(graphId: string): Promise<ShareLinkRecord> {
+  return apiFetch<ShareLinkRecord>(`/graphs/${graphId}/share`, {
+    method: "POST",
+  });
 }
 
-export async function getSharedGraph(token: string) {
-  const { data, error } = await supabase.rpc("get_shared_graph", {
-    share_token: token,
-  });
-
-  if (error) {
-    throw new Error(error.message);
+export async function getSharedGraph(token: string): Promise<SharedGraphData | null> {
+  try {
+    return await apiFetch<SharedGraphData>(`/share/${token}`);
+  } catch (error) {
+    // Return null for 404 errors (expired or invalid token)
+    if (error instanceof ApiError && error.status === 404) {
+      return null;
+    }
+    throw error;
   }
-
-  if (!data) {
-    return null;
-  }
-
-  if (Array.isArray(data)) {
-    return (data[0] ?? null) as {
-      id: string;
-      title: string;
-      data: unknown;
-      updated_at: string;
-    } | null;
-  }
-
-  return data as {
-    id: string;
-    title: string;
-    data: unknown;
-    updated_at: string;
-  };
 }

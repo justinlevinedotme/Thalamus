@@ -12,6 +12,10 @@
         "build/**"
       ]
     },
-    "lint": {}
+    "lint": {},
+    "email:dev": {
+      "cache": false,
+      "persistent": true
+    }
   }
 }
