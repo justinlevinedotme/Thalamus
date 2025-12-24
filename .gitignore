@@ -5,12 +5,18 @@ node_modules/
 .clavix/outputs/
 .claude/
 .devserver.log
-supabase/.temp/cli-latest
 .turbo/
 .wrangler/
-.devserver.log
+
 # Build outputs
 dist/
-supabase/.temp/
 *.tsbuildinfo
+
+# Local development
 apps/api/.dev.vars
+
+# Supabase temp files (contain project refs)
+supabase/.temp/
+
+# MCP config (may contain project refs)
+.mcp.json
