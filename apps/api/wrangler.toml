@@ -1,0 +1,31 @@
+name = "thalamus-api"
+main = "src/index.worker.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Environment variables (set via wrangler secret or dashboard)
+# DATABASE_URL, BETTER_AUTH_SECRET, RESEND_API_KEY, etc.
+
+[vars]
+FRONTEND_URL = "http://localhost:5173"
+
+# Development settings
+[env.dev]
+name = "thalamus-api-dev"
+vars = { FRONTEND_URL = "http://localhost:5173" }
+
+# Staging (for PR previews)
+[env.staging]
+name = "thalamus-api-staging"
+vars = { FRONTEND_URL = "https://staging.thalamus.sh" }
+routes = [
+  { pattern = "staging-api.thalamus.sh", custom_domain = true }
+]
+
+# Production
+[env.production]
+name = "thalamus-api"
+vars = { FRONTEND_URL = "https://thalamus.sh" }
+routes = [
+  { pattern = "api.thalamus.sh", custom_domain = true }
+]

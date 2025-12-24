@@ -1,9 +1,18 @@
 import { Resend } from "resend";
 import { sql } from "./db";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const emailFrom = process.env.EMAIL_FROM || "Thalamus <noreply@thalamus.app>";
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+// Lazy-initialize Resend client for Workers compatibility
+let _resend: Resend | null = null;
+const getResend = () => {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+};
+
+// Lazy getters for env vars
+const getEmailFrom = () => process.env.EMAIL_FROM || "Thalamus <noreply@thalamus.app>";
+const getFrontendUrl = () => process.env.FRONTEND_URL || "http://localhost:5173";
 
 export type EmailCategory = "transactional" | "marketing" | "product_updates";
 
@@ -70,13 +79,13 @@ export async function sendEmail({
   const headers: Record<string, string> = {};
   if (category !== "transactional") {
     const unsubscribeToken = generateUnsubscribeToken(to);
-    const unsubscribeUrl = `${frontendUrl}/unsubscribe?token=${unsubscribeToken}&category=${category}`;
+    const unsubscribeUrl = `${getFrontendUrl()}/unsubscribe?token=${unsubscribeToken}&category=${category}`;
     headers["List-Unsubscribe"] = `<${unsubscribeUrl}>`;
     headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click";
   }
 
-  await resend.emails.send({
-    from: emailFrom,
+  await getResend().emails.send({
+    from: getEmailFrom(),
     to,
     subject,
     html,

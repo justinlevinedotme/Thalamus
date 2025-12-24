@@ -7,7 +7,10 @@ node_modules/
 .devserver.log
 supabase/.temp/cli-latest
 .turbo/
-
+.wrangler/
+.devserver.log
 # Build outputs
 dist/
+supabase/.temp/
 *.tsbuildinfo
+apps/api/.dev.vars

@@ -1,16 +1,11 @@
 import { betterAuth } from "better-auth";
 import { genericOAuth, twoFactor, haveIBeenPwned, captcha } from "better-auth/plugins";
-import pg from "pg";
+import { sql } from "./db";
 import { emails } from "../emails";
 import { sendEmail } from "./email";
 
-const { Pool } = pg;
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+// Helper to get frontend URL (lazy for Workers compatibility)
+const getFrontendUrl = () => process.env.FRONTEND_URL || "http://localhost:5173";
 
 // Generate unsubscribe token from email
 function generateUnsubscribeToken(email: string): string {
@@ -20,6 +15,7 @@ function generateUnsubscribeToken(email: string): string {
 // Helper to send welcome email
 const sendWelcomeEmail = async (user: { email: string; name?: string | null }) => {
   try {
+    const frontendUrl = getFrontendUrl();
     const unsubscribeToken = generateUnsubscribeToken(user.email);
     const unsubscribeUrl = `${frontendUrl}/unsubscribe?token=${unsubscribeToken}&category=marketing`;
 
@@ -40,7 +36,7 @@ const sendWelcomeEmail = async (user: { email: string; name?: string | null }) =
 };
 
 export const auth = betterAuth({
-  database: pool,
+  database: sql,
   baseURL: process.env.BETTER_AUTH_URL,
   basePath: "/auth",
   secret: process.env.BETTER_AUTH_SECRET,
