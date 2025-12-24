@@ -93,7 +93,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         return { success: false, emailNotVerified };
       }
       // Check if 2FA is required
-      if (result.data?.twoFactorRedirect) {
+      if ((result.data as { twoFactorRedirect?: boolean })?.twoFactorRedirect) {
         set({ status: "unauthenticated", error: undefined });
         return { success: false, twoFactorRequired: true };
       }
