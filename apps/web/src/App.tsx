@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import EditorRoute from "./routes/EditorRoute";
-import DocsRoute from "./routes/DocsRoute";
 import BillingRoute from "./routes/BillingRoute";
+import DocsRoute from "./routes/DocsRoute";
+import EditorRoute from "./routes/EditorRoute";
+import LandingRoute from "./routes/LandingRoute";
 import LoginRoute from "./routes/LoginRoute";
 import ShareRoute from "./routes/ShareRoute";
 import SignupRoute from "./routes/SignupRoute";
@@ -18,7 +19,7 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/docs" replace />} />
+      <Route path="/" element={<LandingRoute />} />
       <Route path="/docs" element={<DocsRoute />} />
       <Route path="/editor" element={<EditorRoute />} />
       <Route path="/docs/:graphId" element={<EditorRoute />} />

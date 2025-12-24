@@ -5,3 +5,9 @@ node_modules/
 .clavix/outputs/
 .claude/
 .devserver.log
+supabase/.temp/cli-latest
+.turbo/
+
+# Build outputs
+dist/
+*.tsbuildinfo

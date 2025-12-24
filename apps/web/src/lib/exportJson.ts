@@ -37,7 +37,7 @@ export function exportGraphJson(
     exportedAt: new Date().toISOString(),
     nodes,
     edges,
-    version: 1,
+    version: 2,
   };
 
   const fileName = `${slugify(title || "graph")}.json`;
