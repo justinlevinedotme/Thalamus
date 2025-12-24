@@ -6,6 +6,11 @@ compatibility_flags = ["nodejs_compat"]
 # Environment variables (set via wrangler secret or dashboard)
 # DATABASE_URL, BETTER_AUTH_SECRET, RESEND_API_KEY, etc.
 
+# Hyperdrive binding for database connections
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "3ec1d80bb0c94e2abff1bac20af08b1b"
+
 [vars]
 FRONTEND_URL = "http://localhost:5173"
 
