@@ -9,7 +9,8 @@
     "prepare": "husky",
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "email:dev": "turbo run email:dev"
   },
   "packageManager": "npm@11.6.2",
   "devDependencies": {

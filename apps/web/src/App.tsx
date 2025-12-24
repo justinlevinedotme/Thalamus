@@ -9,6 +9,8 @@ import LoginRoute from "./routes/LoginRoute";
 import ProfileRoute from "./routes/ProfileRoute";
 import ShareRoute from "./routes/ShareRoute";
 import SignupRoute from "./routes/SignupRoute";
+import UnsubscribeRoute from "./routes/UnsubscribeRoute";
+import VerifyEmailRoute from "./routes/VerifyEmailRoute";
 import { useAuthStore } from "./store/authStore";
 
 export default function App() {
@@ -29,6 +31,8 @@ export default function App() {
       <Route path="/profile" element={<ProfileRoute />} />
       <Route path="/login" element={<LoginRoute />} />
       <Route path="/signup" element={<SignupRoute />} />
+      <Route path="/verify-email" element={<VerifyEmailRoute />} />
+      <Route path="/unsubscribe" element={<UnsubscribeRoute />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

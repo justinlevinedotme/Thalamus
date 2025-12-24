@@ -45,10 +45,12 @@ begin
 end;
 $$;
 
+drop trigger if exists set_graphs_updated_at on public.graphs;
 create trigger set_graphs_updated_at
 before update on public.graphs
 for each row execute procedure public.set_updated_at();
 
+drop trigger if exists set_profiles_updated_at on public.profiles;
 create trigger set_profiles_updated_at
 before update on public.profiles
 for each row execute procedure public.set_updated_at();
@@ -66,6 +68,7 @@ begin
 end;
 $$;
 
+drop trigger if exists set_graphs_expiry on public.graphs;
 create trigger set_graphs_expiry
 before insert on public.graphs
 for each row execute procedure public.set_graph_expiry();
@@ -86,42 +89,52 @@ alter table public.profiles enable row level security;
 alter table public.graphs enable row level security;
 alter table public.share_links enable row level security;
 
+drop policy if exists "Profiles are self-viewable" on public.profiles;
 create policy "Profiles are self-viewable"
   on public.profiles for select
   using (auth.uid() = id);
 
+drop policy if exists "Profiles are self-editable" on public.profiles;
 create policy "Profiles are self-editable"
   on public.profiles for update
   using (auth.uid() = id);
 
+drop policy if exists "Profiles can be created" on public.profiles;
 create policy "Profiles can be created"
   on public.profiles for insert
   with check (auth.uid() = id);
 
+drop policy if exists "Graphs are owner-only" on public.graphs;
 create policy "Graphs are owner-only"
   on public.graphs for select
   using (auth.uid() = owner_id);
 
+drop policy if exists "Graphs insert under quota" on public.graphs;
 create policy "Graphs insert under quota"
   on public.graphs for insert
   with check (auth.uid() = owner_id and public.can_create_graph(auth.uid()));
 
+drop policy if exists "Graphs update by owner" on public.graphs;
 create policy "Graphs update by owner"
   on public.graphs for update
   using (auth.uid() = owner_id);
 
+drop policy if exists "Graphs delete by owner" on public.graphs;
 create policy "Graphs delete by owner"
   on public.graphs for delete
   using (auth.uid() = owner_id);
 
+drop policy if exists "Share links owner access" on public.share_links;
 create policy "Share links owner access"
   on public.share_links for select
   using (auth.uid() = created_by);
 
+drop policy if exists "Share links insert by owner" on public.share_links;
 create policy "Share links insert by owner"
   on public.share_links for insert
   with check (auth.uid() = created_by);
 
+drop policy if exists "Share links delete by owner" on public.share_links;
 create policy "Share links delete by owner"
   on public.share_links for delete
   using (auth.uid() = created_by);

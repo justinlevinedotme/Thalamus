@@ -6,6 +6,7 @@ import { auth } from "./lib/auth";
 import graphs from "./routes/graphs";
 import share from "./routes/share";
 import profile from "./routes/profile";
+import unsubscribe from "./routes/unsubscribe";
 
 const app = new Hono();
 
@@ -29,6 +30,7 @@ app.on(["POST", "GET"], "/auth/**", (c) => auth.handler(c.req.raw));
 app.route("/graphs", graphs);
 app.route("/share", share);
 app.route("/profile", profile);
+app.route("/unsubscribe", unsubscribe);
 
 // Start server
 const port = Number(process.env.PORT) || 3001;

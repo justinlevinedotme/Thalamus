@@ -12,12 +12,18 @@ export type User = {
   image: string | null;
 };
 
+type SignInResult = {
+  success: boolean;
+  emailNotVerified?: boolean;
+  twoFactorRequired?: boolean;
+};
+
 type AuthState = {
   user: User | null;
   status: AuthStatus;
   error?: string;
   initialize: () => Promise<void>;
-  signIn: (email: string, password: string, captchaToken?: string) => Promise<boolean>;
+  signIn: (email: string, password: string, captchaToken?: string) => Promise<SignInResult>;
   signInWithProvider: (provider: OAuthProvider) => Promise<void>;
   signUp: (email: string, password: string, captchaToken?: string) => Promise<boolean>;
   signOut: () => Promise<void>;
@@ -75,11 +81,21 @@ export const useAuthStore = create<AuthState>((set) => ({
           : undefined,
       });
       if (result.error) {
+        const errorMessage = result.error.message || "Sign in failed";
+        const emailNotVerified =
+          result.error.code === "EMAIL_NOT_VERIFIED" ||
+          errorMessage.toLowerCase().includes("email not verified") ||
+          errorMessage.toLowerCase().includes("verify your email");
         set({
           status: "unauthenticated",
-          error: result.error.message || "Sign in failed",
+          error: emailNotVerified ? undefined : errorMessage,
         });
-        return false;
+        return { success: false, emailNotVerified };
+      }
+      // Check if 2FA is required
+      if (result.data?.twoFactorRedirect) {
+        set({ status: "unauthenticated", error: undefined });
+        return { success: false, twoFactorRequired: true };
       }
       if (result.data?.user) {
         set({
@@ -92,16 +108,16 @@ export const useAuthStore = create<AuthState>((set) => ({
           status: "authenticated",
           error: undefined,
         });
-        return true;
+        return { success: true };
       }
       set({ status: "unauthenticated" });
-      return false;
+      return { success: false };
     } catch (error) {
       set({
         status: "unauthenticated",
         error: error instanceof Error ? error.message : "Sign in failed",
       });
-      return false;
+      return { success: false };
     }
   },
 
@@ -128,6 +144,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         email,
         password,
         name: email.split("@")[0],
+        callbackURL: `${window.location.origin}/docs`,
         fetchOptions: captchaToken
           ? { headers: { "x-captcha-response": captchaToken } }
           : undefined,

@@ -1,15 +1,43 @@
 import { betterAuth } from "better-auth";
 import { genericOAuth, twoFactor, haveIBeenPwned, captcha } from "better-auth/plugins";
 import pg from "pg";
-import { Resend } from "resend";
+import { emails } from "../emails";
+import { sendEmail } from "./email";
 
 const { Pool } = pg;
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
+
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+// Generate unsubscribe token from email
+function generateUnsubscribeToken(email: string): string {
+  return Buffer.from(email).toString("base64url");
+}
+
+// Helper to send welcome email
+const sendWelcomeEmail = async (user: { email: string; name?: string | null }) => {
+  try {
+    const unsubscribeToken = generateUnsubscribeToken(user.email);
+    const unsubscribeUrl = `${frontendUrl}/unsubscribe?token=${unsubscribeToken}&category=marketing`;
+
+    const html = await emails.welcome({
+      userName: user.name || undefined,
+      loginUrl: `${frontendUrl}/login`,
+      unsubscribeUrl,
+    });
+    await sendEmail({
+      to: user.email,
+      subject: "Welcome to Thalamus!",
+      html,
+      category: "marketing",
+    });
+  } catch (error) {
+    console.error("Failed to send welcome email:", error);
+  }
+};
 
 export const auth = betterAuth({
   database: pool,
@@ -18,25 +46,58 @@ export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   trustedOrigins: [process.env.FRONTEND_URL || "http://localhost:5173"],
 
+  // Database hooks for sending welcome emails after verification
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          // For OAuth users, email is already verified, send welcome immediately
+          if (user.emailVerified) {
+            await sendWelcomeEmail(user);
+          }
+        },
+      },
+    },
+  },
+
+  // Email verification event hook
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    sendVerificationEmail: async ({ user, url }) => {
+      const html = await emails.confirmEmail({
+        userName: user.name || undefined,
+        verifyUrl: url,
+      });
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your email address",
+        html,
+        category: "transactional",
+      });
+    },
+    onVerify: async (user: { email: string; name?: string | null }) => {
+      // Send welcome email after email is verified
+      await sendWelcomeEmail(user);
+    },
+  },
+
   // Custom table names to avoid conflicts
   user: {
     modelName: "ba_user",
     changeEmail: {
       enabled: true,
       sendChangeEmailVerification: async ({ user, newEmail, url }) => {
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM || "Thalamus <noreply@thalamus.app>",
+        const html = await emails.confirmEmail({
+          userName: user.name || undefined,
+          verifyUrl: url,
+          newEmail,
+        });
+        await sendEmail({
           to: newEmail,
           subject: "Verify your new email address",
-          html: `
-            <h2>Verify Your New Email</h2>
-            <p>Hi${user.name ? ` ${user.name}` : ""},</p>
-            <p>You requested to change your email to this address.</p>
-            <p>Click the link below to verify:</p>
-            <p><a href="${url}">Verify Email</a></p>
-            <p>This link will expire in 1 hour.</p>
-            <p>If you didn't request this, you can safely ignore this email.</p>
-          `,
+          html,
+          category: "transactional",
         });
       },
     },
@@ -60,20 +121,17 @@ export const auth = betterAuth({
   // Email/password authentication
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: true,
     sendResetPassword: async ({ user, url }) => {
-      await resend.emails.send({
-        from: process.env.EMAIL_FROM || "Thalamus <noreply@thalamus.app>",
+      const html = await emails.passwordReset({
+        userName: user.name || undefined,
+        resetUrl: url,
+      });
+      await sendEmail({
         to: user.email,
         subject: "Reset your password",
-        html: `
-          <h2>Reset Your Password</h2>
-          <p>Hi${user.name ? ` ${user.name}` : ""},</p>
-          <p>Click the link below to reset your password:</p>
-          <p><a href="${url}">Reset Password</a></p>
-          <p>This link will expire in 1 hour.</p>
-          <p>If you didn't request this, you can safely ignore this email.</p>
-        `,
+        html,
+        category: "transactional",
       });
     },
   },

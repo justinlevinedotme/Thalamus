@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import {
   Camera,
   Check,
+  Copy,
   Github,
   KeyRound,
   Link2,
   Loader2,
+  Mail,
   Shield,
   User,
 } from "lucide-react";
@@ -80,6 +82,7 @@ export default function ProfileRoute() {
   const [twoFactorLoading, setTwoFactorLoading] = useState(false);
   const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
   const [twoFactorPassword, setTwoFactorPassword] = useState("");
+  const [secretCopied, setSecretCopied] = useState(false);
 
   // Password states (for OAuth-only users)
   const [setPasswordOpen, setSetPasswordOpen] = useState(false);
@@ -93,6 +96,10 @@ export default function ProfileRoute() {
   const [emailChangeLoading, setEmailChangeLoading] = useState(false);
   const [emailChangeError, setEmailChangeError] = useState<string | null>(null);
   const [emailChangeSent, setEmailChangeSent] = useState(false);
+
+  // Email preferences states
+  const [emailPrefs, setEmailPrefs] = useState({ marketingEmails: true, productUpdates: true });
+  const [emailPrefsLoading, setEmailPrefsLoading] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -114,10 +121,33 @@ export default function ProfileRoute() {
       // Check if 2FA is enabled
       const session = await authClient.getSession();
       setTwoFactorEnabled(session.data?.user?.twoFactorEnabled ?? false);
+
+      // Load email preferences
+      try {
+        const prefs = await apiFetch<{ marketingEmails: boolean; productUpdates: boolean }>("/profile/email-preferences");
+        setEmailPrefs(prefs);
+      } catch {
+        // Ignore errors, use defaults
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateEmailPrefs = async (key: "marketingEmails" | "productUpdates", value: boolean) => {
+    setEmailPrefsLoading(true);
+    try {
+      const updated = await apiFetch<{ marketingEmails: boolean; productUpdates: boolean }>("/profile/email-preferences", {
+        method: "PATCH",
+        body: JSON.stringify({ [key]: value }),
+      });
+      setEmailPrefs(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update email preferences");
+    } finally {
+      setEmailPrefsLoading(false);
     }
   };
 
@@ -499,6 +529,64 @@ export default function ProfileRoute() {
               </div>
             )}
           </section>
+
+          {/* Email Preferences Section */}
+          <section className="rounded-lg border border-slate-200 bg-white p-6">
+            <div className="mb-4 flex items-center gap-2">
+              <Mail className="h-5 w-5 text-slate-600" />
+              <h2 className="text-lg font-medium text-slate-900">Email Preferences</h2>
+            </div>
+            <p className="mb-4 text-sm text-slate-500">
+              Choose which emails you'd like to receive. Transactional emails (password resets, security alerts) cannot be disabled.
+            </p>
+            <div className="space-y-4">
+              <label className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-700">Marketing emails</p>
+                  <p className="text-xs text-slate-500">Product announcements and promotional content</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={emailPrefs.marketingEmails}
+                  disabled={emailPrefsLoading}
+                  onClick={() => handleUpdateEmailPrefs("marketingEmails", !emailPrefs.marketingEmails)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 ${
+                    emailPrefs.marketingEmails ? "bg-slate-900" : "bg-slate-200"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      emailPrefs.marketingEmails ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </label>
+              <div className="border-t border-slate-100" />
+              <label className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-700">Product updates</p>
+                  <p className="text-xs text-slate-500">New features and improvements</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={emailPrefs.productUpdates}
+                  disabled={emailPrefsLoading}
+                  onClick={() => handleUpdateEmailPrefs("productUpdates", !emailPrefs.productUpdates)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 ${
+                    emailPrefs.productUpdates ? "bg-slate-900" : "bg-slate-200"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                      emailPrefs.productUpdates ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </label>
+            </div>
+          </section>
         </div>
       </div>
       <Footer />
@@ -607,6 +695,7 @@ export default function ProfileRoute() {
           setVerifyCode("");
           setTwoFactorError(null);
           setTwoFactorPassword("");
+          setSecretCopied(false);
         }
       }}>
         <DialogContent className="sm:max-w-md">
@@ -633,15 +722,51 @@ export default function ProfileRoute() {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Or enter this code manually
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 rounded-md bg-slate-100 px-3 py-2 text-sm font-mono text-slate-800 break-all">
+                      {new URL(totpUri).searchParams.get("secret") || ""}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const secret = new URL(totpUri).searchParams.get("secret");
+                        if (secret) {
+                          navigator.clipboard.writeText(secret);
+                          setSecretCopied(true);
+                          setTimeout(() => setSecretCopied(false), 2000);
+                        }
+                      }}
+                      className="shrink-0 rounded-md border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50"
+                      title="Copy secret"
+                    >
+                      {secretCopied ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-slate-700">
                     Verification Code
                   </label>
                   <Input
                     value={verifyCode}
                     onChange={(e) => setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+                      if (pasted) setVerifyCode(pasted);
+                    }}
                     placeholder="000000"
                     className="mt-1 text-center text-lg tracking-widest"
                     maxLength={6}
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
                   />
                 </div>
                 {twoFactorError && (

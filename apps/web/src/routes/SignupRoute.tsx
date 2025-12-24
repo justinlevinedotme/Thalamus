@@ -23,7 +23,6 @@ export default function SignupRoute() {
   const { signUp, signInWithProvider, status, error, setError } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileInstance>(null);
 
@@ -35,7 +34,7 @@ export default function SignupRoute() {
     }
     const success = await signUp(email, password, captchaToken || undefined);
     if (success) {
-      setSubmitted(true);
+      navigate("/verify-email", { state: { email } });
     } else {
       // Reset captcha on failure
       turnstileRef.current?.reset();
@@ -108,11 +107,6 @@ export default function SignupRoute() {
         )}
         {error ? (
           <p className="text-sm text-red-600">{error}</p>
-        ) : null}
-        {submitted && !error ? (
-          <p className="text-sm text-emerald-600">
-            Account created! You can now sign in.
-          </p>
         ) : null}
         <button
           className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"

@@ -40,13 +40,13 @@ profile.get("/", async (c) => {
     let linkedAccounts: Array<{ provider: string; linkedAt: Date }> = [];
     try {
       const accounts = await sql`
-        SELECT provider_id as provider, created_at
+        SELECT "providerId" as provider, "createdAt"
         FROM ba_account
-        WHERE user_id = ${user.id}
+        WHERE "userId" = ${user.id}
       `;
       linkedAccounts = accounts.map((a) => ({
-        provider: (a as { provider: string; created_at: Date }).provider,
-        linkedAt: (a as { provider: string; created_at: Date }).created_at,
+        provider: (a as { provider: string; createdAt: Date }).provider,
+        linkedAt: (a as { provider: string; createdAt: Date }).createdAt,
       }));
     } catch (dbError) {
       console.error("Error fetching linked accounts:", dbError);
@@ -98,26 +98,26 @@ profile.patch("/", async (c) => {
   if (updates.name !== undefined && updates.image !== undefined) {
     await sql`
       UPDATE ba_user
-      SET name = ${updates.name}, image = ${updates.image}, updated_at = NOW()
+      SET name = ${updates.name}, image = ${updates.image}, "updatedAt" = NOW()
       WHERE id = ${user.id}
     `;
   } else if (updates.name !== undefined) {
     await sql`
       UPDATE ba_user
-      SET name = ${updates.name}, updated_at = NOW()
+      SET name = ${updates.name}, "updatedAt" = NOW()
       WHERE id = ${user.id}
     `;
   } else if (updates.image !== undefined) {
     await sql`
       UPDATE ba_user
-      SET image = ${updates.image}, updated_at = NOW()
+      SET image = ${updates.image}, "updatedAt" = NOW()
       WHERE id = ${user.id}
     `;
   }
 
   // Return updated user
   const users = await sql`
-    SELECT id, email, name, image, email_verified
+    SELECT id, email, name, image, "emailVerified"
     FROM ba_user
     WHERE id = ${user.id}
   `;
@@ -128,6 +128,87 @@ profile.patch("/", async (c) => {
     name: users[0].name,
     image: users[0].image,
   });
+});
+
+// Get email preferences
+profile.get("/email-preferences", async (c) => {
+  const user = c.get("user");
+
+  try {
+    const prefs = await sql`
+      SELECT marketing_emails, product_updates
+      FROM email_preferences
+      WHERE user_id = ${user.id}
+    `;
+
+    if (prefs.length === 0) {
+      // Return defaults if no preferences exist
+      return c.json({
+        marketingEmails: true,
+        productUpdates: true,
+      });
+    }
+
+    const pref = prefs[0] as { marketing_emails: boolean; product_updates: boolean };
+    return c.json({
+      marketingEmails: pref.marketing_emails,
+      productUpdates: pref.product_updates,
+    });
+  } catch (error) {
+    console.error("Error fetching email preferences:", error);
+    return c.json({ error: "Failed to load email preferences" }, 500);
+  }
+});
+
+// Update email preferences
+profile.patch("/email-preferences", async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json();
+
+  const { marketingEmails, productUpdates } = body as {
+    marketingEmails?: boolean;
+    productUpdates?: boolean;
+  };
+
+  if (marketingEmails === undefined && productUpdates === undefined) {
+    return c.json({ error: "No valid updates provided" }, 400);
+  }
+
+  try {
+    const marketing = marketingEmails ?? true;
+    const updates = productUpdates ?? true;
+
+    // Upsert email preferences
+    await sql`
+      INSERT INTO email_preferences (user_id, email, marketing_emails, product_updates)
+      VALUES (
+        ${user.id},
+        ${user.email},
+        ${marketing},
+        ${updates}
+      )
+      ON CONFLICT (user_id) DO UPDATE SET
+        marketing_emails = ${marketing},
+        product_updates = ${updates},
+        updated_at = NOW()
+    `;
+
+    // Return updated preferences
+    const prefs = await sql`
+      SELECT marketing_emails, product_updates
+      FROM email_preferences
+      WHERE user_id = ${user.id}
+    `;
+
+    const pref = prefs[0] as { marketing_emails: boolean; product_updates: boolean };
+    return c.json({
+      marketingEmails: pref.marketing_emails,
+      productUpdates: pref.product_updates,
+    });
+  } catch (error) {
+    console.error("Error updating email preferences:", error);
+    return c.json({ error: "Failed to update email preferences" }, 500);
+  }
 });
 
 export default profile;

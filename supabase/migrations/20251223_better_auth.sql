@@ -125,10 +125,12 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS set_graphs_updated_at ON public.graphs;
 CREATE TRIGGER set_graphs_updated_at
 BEFORE UPDATE ON public.graphs
 FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();
 
+DROP TRIGGER IF EXISTS set_profiles_updated_at ON public.profiles;
 CREATE TRIGGER set_profiles_updated_at
 BEFORE UPDATE ON public.profiles
 FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();
@@ -146,6 +148,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS set_graphs_expiry ON public.graphs;
 CREATE TRIGGER set_graphs_expiry
 BEFORE INSERT ON public.graphs
 FOR EACH ROW EXECUTE PROCEDURE public.set_graph_expiry();
