@@ -4,7 +4,8 @@ import { logger } from "hono/logger";
 
 // Define env bindings type
 export type Bindings = {
-  DATABASE_URL: string;
+  HYPERDRIVE: Hyperdrive;
+  DATABASE_URL: string; // Fallback for local dev
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   FRONTEND_URL: string;
@@ -34,8 +35,13 @@ const app = new Hono<{ Bindings: Bindings }>();
 // Middleware to inject env vars into process.env for compatibility
 app.use("*", async (c, next) => {
   // Polyfill process.env for libraries that expect it
+  // Use Hyperdrive connection string if available, fallback to DATABASE_URL for local dev
+  const envWithHyperdrive = {
+    ...c.env,
+    DATABASE_URL: c.env.HYPERDRIVE?.connectionString || c.env.DATABASE_URL,
+  };
   (globalThis as { process?: { env: Record<string, string> } }).process = {
-    env: c.env as unknown as Record<string, string>,
+    env: envWithHyperdrive as unknown as Record<string, string>,
   };
   await next();
 });

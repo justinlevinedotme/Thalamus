@@ -1,9 +1,7 @@
-import postgres, { Sql } from "postgres";
+import postgres from "postgres";
+import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
-let _sql: Sql | null = null;
-
-// Lazy-initialize the database connection
-// This is needed for Workers where env vars are set per-request
+// Get connection string - uses Hyperdrive in production, DATABASE_URL in dev
 function getConnectionString(): string {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
@@ -12,32 +10,38 @@ function getConnectionString(): string {
   return connectionString;
 }
 
-// Export a getter that lazily creates the connection
-export const sql = new Proxy({} as Sql, {
+// Create a fresh database connection
+// In Workers with Hyperdrive, connections should be created per-request
+export function createDb(): PostgresJsDatabase {
+  const client = postgres(getConnectionString(), {
+    prepare: false, // Required for Hyperdrive compatibility
+  });
+  return drizzle(client);
+}
+
+// For backwards compatibility - lazily creates connection
+// Note: In production Workers, prefer using createDb() directly per request
+let _db: PostgresJsDatabase | null = null;
+
+export function getDb(): PostgresJsDatabase {
+  if (!_db) {
+    _db = createDb();
+  }
+  return _db;
+}
+
+// Export sql client for direct queries (legacy support)
+export const sql = new Proxy({} as ReturnType<typeof postgres>, {
   get(_target, prop) {
-    if (!_sql) {
-      _sql = postgres(getConnectionString(), {
-        max: 10,
-        idle_timeout: 20,
-        connect_timeout: 10,
-        prepare: false, // Required for Workers compatibility
-      });
-    }
-    const value = (_sql as unknown as Record<string | symbol, unknown>)[prop];
+    const client = postgres(getConnectionString(), { prepare: false });
+    const value = (client as unknown as Record<string | symbol, unknown>)[prop];
     if (typeof value === "function") {
-      return value.bind(_sql);
+      return value.bind(client);
     }
     return value;
   },
   apply(_target, _thisArg, args) {
-    if (!_sql) {
-      _sql = postgres(getConnectionString(), {
-        max: 10,
-        idle_timeout: 20,
-        connect_timeout: 10,
-        prepare: false,
-      });
-    }
-    return (_sql as unknown as (...args: unknown[]) => unknown)(...args);
+    const client = postgres(getConnectionString(), { prepare: false });
+    return (client as unknown as (...args: unknown[]) => unknown)(...args);
   },
 });

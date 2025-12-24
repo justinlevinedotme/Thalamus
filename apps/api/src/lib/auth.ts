@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
+import { withCloudflare } from "better-auth-cloudflare";
 import { genericOAuth, twoFactor, haveIBeenPwned, captcha } from "better-auth/plugins";
-import { sql } from "./db";
+import { createDb } from "./db";
 import { emails } from "../emails";
 import { sendEmail } from "./email";
 
@@ -35,8 +36,18 @@ const sendWelcomeEmail = async (user: { email: string; name?: string | null }) =
   }
 };
 
-export const auth = betterAuth({
-  database: sql,
+// Lazily create auth instance - required for Cloudflare Workers where
+// env vars are set per-request via middleware
+let _auth: ReturnType<typeof betterAuth> | null = null;
+
+function createAuth() {
+  try {
+    const db = createDb();
+    return betterAuth(withCloudflare({
+      postgresJs: { db },
+      autoDetectIpAddress: false,
+      geolocationTracking: false,
+    }, {
   baseURL: process.env.BETTER_AUTH_URL,
   basePath: "/auth",
   secret: process.env.BETTER_AUTH_SECRET,
@@ -206,6 +217,25 @@ export const auth = betterAuth({
       ],
     }),
   ],
+}));
+  } catch (error) {
+    console.error("Failed to create betterAuth:", error);
+    throw error;
+  }
+}
+
+// Export getter that lazily creates auth instance
+export const auth = new Proxy({} as ReturnType<typeof betterAuth>, {
+  get(_target, prop) {
+    if (!_auth) {
+      _auth = createAuth();
+    }
+    const value = (_auth as unknown as Record<string | symbol, unknown>)[prop];
+    if (typeof value === "function") {
+      return value.bind(_auth);
+    }
+    return value;
+  },
 });
 
-export type Session = typeof auth.$Infer.Session;
+export type Session = ReturnType<typeof createAuth>["$Infer"]["Session"];
