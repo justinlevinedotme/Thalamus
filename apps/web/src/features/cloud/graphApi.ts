@@ -1,6 +1,6 @@
 import type { Edge, Node } from "reactflow";
 
-import { supabase } from "../../lib/supabaseClient";
+import { apiFetch } from "../../lib/apiClient";
 import type { NodeGroup, RelationshipData } from "../../store/graphStore";
 
 export type GraphPayload = {
@@ -23,73 +23,37 @@ export const emptyGraphPayload = (): GraphPayload => ({
   groups: [],
 });
 
-export async function listGraphs() {
-  const { data, error } = await supabase
-    .from("graphs")
-    .select("id,title,data,updated_at,expires_at")
-    .order("updated_at", { ascending: false });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return (data ?? []) as GraphRecord[];
+export async function listGraphs(): Promise<GraphRecord[]> {
+  return apiFetch<GraphRecord[]>("/graphs");
 }
 
-export async function getGraph(graphId: string) {
-  const { data, error } = await supabase
-    .from("graphs")
-    .select("id,title,data,updated_at,expires_at")
-    .eq("id", graphId)
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data as GraphRecord;
+export async function getGraph(graphId: string): Promise<GraphRecord> {
+  return apiFetch<GraphRecord>(`/graphs/${graphId}`);
 }
 
-export async function createGraph(title: string, payload: GraphPayload) {
-  const { data, error } = await supabase
-    .from("graphs")
-    .insert({
-      title,
-      data: payload,
-    })
-    .select("id,title,data,updated_at,expires_at")
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data as GraphRecord;
+export async function createGraph(
+  title: string,
+  payload: GraphPayload
+): Promise<GraphRecord> {
+  return apiFetch<GraphRecord>("/graphs", {
+    method: "POST",
+    body: JSON.stringify({ title, data: payload }),
+  });
 }
 
 export async function updateGraph(
   graphId: string,
   title: string,
   payload: GraphPayload
-) {
-  const { data, error } = await supabase
-    .from("graphs")
-    .update({ title, data: payload })
-    .eq("id", graphId)
-    .select("id,title,data,updated_at,expires_at")
-    .single();
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return data as GraphRecord;
+): Promise<GraphRecord> {
+  return apiFetch<GraphRecord>(`/graphs/${graphId}`, {
+    method: "PUT",
+    body: JSON.stringify({ title, data: payload }),
+  });
 }
 
-export async function deleteGraph(graphId: string) {
-  const { error } = await supabase.from("graphs").delete().eq("id", graphId);
-
-  if (error) {
-    throw new Error(error.message);
-  }
+export async function deleteGraph(graphId: string): Promise<void> {
+  await apiFetch(`/graphs/${graphId}`, {
+    method: "DELETE",
+  });
 }
