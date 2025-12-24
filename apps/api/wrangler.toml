@@ -26,6 +26,9 @@ vars = { FRONTEND_URL = "https://staging.thalamus.sh" }
 routes = [
   { pattern = "staging-api.thalamus.sh", custom_domain = true }
 ]
+[[env.staging.hyperdrive]]
+binding = "HYPERDRIVE"
+id = "3ec1d80bb0c94e2abff1bac20af08b1b"
 
 # Production
 [env.production]
@@ -34,3 +37,6 @@ vars = { FRONTEND_URL = "https://thalamus.sh" }
 routes = [
   { pattern = "api.thalamus.sh", custom_domain = true }
 ]
+[[env.production.hyperdrive]]
+binding = "HYPERDRIVE"
+id = "3ec1d80bb0c94e2abff1bac20af08b1b"
