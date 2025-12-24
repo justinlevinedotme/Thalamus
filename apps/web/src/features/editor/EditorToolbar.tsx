@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, FileJson, FileText, Image, Redo2, Undo2 } from "lucide-react";
+import { Download, FileJson, Image, Redo2, Undo2 } from "lucide-react";
 
 import Header from "../../components/Header";
 import { Input } from "../../components/ui/input";
@@ -7,10 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import {
@@ -27,9 +23,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
-import { exportGraphPdf, exportGraphPng, type ExportMargin } from "../../lib/exportImage";
 import { exportGraphJson } from "../../lib/exportJson";
 import { useGraphStore } from "../../store/graphStore";
+import ExportDialog from "./ExportDialog";
 
 type EditorToolbarProps = {
   canSave: boolean;
@@ -73,8 +69,7 @@ export default function EditorToolbar({
     canUndo,
     canRedo,
   } = useGraphStore();
-  const [exporting, setExporting] = useState<"png" | "pdf" | null>(null);
-  const [exportMargin, setExportMargin] = useState<ExportMargin>("small");
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   const isMac =
     typeof navigator !== "undefined" &&
@@ -82,22 +77,6 @@ export default function EditorToolbar({
 
   const handleExportJson = () => {
     exportGraphJson(graphTitle, nodes, edges);
-  };
-
-  const handleExportImage = async (format: "png" | "pdf") => {
-    try {
-      setExporting(format);
-      const options = { margin: exportMargin };
-      if (format === "png") {
-        await exportGraphPng(graphTitle, nodes, edges, options);
-      } else {
-        await exportGraphPdf(graphTitle, nodes, edges, options);
-      }
-    } catch (error) {
-      console.error("Export failed", error);
-    } finally {
-      setExporting(null);
-    }
   };
 
   return (
@@ -130,20 +109,11 @@ export default function EditorToolbar({
                 <MenubarShortcut>{isMac ? "⌘S" : "Ctrl+S"}</MenubarShortcut>
               </MenubarItem>
               <MenubarSeparator />
-              <MenubarItem onClick={handleExportJson} disabled={exporting !== null}>
+              <MenubarItem onClick={handleExportJson}>
                 Export as JSON
               </MenubarItem>
-              <MenubarItem
-                onClick={() => handleExportImage("png")}
-                disabled={exporting !== null}
-              >
-                Export as PNG
-              </MenubarItem>
-              <MenubarItem
-                onClick={() => handleExportImage("pdf")}
-                disabled={exporting !== null}
-              >
-                Export as PDF
+              <MenubarItem onClick={() => setExportDialogOpen(true)}>
+                Export as Image...
               </MenubarItem>
               <MenubarSeparator />
               <MenubarItem onClick={onShare} disabled={!canSave}>
@@ -233,7 +203,6 @@ export default function EditorToolbar({
                     <button
                       className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
                       type="button"
-                      disabled={exporting !== null}
                       aria-label="Export"
                     >
                       <Download className="h-4 w-4" />
@@ -243,31 +212,28 @@ export default function EditorToolbar({
                 <TooltipContent>Export</TooltipContent>
               </Tooltip>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExportJson} disabled={exporting !== null}>
+                <DropdownMenuItem onClick={handleExportJson}>
                   <FileJson className="mr-2 h-4 w-4" />
                   Export as JSON
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExportImage("png")} disabled={exporting !== null}>
+                <DropdownMenuItem onClick={() => setExportDialogOpen(true)}>
                   <Image className="mr-2 h-4 w-4" />
-                  Export as PNG
+                  Export as Image...
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExportImage("pdf")} disabled={exporting !== null}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Export as PDF
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs text-slate-500">Margin</DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={exportMargin} onValueChange={(v) => setExportMargin(v as ExportMargin)}>
-                  <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="small">Small</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="medium">Medium</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="large">Large</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </div>
+
+      {/* Export Dialog */}
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        title={graphTitle}
+        nodes={nodes}
+        edges={edges}
+      />
     </div>
   );
 }

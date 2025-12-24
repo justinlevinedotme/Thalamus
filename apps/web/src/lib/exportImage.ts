@@ -4,7 +4,6 @@ import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
 import {
   getNodesBounds,
-  getViewportForBounds,
   type Node as ReactFlowNode,
   type Edge as ReactFlowEdge,
 } from "reactflow";
@@ -24,10 +23,27 @@ const downloadDataUrl = (dataUrl: string, filename: string) => {
 };
 
 export type ExportMargin = "none" | "small" | "medium" | "large";
+export type ExportFormat = "png" | "pdf";
+export type ExportQuality = "standard" | "high" | "ultra";
 
-type ExportOptions = {
+export type ExportOptions = {
   transparentBackground?: boolean;
   margin?: ExportMargin;
+  backgroundColor?: string;
+  quality?: ExportQuality;
+};
+
+const qualityToPixelRatio = (quality: ExportQuality): number => {
+  switch (quality) {
+    case "standard":
+      return 1;
+    case "high":
+      return 2;
+    case "ultra":
+      return 4;
+    default:
+      return 2;
+  }
 };
 
 const marginToPixels = (margin: ExportMargin): number => {
@@ -103,31 +119,29 @@ async function captureGraphImage(
     throw new Error("React Flow viewport not found");
   }
 
-  // Get current container dimensions
-  const containerRect = reactFlow.getBoundingClientRect();
-  const exportWidth = containerRect.width;
-  const exportHeight = containerRect.height;
-
-  // Calculate margin
-  const margin = marginToPixels(options.margin ?? "small");
+  // Calculate margin in pixels
+  const marginPx = marginToPixels(options.margin ?? "small");
 
   // Calculate bounds of all nodes
   const nodesBounds = getNodesBounds(nodes);
 
-  // Calculate viewport transform to fit all nodes with margin
-  const { x, y, zoom } = getViewportForBounds(
-    nodesBounds,
-    exportWidth,
-    exportHeight,
-    0.1, // minZoom
-    2, // maxZoom
-    margin / Math.min(exportWidth, exportHeight) // padding as ratio
-  );
+  // Calculate the export dimensions based on content bounds + margin
+  // This crops to exactly fit the content
+  const contentWidth = nodesBounds.width;
+  const contentHeight = nodesBounds.height;
+  const exportWidth = contentWidth + marginPx * 2;
+  const exportHeight = contentHeight + marginPx * 2;
+
+  // Calculate viewport transform to position content with margin
+  // We want zoom = 1 (actual size) and position the content centered with margin
+  const zoom = 1;
+  const x = -nodesBounds.x + marginPx;
+  const y = -nodesBounds.y + marginPx;
 
   // Store original transform
   const originalTransform = viewport.style.transform;
 
-  // Apply the calculated transform
+  // Apply the calculated transform to position content for capture
   viewport.style.transform = `translate(${x}px, ${y}px) scale(${zoom})`;
 
   // Hide edge labels by setting inline styles directly on elements
@@ -155,10 +169,15 @@ async function captureGraphImage(
 
   try {
     // Capture using html-to-image
+    const pixelRatio = qualityToPixelRatio(options.quality ?? "high");
     const dataUrl = await toPng(reactFlow, {
       cacheBust: true,
-      pixelRatio: 2,
-      backgroundColor: options.transparentBackground ? undefined : "#ffffff",
+      pixelRatio,
+      width: exportWidth,
+      height: exportHeight,
+      backgroundColor: options.transparentBackground
+        ? undefined
+        : (options.backgroundColor ?? "#ffffff"),
       filter: (domNode) => {
         if (domNode.nodeType !== 1) {
           return true;
@@ -182,6 +201,15 @@ async function captureGraphImage(
       delete el.dataset.originalDisplay;
     });
   }
+}
+
+export async function generateExportPreview(
+  nodes: ReactFlowNode[],
+  edges: ReactFlowEdge[],
+  options: ExportOptions = {}
+): Promise<string> {
+  const { dataUrl } = await captureGraphImage(nodes, edges, options);
+  return dataUrl;
 }
 
 export async function exportGraphPng(
