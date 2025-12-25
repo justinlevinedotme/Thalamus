@@ -97,9 +97,7 @@ CI/CD is configured in `.github/workflows/`:
 - `deploy-staging.yml` - Deploys on push to dev/develop/staging branches and PRs to main
 - `deploy-production.yml` - Deploys on push to main
 
-Both workflows:
-1. Run D1 migrations first
-2. Deploy the Worker
+Both workflows deploy the Worker. D1 migrations are run manually via wrangler or MCP.
 
 ### Manual Deployment
 
