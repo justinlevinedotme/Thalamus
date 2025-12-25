@@ -110,9 +110,20 @@ function createAuth() {
       },
     },
 
-    // Custom table names to avoid conflicts
+    // Custom table names with explicit field mappings for D1/SQLite
+    // D1 uses camelCase column names, so we map BetterAuth's internal names to match
     user: {
       modelName: "ba_user",
+      fields: {
+        id: "id",
+        name: "name",
+        email: "email",
+        emailVerified: "emailVerified",
+        image: "image",
+        twoFactorEnabled: "twoFactorEnabled",
+        createdAt: "createdAt",
+        updatedAt: "updatedAt",
+      },
       changeEmail: {
         enabled: true,
         sendChangeEmailVerification: async ({ user, newEmail, url }) => {
@@ -132,6 +143,16 @@ function createAuth() {
     },
     session: {
       modelName: "ba_session",
+      fields: {
+        id: "id",
+        expiresAt: "expiresAt",
+        token: "token",
+        createdAt: "createdAt",
+        updatedAt: "updatedAt",
+        ipAddress: "ipAddress",
+        userAgent: "userAgent",
+        userId: "userId",
+      },
       expiresIn: 60 * 60 * 24 * 7, // 7 days
       updateAge: 60 * 60 * 24, // 1 day
       cookieCache: {
@@ -141,9 +162,32 @@ function createAuth() {
     },
     account: {
       modelName: "ba_account",
+      fields: {
+        id: "id",
+        accountId: "accountId",
+        providerId: "providerId",
+        userId: "userId",
+        accessToken: "accessToken",
+        refreshToken: "refreshToken",
+        idToken: "idToken",
+        accessTokenExpiresAt: "accessTokenExpiresAt",
+        refreshTokenExpiresAt: "refreshTokenExpiresAt",
+        scope: "scope",
+        password: "password",
+        createdAt: "createdAt",
+        updatedAt: "updatedAt",
+      },
     },
     verification: {
       modelName: "ba_verification",
+      fields: {
+        id: "id",
+        identifier: "identifier",
+        value: "value",
+        expiresAt: "expiresAt",
+        createdAt: "createdAt",
+        updatedAt: "updatedAt",
+      },
     },
 
     // Email/password authentication
@@ -187,6 +231,12 @@ function createAuth() {
         schema: {
           twoFactor: {
             modelName: "ba_two_factor",
+            fields: {
+              id: "id",
+              secret: "secret",
+              backupCodes: "backupCodes",
+              userId: "userId",
+            },
           },
         },
       }),

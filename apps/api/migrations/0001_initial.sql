@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS ba_user (
   email TEXT NOT NULL UNIQUE,
   emailVerified INTEGER DEFAULT 0,
   image TEXT,
+  twoFactorEnabled INTEGER DEFAULT 0,
   createdAt INTEGER NOT NULL,
   updatedAt INTEGER NOT NULL
 );

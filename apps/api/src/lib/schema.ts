@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // Helper for timestamps
 const timestamp = (name: string) =>
@@ -12,6 +12,7 @@ export const baUser = sqliteTable("ba_user", {
   email: text("email").notNull().unique(),
   emailVerified: integer("emailVerified", { mode: "boolean" }).default(false),
   image: text("image"),
+  twoFactorEnabled: integer("twoFactorEnabled", { mode: "boolean" }).default(false),
   createdAt: timestamp("createdAt").notNull(),
   updatedAt: timestamp("updatedAt").notNull(),
 });
@@ -64,6 +65,34 @@ export const baTwoFactor = sqliteTable("ba_two_factor", {
     .notNull()
     .references(() => baUser.id, { onDelete: "cascade" }),
 });
+
+// BetterAuth relations (required for drizzle adapter)
+export const baUserRelations = relations(baUser, ({ many }) => ({
+  sessions: many(baSession),
+  accounts: many(baAccount),
+  twoFactors: many(baTwoFactor),
+}));
+
+export const baSessionRelations = relations(baSession, ({ one }) => ({
+  user: one(baUser, {
+    fields: [baSession.userId],
+    references: [baUser.id],
+  }),
+}));
+
+export const baAccountRelations = relations(baAccount, ({ one }) => ({
+  user: one(baUser, {
+    fields: [baAccount.userId],
+    references: [baUser.id],
+  }),
+}));
+
+export const baTwoFactorRelations = relations(baTwoFactor, ({ one }) => ({
+  user: one(baUser, {
+    fields: [baTwoFactor.userId],
+    references: [baUser.id],
+  }),
+}));
 
 // Application tables
 export const graphs = sqliteTable("graphs", {
