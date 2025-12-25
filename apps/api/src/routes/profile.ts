@@ -1,5 +1,6 @@
 import { Hono } from "hono";
-import { sql } from "../lib/db";
+import { eq } from "drizzle-orm";
+import { getDb, schema } from "../lib/db";
 import { sessionMiddleware } from "../middleware/session";
 
 const profile = new Hono();
@@ -10,26 +11,34 @@ profile.use("/*", sessionMiddleware);
 // Get current user profile
 profile.get("/", async (c) => {
   const user = c.get("user");
+  const db = getDb();
 
   try {
     // Try to get profile, but handle case where profiles table may not exist yet
-    let profileData: { plan?: string; max_graphs?: number; retention_days?: number } = {};
+    let profileData: { plan?: string | null; maxGraphs?: number | null; retentionDays?: number | null } = {};
     try {
-      const profiles = await sql`
-        SELECT plan, max_graphs, retention_days
-        FROM profiles
-        WHERE id = ${user.id}
-      `;
+      const profiles = await db
+        .select({
+          plan: schema.profiles.plan,
+          maxGraphs: schema.profiles.maxGraphs,
+          retentionDays: schema.profiles.retentionDays,
+        })
+        .from(schema.profiles)
+        .where(eq(schema.profiles.id, user.id));
 
       if (profiles.length === 0) {
         // Create default profile if it doesn't exist
-        await sql`
-          INSERT INTO profiles (id)
-          VALUES (${user.id})
-          ON CONFLICT (id) DO NOTHING
-        `;
+        const now = new Date();
+        await db
+          .insert(schema.profiles)
+          .values({
+            id: user.id,
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoNothing();
       } else {
-        profileData = profiles[0] as typeof profileData;
+        profileData = profiles[0];
       }
     } catch (dbError) {
       // Profiles table might not exist yet, continue with defaults
@@ -37,16 +46,19 @@ profile.get("/", async (c) => {
     }
 
     // Get linked accounts
-    let linkedAccounts: Array<{ provider: string; linkedAt: Date }> = [];
+    let linkedAccounts: Array<{ provider: string; linkedAt: Date | null }> = [];
     try {
-      const accounts = await sql`
-        SELECT "providerId" as provider, "createdAt"
-        FROM ba_account
-        WHERE "userId" = ${user.id}
-      `;
+      const accounts = await db
+        .select({
+          provider: schema.baAccount.providerId,
+          createdAt: schema.baAccount.createdAt,
+        })
+        .from(schema.baAccount)
+        .where(eq(schema.baAccount.userId, user.id));
+
       linkedAccounts = accounts.map((a) => ({
-        provider: (a as { provider: string; createdAt: Date }).provider,
-        linkedAt: (a as { provider: string; createdAt: Date }).createdAt,
+        provider: a.provider,
+        linkedAt: a.createdAt,
       }));
     } catch (dbError) {
       console.error("Error fetching linked accounts:", dbError);
@@ -59,8 +71,8 @@ profile.get("/", async (c) => {
       image: user.image,
       emailVerified: user.emailVerified,
       plan: profileData.plan || "free",
-      maxGraphs: profileData.max_graphs || 20,
-      retentionDays: profileData.retention_days || 365,
+      maxGraphs: profileData.maxGraphs || 20,
+      retentionDays: profileData.retentionDays || 365,
       linkedAccounts,
     });
   } catch (error) {
@@ -73,6 +85,7 @@ profile.get("/", async (c) => {
 profile.patch("/", async (c) => {
   const user = c.get("user");
   const body = await c.req.json();
+  const db = getDb();
 
   const updates: { name?: string; image?: string } = {};
 
@@ -95,32 +108,24 @@ profile.patch("/", async (c) => {
   }
 
   // Update ba_user table
-  if (updates.name !== undefined && updates.image !== undefined) {
-    await sql`
-      UPDATE ba_user
-      SET name = ${updates.name}, image = ${updates.image}, "updatedAt" = NOW()
-      WHERE id = ${user.id}
-    `;
-  } else if (updates.name !== undefined) {
-    await sql`
-      UPDATE ba_user
-      SET name = ${updates.name}, "updatedAt" = NOW()
-      WHERE id = ${user.id}
-    `;
-  } else if (updates.image !== undefined) {
-    await sql`
-      UPDATE ba_user
-      SET image = ${updates.image}, "updatedAt" = NOW()
-      WHERE id = ${user.id}
-    `;
-  }
+  await db
+    .update(schema.baUser)
+    .set({
+      ...updates,
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.baUser.id, user.id));
 
   // Return updated user
-  const users = await sql`
-    SELECT id, email, name, image, "emailVerified"
-    FROM ba_user
-    WHERE id = ${user.id}
-  `;
+  const users = await db
+    .select({
+      id: schema.baUser.id,
+      email: schema.baUser.email,
+      name: schema.baUser.name,
+      image: schema.baUser.image,
+    })
+    .from(schema.baUser)
+    .where(eq(schema.baUser.id, user.id));
 
   return c.json({
     id: users[0].id,
@@ -133,13 +138,16 @@ profile.patch("/", async (c) => {
 // Get email preferences
 profile.get("/email-preferences", async (c) => {
   const user = c.get("user");
+  const db = getDb();
 
   try {
-    const prefs = await sql`
-      SELECT marketing_emails, product_updates
-      FROM email_preferences
-      WHERE user_id = ${user.id}
-    `;
+    const prefs = await db
+      .select({
+        marketingEmails: schema.emailPreferences.marketingEmails,
+        productUpdates: schema.emailPreferences.productUpdates,
+      })
+      .from(schema.emailPreferences)
+      .where(eq(schema.emailPreferences.userId, user.id));
 
     if (prefs.length === 0) {
       // Return defaults if no preferences exist
@@ -149,10 +157,9 @@ profile.get("/email-preferences", async (c) => {
       });
     }
 
-    const pref = prefs[0] as { marketing_emails: boolean; product_updates: boolean };
     return c.json({
-      marketingEmails: pref.marketing_emails,
-      productUpdates: pref.product_updates,
+      marketingEmails: prefs[0].marketingEmails,
+      productUpdates: prefs[0].productUpdates,
     });
   } catch (error) {
     console.error("Error fetching email preferences:", error);
@@ -164,6 +171,7 @@ profile.get("/email-preferences", async (c) => {
 profile.patch("/email-preferences", async (c) => {
   const user = c.get("user");
   const body = await c.req.json();
+  const db = getDb();
 
   const { marketingEmails, productUpdates } = body as {
     marketingEmails?: boolean;
@@ -177,33 +185,40 @@ profile.patch("/email-preferences", async (c) => {
   try {
     const marketing = marketingEmails ?? true;
     const updates = productUpdates ?? true;
+    const now = new Date();
 
     // Upsert email preferences
-    await sql`
-      INSERT INTO email_preferences (user_id, email, marketing_emails, product_updates)
-      VALUES (
-        ${user.id},
-        ${user.email},
-        ${marketing},
-        ${updates}
-      )
-      ON CONFLICT (user_id) DO UPDATE SET
-        marketing_emails = ${marketing},
-        product_updates = ${updates},
-        updated_at = NOW()
-    `;
+    await db
+      .insert(schema.emailPreferences)
+      .values({
+        userId: user.id,
+        email: user.email,
+        marketingEmails: marketing,
+        productUpdates: updates,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: schema.emailPreferences.userId,
+        set: {
+          marketingEmails: marketing,
+          productUpdates: updates,
+          updatedAt: now,
+        },
+      });
 
     // Return updated preferences
-    const prefs = await sql`
-      SELECT marketing_emails, product_updates
-      FROM email_preferences
-      WHERE user_id = ${user.id}
-    `;
+    const prefs = await db
+      .select({
+        marketingEmails: schema.emailPreferences.marketingEmails,
+        productUpdates: schema.emailPreferences.productUpdates,
+      })
+      .from(schema.emailPreferences)
+      .where(eq(schema.emailPreferences.userId, user.id));
 
-    const pref = prefs[0] as { marketing_emails: boolean; product_updates: boolean };
     return c.json({
-      marketingEmails: pref.marketing_emails,
-      productUpdates: pref.product_updates,
+      marketingEmails: prefs[0].marketingEmails,
+      productUpdates: prefs[0].productUpdates,
     });
   } catch (error) {
     console.error("Error updating email preferences:", error);

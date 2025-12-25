@@ -1,5 +1,6 @@
 import { Hono } from "hono";
-import { sql } from "../lib/db";
+import { eq, and, count, sql } from "drizzle-orm";
+import { getDb, schema } from "../lib/db";
 import { sessionMiddleware } from "../middleware/session";
 
 type GraphPayload = {
@@ -16,13 +17,19 @@ graphs.use("/*", sessionMiddleware);
 // List user's graphs
 graphs.get("/", async (c) => {
   const user = c.get("user");
+  const db = getDb();
 
-  const result = await sql`
-    SELECT id, title, data, updated_at, expires_at
-    FROM graphs
-    WHERE owner_id = ${user.id}
-    ORDER BY updated_at DESC
-  `;
+  const result = await db
+    .select({
+      id: schema.graphs.id,
+      title: schema.graphs.title,
+      data: schema.graphs.data,
+      updatedAt: schema.graphs.updatedAt,
+      expiresAt: schema.graphs.expiresAt,
+    })
+    .from(schema.graphs)
+    .where(eq(schema.graphs.ownerId, user.id))
+    .orderBy(sql`${schema.graphs.updatedAt} DESC`);
 
   return c.json(result);
 });
@@ -31,12 +38,18 @@ graphs.get("/", async (c) => {
 graphs.get("/:id", async (c) => {
   const user = c.get("user");
   const graphId = c.req.param("id");
+  const db = getDb();
 
-  const result = await sql`
-    SELECT id, title, data, updated_at, expires_at
-    FROM graphs
-    WHERE id = ${graphId} AND owner_id = ${user.id}
-  `;
+  const result = await db
+    .select({
+      id: schema.graphs.id,
+      title: schema.graphs.title,
+      data: schema.graphs.data,
+      updatedAt: schema.graphs.updatedAt,
+      expiresAt: schema.graphs.expiresAt,
+    })
+    .from(schema.graphs)
+    .where(and(eq(schema.graphs.id, graphId), eq(schema.graphs.ownerId, user.id)));
 
   if (result.length === 0) {
     return c.json({ error: "Graph not found" }, 404);
@@ -49,18 +62,21 @@ graphs.get("/:id", async (c) => {
 graphs.post("/", async (c) => {
   const user = c.get("user");
   const body = await c.req.json<{ title: string; data: GraphPayload }>();
+  const db = getDb();
 
   // Check quota
-  const countResult = await sql`
-    SELECT COUNT(*) as count FROM graphs WHERE owner_id = ${user.id}
-  `;
-  const currentCount = Number(countResult[0].count);
+  const countResult = await db
+    .select({ count: count() })
+    .from(schema.graphs)
+    .where(eq(schema.graphs.ownerId, user.id));
+  const currentCount = countResult[0]?.count ?? 0;
 
   // Get max graphs from profile (default 20)
-  const profileResult = await sql`
-    SELECT max_graphs FROM profiles WHERE id = ${user.id}
-  `;
-  const maxGraphs = profileResult.length > 0 ? profileResult[0].max_graphs : 20;
+  const profileResult = await db
+    .select({ maxGraphs: schema.profiles.maxGraphs })
+    .from(schema.profiles)
+    .where(eq(schema.profiles.id, user.id));
+  const maxGraphs = profileResult.length > 0 ? (profileResult[0].maxGraphs ?? 20) : 20;
 
   if (currentCount >= maxGraphs) {
     return c.json(
@@ -69,11 +85,23 @@ graphs.post("/", async (c) => {
     );
   }
 
-  const result = await sql`
-    INSERT INTO graphs (owner_id, title, data)
-    VALUES (${user.id}, ${body.title || "Untitled Graph"}, ${JSON.stringify(body.data || { nodes: [], edges: [], groups: [] })})
-    RETURNING id, title, data, updated_at, expires_at
-  `;
+  const now = new Date();
+  const result = await db
+    .insert(schema.graphs)
+    .values({
+      ownerId: user.id,
+      title: body.title || "Untitled Graph",
+      data: body.data || { nodes: [], edges: [], groups: [] },
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning({
+      id: schema.graphs.id,
+      title: schema.graphs.title,
+      data: schema.graphs.data,
+      updatedAt: schema.graphs.updatedAt,
+      expiresAt: schema.graphs.expiresAt,
+    });
 
   return c.json(result[0], 201);
 });
@@ -83,13 +111,23 @@ graphs.put("/:id", async (c) => {
   const user = c.get("user");
   const graphId = c.req.param("id");
   const body = await c.req.json<{ title: string; data: GraphPayload }>();
+  const db = getDb();
 
-  const result = await sql`
-    UPDATE graphs
-    SET title = ${body.title}, data = ${JSON.stringify(body.data)}, updated_at = NOW()
-    WHERE id = ${graphId} AND owner_id = ${user.id}
-    RETURNING id, title, data, updated_at, expires_at
-  `;
+  const result = await db
+    .update(schema.graphs)
+    .set({
+      title: body.title,
+      data: body.data,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(schema.graphs.id, graphId), eq(schema.graphs.ownerId, user.id)))
+    .returning({
+      id: schema.graphs.id,
+      title: schema.graphs.title,
+      data: schema.graphs.data,
+      updatedAt: schema.graphs.updatedAt,
+      expiresAt: schema.graphs.expiresAt,
+    });
 
   if (result.length === 0) {
     return c.json({ error: "Graph not found" }, 404);
@@ -102,12 +140,12 @@ graphs.put("/:id", async (c) => {
 graphs.delete("/:id", async (c) => {
   const user = c.get("user");
   const graphId = c.req.param("id");
+  const db = getDb();
 
-  const result = await sql`
-    DELETE FROM graphs
-    WHERE id = ${graphId} AND owner_id = ${user.id}
-    RETURNING id
-  `;
+  const result = await db
+    .delete(schema.graphs)
+    .where(and(eq(schema.graphs.id, graphId), eq(schema.graphs.ownerId, user.id)))
+    .returning({ id: schema.graphs.id });
 
   if (result.length === 0) {
     return c.json({ error: "Graph not found" }, 404);
@@ -120,21 +158,33 @@ graphs.delete("/:id", async (c) => {
 graphs.post("/:id/share", async (c) => {
   const user = c.get("user");
   const graphId = c.req.param("id");
+  const db = getDb();
 
   // Verify graph ownership
-  const graphResult = await sql`
-    SELECT id FROM graphs WHERE id = ${graphId} AND owner_id = ${user.id}
-  `;
+  const graphResult = await db
+    .select({ id: schema.graphs.id })
+    .from(schema.graphs)
+    .where(and(eq(schema.graphs.id, graphId), eq(schema.graphs.ownerId, user.id)));
 
   if (graphResult.length === 0) {
     return c.json({ error: "Graph not found" }, 404);
   }
 
-  const result = await sql`
-    INSERT INTO share_links (graph_id, created_by)
-    VALUES (${graphId}, ${user.id})
-    RETURNING token, expires_at
-  `;
+  const now = new Date();
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+  const result = await db
+    .insert(schema.shareLinks)
+    .values({
+      graphId,
+      createdBy: user.id,
+      createdAt: now,
+      expiresAt,
+    })
+    .returning({
+      token: schema.shareLinks.token,
+      expiresAt: schema.shareLinks.expiresAt,
+    });
 
   return c.json(result[0], 201);
 });

@@ -1,5 +1,6 @@
 import { Resend } from "resend";
-import { sql } from "./db";
+import { eq } from "drizzle-orm";
+import { getDb, schema } from "./db";
 
 // Lazy-initialize Resend client for Workers compatibility
 let _resend: Resend | null = null;
@@ -51,24 +52,24 @@ export async function sendEmail({
   category = "transactional",
   userId,
 }: SendEmailOptions): Promise<void> {
+  const db = getDb();
+
   // Check if user has unsubscribed from this category
   if (category !== "transactional" && userId) {
-    const prefs = await sql`
-      SELECT marketing_emails, product_updates
-      FROM email_preferences
-      WHERE user_id = ${userId}
-    `;
+    const prefs = await db
+      .select({
+        marketingEmails: schema.emailPreferences.marketingEmails,
+        productUpdates: schema.emailPreferences.productUpdates,
+      })
+      .from(schema.emailPreferences)
+      .where(eq(schema.emailPreferences.userId, userId));
 
     if (prefs.length > 0) {
-      const pref = prefs[0] as {
-        marketing_emails: boolean;
-        product_updates: boolean;
-      };
-      if (category === "marketing" && !pref.marketing_emails) {
+      if (category === "marketing" && !prefs[0].marketingEmails) {
         console.log(`User ${userId} has unsubscribed from marketing emails`);
         return;
       }
-      if (category === "product_updates" && !pref.product_updates) {
+      if (category === "product_updates" && !prefs[0].productUpdates) {
         console.log(`User ${userId} has unsubscribed from product updates`);
         return;
       }
@@ -101,36 +102,58 @@ export async function unsubscribeUser(
   category: EmailCategory
 ): Promise<boolean> {
   try {
+    const db = getDb();
+
     // Find user by email
-    const users = await sql`
-      SELECT id FROM ba_user WHERE email = ${email}
-    `;
+    const users = await db
+      .select({ id: schema.baUser.id })
+      .from(schema.baUser)
+      .where(eq(schema.baUser.email, email));
 
     if (users.length === 0) {
       return false;
     }
 
-    const userId = (users[0] as { id: string }).id;
+    const userId = users[0].id;
+    const now = new Date();
 
     // Upsert email preferences
     if (category === "marketing") {
-      await sql`
-        INSERT INTO email_preferences (user_id, email, marketing_emails, unsubscribed_at)
-        VALUES (${userId}, ${email}, false, now())
-        ON CONFLICT (user_id) DO UPDATE SET
-          marketing_emails = false,
-          unsubscribed_at = COALESCE(email_preferences.unsubscribed_at, now()),
-          updated_at = now()
-      `;
+      await db
+        .insert(schema.emailPreferences)
+        .values({
+          userId,
+          email,
+          marketingEmails: false,
+          unsubscribedAt: now,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: schema.emailPreferences.userId,
+          set: {
+            marketingEmails: false,
+            updatedAt: now,
+          },
+        });
     } else if (category === "product_updates") {
-      await sql`
-        INSERT INTO email_preferences (user_id, email, product_updates, unsubscribed_at)
-        VALUES (${userId}, ${email}, false, now())
-        ON CONFLICT (user_id) DO UPDATE SET
-          product_updates = false,
-          unsubscribed_at = COALESCE(email_preferences.unsubscribed_at, now()),
-          updated_at = now()
-      `;
+      await db
+        .insert(schema.emailPreferences)
+        .values({
+          userId,
+          email,
+          productUpdates: false,
+          unsubscribedAt: now,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: schema.emailPreferences.userId,
+          set: {
+            productUpdates: false,
+            updatedAt: now,
+          },
+        });
     }
 
     return true;
@@ -148,28 +171,36 @@ export async function resubscribeUser(
   category: EmailCategory
 ): Promise<boolean> {
   try {
-    const users = await sql`
-      SELECT id FROM ba_user WHERE email = ${email}
-    `;
+    const db = getDb();
+
+    const users = await db
+      .select({ id: schema.baUser.id })
+      .from(schema.baUser)
+      .where(eq(schema.baUser.email, email));
 
     if (users.length === 0) {
       return false;
     }
 
-    const userId = (users[0] as { id: string }).id;
+    const userId = users[0].id;
+    const now = new Date();
 
     if (category === "marketing") {
-      await sql`
-        UPDATE email_preferences
-        SET marketing_emails = true, updated_at = now()
-        WHERE user_id = ${userId}
-      `;
+      await db
+        .update(schema.emailPreferences)
+        .set({
+          marketingEmails: true,
+          updatedAt: now,
+        })
+        .where(eq(schema.emailPreferences.userId, userId));
     } else if (category === "product_updates") {
-      await sql`
-        UPDATE email_preferences
-        SET product_updates = true, updated_at = now()
-        WHERE user_id = ${userId}
-      `;
+      await db
+        .update(schema.emailPreferences)
+        .set({
+          productUpdates: true,
+          updatedAt: now,
+        })
+        .where(eq(schema.emailPreferences.userId, userId));
     }
 
     return true;

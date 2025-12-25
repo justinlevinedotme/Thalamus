@@ -1,19 +1,29 @@
 import { Hono } from "hono";
-import { sql } from "../lib/db";
+import { eq, and, gt } from "drizzle-orm";
+import { getDb, schema } from "../lib/db";
 
 const share = new Hono();
 
 // Get shared graph by token (public - no auth required)
 share.get("/:token", async (c) => {
   const token = c.req.param("token");
+  const db = getDb();
 
-  const result = await sql`
-    SELECT g.id, g.title, g.data, g.updated_at
-    FROM share_links s
-    JOIN graphs g ON g.id = s.graph_id
-    WHERE s.token = ${token}
-      AND s.expires_at > NOW()
-  `;
+  const result = await db
+    .select({
+      id: schema.graphs.id,
+      title: schema.graphs.title,
+      data: schema.graphs.data,
+      updatedAt: schema.graphs.updatedAt,
+    })
+    .from(schema.shareLinks)
+    .innerJoin(schema.graphs, eq(schema.graphs.id, schema.shareLinks.graphId))
+    .where(
+      and(
+        eq(schema.shareLinks.token, token),
+        gt(schema.shareLinks.expiresAt, new Date())
+      )
+    );
 
   if (result.length === 0) {
     return c.json({ error: "Share link not found or expired" }, 404);
