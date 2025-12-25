@@ -30,11 +30,11 @@ const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 // Environment variables to control which OAuth providers are shown
 // Set these in .env: VITE_OAUTH_GITHUB=true, VITE_OAUTH_GOOGLE=true, etc.
 const ENABLED_OAUTH_PROVIDERS: Record<string, boolean> = {
-  github: import.meta.env.VITE_OAUTH_GITHUB === "true",
-  google: import.meta.env.VITE_OAUTH_GOOGLE === "true",
-  gitlab: import.meta.env.VITE_OAUTH_GITLAB === "true",
-  atlassian: import.meta.env.VITE_OAUTH_ATLASSIAN === "true",
-  apple: import.meta.env.VITE_OAUTH_APPLE === "true",
+  github: import.meta.env.VITE_OAUTH_GITHUB?.toLowerCase() === "true",
+  google: import.meta.env.VITE_OAUTH_GOOGLE?.toLowerCase() === "true",
+  gitlab: import.meta.env.VITE_OAUTH_GITLAB?.toLowerCase() === "true",
+  atlassian: import.meta.env.VITE_OAUTH_ATLASSIAN?.toLowerCase() === "true",
+  apple: import.meta.env.VITE_OAUTH_APPLE?.toLowerCase() === "true",
 };
 
 // OAuth provider configurations with brand colors and SVG icons
