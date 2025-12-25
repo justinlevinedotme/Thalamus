@@ -1,11 +1,12 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { setD1, resetDb } from "./lib/db";
+import { setAuthD1 } from "./lib/auth";
 
 // Define env bindings type
 export type Bindings = {
-  HYPERDRIVE: Hyperdrive;
-  DATABASE_URL: string; // Fallback for local dev
+  DB: D1Database;
   BETTER_AUTH_SECRET: string;
   BETTER_AUTH_URL: string;
   FRONTEND_URL: string;
@@ -32,16 +33,18 @@ import unsubscribe from "./routes/unsubscribe";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-// Middleware to inject env vars into process.env for compatibility
+// Middleware to inject D1 and env vars
 app.use("*", async (c, next) => {
+  // Reset DB cache for each request
+  resetDb();
+
+  // Set D1 binding for database access
+  setD1(c.env.DB);
+  setAuthD1(c.env.DB);
+
   // Polyfill process.env for libraries that expect it
-  // Use Hyperdrive connection string if available, fallback to DATABASE_URL for local dev
-  const envWithHyperdrive = {
-    ...c.env,
-    DATABASE_URL: c.env.HYPERDRIVE?.connectionString || c.env.DATABASE_URL,
-  };
   (globalThis as { process?: { env: Record<string, string> } }).process = {
-    env: envWithHyperdrive as unknown as Record<string, string>,
+    env: c.env as unknown as Record<string, string>,
   };
   await next();
 });
@@ -58,8 +61,8 @@ app.use("*", async (c, next) => {
 // Health check
 app.get("/health", (c) => c.json({ status: "ok" }));
 
-// Auth routes - use dynamic import for better-auth which needs process.env at runtime
-app.on(["POST", "GET"], "/auth/*", async (c) => {
+// Auth routes - use all() to catch any method on /auth/**
+app.all("/auth/*", async (c) => {
   const { auth } = await import("./lib/auth");
   return auth.handler(c.req.raw);
 });

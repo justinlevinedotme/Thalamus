@@ -1,47 +1,41 @@
-import postgres from "postgres";
-import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import { drizzle, DrizzleD1Database } from "drizzle-orm/d1";
+import * as schema from "./schema";
 
-// Get connection string - uses Hyperdrive in production, DATABASE_URL in dev
-function getConnectionString(): string {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error("DATABASE_URL environment variable is required");
+// Store the D1 binding globally for the request
+let _d1: D1Database | null = null;
+
+// Set the D1 binding (called from middleware)
+export function setD1(d1: D1Database) {
+  _d1 = d1;
+}
+
+// Get the D1 binding
+export function getD1(): D1Database {
+  if (!_d1) {
+    throw new Error("D1 database not initialized. Make sure setD1() is called in middleware.");
   }
-  return connectionString;
+  return _d1;
 }
 
-// Create a fresh database connection
-// In Workers with Hyperdrive, connections should be created per-request
-export function createDb(): PostgresJsDatabase {
-  const client = postgres(getConnectionString(), {
-    prepare: false, // Required for Hyperdrive compatibility
-  });
-  return drizzle(client);
+// Create a Drizzle instance from the D1 binding
+export function createDb(): DrizzleD1Database<typeof schema> {
+  return drizzle(getD1(), { schema });
 }
 
-// For backwards compatibility - lazily creates connection
-// Note: In production Workers, prefer using createDb() directly per request
-let _db: PostgresJsDatabase | null = null;
+// Lazy getter for backwards compatibility
+let _db: DrizzleD1Database<typeof schema> | null = null;
 
-export function getDb(): PostgresJsDatabase {
+export function getDb(): DrizzleD1Database<typeof schema> {
   if (!_db) {
     _db = createDb();
   }
   return _db;
 }
 
-// Export sql client for direct queries (legacy support)
-export const sql = new Proxy({} as ReturnType<typeof postgres>, {
-  get(_target, prop) {
-    const client = postgres(getConnectionString(), { prepare: false });
-    const value = (client as unknown as Record<string | symbol, unknown>)[prop];
-    if (typeof value === "function") {
-      return value.bind(client);
-    }
-    return value;
-  },
-  apply(_target, _thisArg, args) {
-    const client = postgres(getConnectionString(), { prepare: false });
-    return (client as unknown as (...args: unknown[]) => unknown)(...args);
-  },
-});
+// Reset cached db (call this at the start of each request)
+export function resetDb() {
+  _db = null;
+}
+
+// Export schema for convenience
+export { schema };

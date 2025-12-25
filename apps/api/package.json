@@ -4,23 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/index.ts",
-    "dev:worker": "wrangler dev --env dev",
+    "dev": "wrangler dev --env dev",
     "build": "tsc",
-    "start": "node dist/index.js",
     "deploy": "wrangler deploy --env production",
     "deploy:staging": "wrangler deploy --env staging",
+    "db:migrate": "wrangler d1 migrations apply thalamus-auth --env production",
+    "db:migrate:local": "wrangler d1 migrations apply thalamus-auth --local",
     "email:dev": "email dev --dir src/emails --port 3002"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.7",
     "@react-email/components": "^1.0.2",
     "better-auth": "^1.2.3",
-    "better-auth-cloudflare": "^0.2.9",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.6.14",
-    "pg": "^8.13.1",
-    "postgres": "^3.4.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "resend": "^6.6.0"
@@ -30,11 +26,10 @@
     "@react-email/preview-server": "^5.1.0",
     "@react-email/render": "^2.0.0",
     "@types/node": "^22.10.2",
-    "@types/pg": "^8.11.10",
     "@types/react": "^18.3.27",
     "@types/react-dom": "^18.3.7",
+    "drizzle-kit": "^0.31.1",
     "react-email": "^5.1.0",
-    "tsx": "^4.19.2",
     "typescript": "^5.6.3",
     "wrangler": "^3.99.0"
   }
