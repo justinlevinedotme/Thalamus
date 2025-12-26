@@ -33,6 +33,44 @@ cd apps/api && npx wrangler d1 migrations apply thalamus-auth --local
 
 ---
 
+## Git Workflow
+
+**Branch Protection**: Direct pushes to `main` are not allowed. All changes must go through pull requests.
+
+### Branch Naming Convention
+
+Branches must follow the pattern: `type/description`
+
+**Valid types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`, `hotfix`, `claude`
+
+**Examples**:
+- `feat/add-export-button`
+- `fix/auth-session-bug`
+- `claude/code-review-cleanup`
+
+### Commit Message Convention
+
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+type: description in lower-case
+```
+
+**Examples**:
+- `feat: add graph export functionality`
+- `fix: resolve session timeout issue`
+- `claude: ai-assisted refactoring`
+
+### PR Workflow
+
+1. Create a branch following the naming convention
+2. Make commits following the message convention
+3. Open a PR - title must match commit format: `type: description`
+4. PR checks run automatically (commitlint, branch naming, PR title)
+5. PRs are auto-labeled based on type (e.g., `feat`, `fix`, `claude`)
+
+---
+
 ## Architecture Overview
 
 ```

@@ -22,6 +22,7 @@ module.exports = {
         "build", // changes related to build system or external dependencies
         "revert", // revert a previous commit
         "hotfix", // urgent fixes
+        "claude", // AI-assisted changes
       ],
     ],
     "scope-empty": [2, "always"], // no scope allowed

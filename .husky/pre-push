@@ -3,7 +3,7 @@
 branch=$(git rev-parse --abbrev-ref HEAD)
 
 # Types must match commitlint.config.js
-types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix"
+types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix|claude"
 
 # Branch naming pattern: type/description
 # Examples: feat/add-button, fix/auth-bug, chore/update-deps

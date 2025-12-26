@@ -37,7 +37,7 @@ jobs:
       - name: Validate PR title
         run: |
           title="${{ github.event.pull_request.title }}"
-          types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix"
+          types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix|claude"
           pattern="^($types): [a-z0-9][a-z0-9 .,'/-]*$"
 
           if ! echo "$title" | grep -qE "$pattern"; then
@@ -76,6 +76,7 @@ jobs:
               "build",
               "revert",
               "hotfix",
+              "claude",
             ];
 
             if (!allowed.includes(type)) {
@@ -96,6 +97,7 @@ jobs:
               build: "C2E0C6",
               revert: "E99695",
               hotfix: "D93F0B",
+              claude: "CC785C",
             };
 
             const labelName = type;
@@ -127,7 +129,7 @@ jobs:
       - name: Validate branch name
         run: |
           branch="${{ github.head_ref }}"
-          types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix"
+          types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix|claude"
           pattern="^($types)/[a-z0-9-]+$"
 
           if ! echo "$branch" | grep -qE "$pattern"; then
