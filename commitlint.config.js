@@ -26,7 +26,7 @@ module.exports = {
       ],
     ],
     "scope-empty": [2, "always"], // no scope allowed
-    "subject-case": [2, "always", "lower-case"],
+    "subject-case": [0], // disabled - allow filenames like CLAUDE.md and acronyms
     "header-max-length": [2, "always", 72],
     "footer-max-line-length": [2, "always", 100],
     "body-max-line-length": [2, "always", 100],
