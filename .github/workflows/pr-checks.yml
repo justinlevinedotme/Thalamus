@@ -38,7 +38,7 @@ jobs:
         run: |
           title="${{ github.event.pull_request.title }}"
           types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix|claude"
-          pattern="^($types): [a-z0-9][a-z0-9 .,'/-]*$"
+          pattern="^($types): [a-zA-Z0-9][a-zA-Z0-9 .,'/_-]*$"
 
           if ! echo "$title" | grep -qE "$pattern"; then
             echo "❌ PR title '$title' doesn't match the required pattern."
@@ -130,7 +130,7 @@ jobs:
         run: |
           branch="${{ github.head_ref }}"
           types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix|claude"
-          pattern="^($types)/[a-z0-9-]+$"
+          pattern="^($types)/[a-zA-Z0-9-]+$"
 
           if ! echo "$branch" | grep -qE "$pattern"; then
             echo "❌ Branch name '$branch' doesn't match the required pattern."

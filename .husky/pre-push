@@ -6,8 +6,8 @@ branch=$(git rev-parse --abbrev-ref HEAD)
 types="feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert|hotfix|claude"
 
 # Branch naming pattern: type/description
-# Examples: feat/add-button, fix/auth-bug, chore/update-deps
-pattern="^($types)/[a-z0-9-]+$|^(main|master|develop)$"
+# Examples: feat/add-button, fix/auth-bug, claude/session-id-ABC123
+pattern="^($types)/[a-zA-Z0-9-]+$|^(main|master|develop)$"
 
 if ! echo "$branch" | grep -qE "$pattern"; then
   echo "❌ Branch name '$branch' doesn't match the required pattern."

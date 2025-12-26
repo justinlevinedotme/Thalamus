@@ -39,27 +39,27 @@ cd apps/api && npx wrangler d1 migrations apply thalamus-auth --local
 
 ### Branch Naming Convention
 
-Branches must follow the pattern: `type/description`
+Branches must follow the pattern: `type/description` (alphanumeric + hyphens)
 
 **Valid types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`, `hotfix`, `claude`
 
 **Examples**:
 - `feat/add-export-button`
 - `fix/auth-session-bug`
-- `claude/code-review-cleanup`
+- `claude/code-review-ABC123` (session IDs with mixed case allowed)
 
 ### Commit Message Convention
 
 Commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
-type: description in lower-case
+type: description
 ```
 
 **Examples**:
 - `feat: add graph export functionality`
 - `fix: resolve session timeout issue`
-- `claude: ai-assisted refactoring`
+- `claude: update CLAUDE.md configuration`
 
 ### PR Workflow
 
