@@ -1,26 +1,201 @@
-# Thalamus Development Guide
+# CLAUDE.md - Thalamus Development Guide
+
+> **Purpose**: This file provides context and instructions for AI coding assistants working on this project.
+
+---
+
+## Project Overview
+
+**Project Name**: Thalamus
+**Description**: Visual diagram editor for event-driven architecture modeling with React Flow, backed by Cloudflare Workers API
+**Tech Stack**: React 18, TypeScript, Vite, Hono, Cloudflare D1, Drizzle ORM, BetterAuth
+**Repository**: Monorepo with Turborepo
+
+### Quick Start
+
+```bash
+# Install dependencies (from root)
+npm install
+
+# Run development (both apps)
+npm run dev
+
+# Run individual apps
+cd apps/web && npm run dev    # Frontend at localhost:5173
+cd apps/api && npm run dev    # API at localhost:8787
+
+# Build
+npm run build
+
+# Database migrations (local)
+cd apps/api && npx wrangler d1 migrations apply thalamus-auth --local
+```
+
+---
+
+## Git Workflow
+
+**Branch Protection**: Direct pushes to `main` are not allowed. All changes must go through pull requests.
+
+### Branch Naming Convention
+
+Branches must follow the pattern: `type/description` (alphanumeric + hyphens)
+
+**Valid types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`, `hotfix`, `claude`
+
+**Examples**:
+- `feat/add-export-button`
+- `fix/auth-session-bug`
+- `claude/code-review-ABC123` (session IDs with mixed case allowed)
+
+### Commit Message Convention
+
+Commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+type: description
+```
+
+**Examples**:
+- `feat: add graph export functionality`
+- `fix: resolve session timeout issue`
+- `claude: update CLAUDE.md configuration`
+
+### PR Workflow
+
+1. Create a branch following the naming convention
+2. Make commits following the message convention
+3. Open a PR - title must match commit format: `type: description`
+4. PR checks run automatically (commitlint, branch naming, PR title)
+5. PRs are auto-labeled based on type (e.g., `feat`, `fix`, `claude`)
+
+---
 
 ## Architecture Overview
 
-Thalamus is a monorepo with:
-- `apps/web` - React frontend (Vite)
-- `apps/api` - Cloudflare Workers API with BetterAuth
+```
+Thalamus/
+├── apps/
+│   ├── api/                    # Cloudflare Workers API (Hono + D1)
+│   │   ├── src/
+│   │   │   ├── index.worker.ts # Entry point, middleware pipeline
+│   │   │   ├── lib/
+│   │   │   │   ├── auth.ts     # BetterAuth configuration
+│   │   │   │   ├── db.ts       # D1 database factory
+│   │   │   │   ├── email.ts    # Resend email service
+│   │   │   │   └── schema.ts   # Drizzle schema
+│   │   │   ├── routes/         # API route handlers
+│   │   │   ├── middleware/     # Auth session validation
+│   │   │   └── emails/         # Email templates (React Email)
+│   │   ├── migrations/         # D1 SQL migrations
+│   │   └── wrangler.toml       # Cloudflare config
+│   │
+│   └── web/                    # React frontend (Vite + React Flow)
+│       └── src/
+│           ├── store/          # Zustand state (graphStore, authStore)
+│           ├── lib/            # API clients, utilities
+│           ├── features/       # Feature modules (auth, cloud, graph, nodes)
+│           ├── components/ui/  # shadcn/ui components
+│           └── routes/         # Route pages
+│
+├── packages/                   # Shared packages (currently empty)
+├── .github/workflows/          # CI/CD (staging + production)
+└── turbo.json                  # Turborepo config
+```
+
+---
+
+## Role-Based Instructions
+
+Use these context keywords to activate specialized behavior.
+
+### `/backend` - API Development
+
+**Focus**: `apps/api/` - Hono routes, D1 database, BetterAuth
+
+**Key Files**:
+- `src/index.worker.ts` - Entry point, middleware
+- `src/lib/auth.ts` - BetterAuth config (OAuth, 2FA, sessions)
+- `src/lib/schema.ts` - Drizzle schema definitions
+- `src/routes/*.ts` - API endpoints
+
+**Before Starting**:
+1. Check existing route patterns in `src/routes/`
+2. Review schema in `src/lib/schema.ts`
+3. Understand auth middleware in `src/middleware/session.ts`
+
+**API Endpoints**:
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/health` | GET | No | Health check |
+| `/auth/*` | ALL | No | BetterAuth handlers |
+| `/graphs` | GET/POST | Yes | List/create graphs |
+| `/graphs/:id` | GET/PUT/DELETE | Yes | Graph CRUD |
+| `/graphs/:id/share` | POST | Yes | Generate share link |
+| `/share/:token` | GET | No | Get shared graph |
+| `/profile` | GET/PUT | Yes | User profile/quotas |
+
+---
+
+### `/frontend` - React Development
+
+**Focus**: `apps/web/` - React Flow editor, shadcn/ui components
+
+**Key Files**:
+- `src/store/graphStore.ts` - Central state (nodes, edges, history)
+- `src/store/authStore.ts` - Auth state wrapper
+- `src/features/graph/` - Editor components
+- `src/features/nodes/` - Node type components
+- `src/components/ui/` - shadcn/ui primitives
+
+**Before Starting**:
+1. Check component patterns in `src/components/ui/`
+2. Review graphStore for state management patterns
+3. Understand React Flow integration in `src/features/graph/`
+
+**Node Types**: Event, Actor, System, State, Read Model, Command, Saga, Policy, Aggregate
+
+---
+
+### `/fullstack` - End-to-End Features
+
+**Workflow**:
+1. Design schema changes in `apps/api/src/lib/schema.ts`
+2. Create migration in `apps/api/migrations/`
+3. Implement API route in `apps/api/src/routes/`
+4. Build frontend components in `apps/web/src/features/`
+5. Connect via API client in `apps/web/src/lib/apiClient.ts`
+
+---
 
 ## Database: Cloudflare D1
 
-The API uses Cloudflare D1 (SQLite) with Drizzle ORM.
-
-### Database Configuration
+### Configuration
 
 - **D1 Database**: `thalamus-auth` (defined in `wrangler.toml`)
 - **Schema**: `apps/api/src/lib/schema.ts`
 - **Migrations**: `apps/api/migrations/`
 
+### Schema Tables
+
+| Table | Purpose |
+|-------|---------|
+| `ba_user` | User accounts (id, email, emailVerified, twoFactorEnabled) |
+| `ba_session` | Auth sessions (token, userId, expiresAt) |
+| `ba_account` | OAuth accounts (providerId, accessToken) |
+| `ba_verification` | Email verification tokens |
+| `ba_two_factor` | 2FA secrets and backup codes |
+| `graphs` | User diagrams (ownerId, title, data JSON) |
+| `share_links` | Share tokens (graphId, token, expiresAt) |
+| `profiles` | User quotas (plan, maxGraphs, retentionDays) |
+| `email_preferences` | Marketing opt-outs |
+
 ### Running Migrations
 
 ```bash
-# Local development
 cd apps/api
+
+# Local development
 npx wrangler d1 migrations apply thalamus-auth --local
 
 # Staging
@@ -40,22 +215,21 @@ npx wrangler d1 execute thalamus-auth --local --command "SELECT * FROM ba_user"
 npx wrangler d1 execute thalamus-auth --env production --command "SELECT * FROM ba_user"
 ```
 
-## Authentication: BetterAuth with D1
+---
 
-Authentication uses BetterAuth with the Drizzle adapter configured for D1/SQLite.
+## Authentication: BetterAuth
 
 ### Key Configuration Notes
 
 1. **Custom Table Names**: BetterAuth tables use `ba_` prefix (e.g., `ba_user`, `ba_session`)
 
-2. **Field Mappings**: D1 uses camelCase column names. Explicit field mappings in `auth.ts` ensure BetterAuth matches the Drizzle schema:
+2. **Field Mappings**: D1 uses camelCase column names. Explicit field mappings in `auth.ts`:
    ```typescript
    user: {
      modelName: "ba_user",
      fields: {
        emailVerified: "emailVerified",
        twoFactorEnabled: "twoFactorEnabled",
-       // ... other fields
      },
    }
    ```
@@ -68,55 +242,48 @@ Authentication uses BetterAuth with the Drizzle adapter configured for D1/SQLite
      schema: {
        ba_user: schema.baUser,
        ba_session: schema.baSession,
-       // ...
      },
    })
    ```
 
-4. **twoFactor Plugin Requirement**: If using the `twoFactor` plugin, the user table MUST include a `twoFactorEnabled` column. This is a common source of `unable_to_create_user` errors.
+4. **twoFactor Plugin**: User table MUST include `twoFactorEnabled` column. Common source of `unable_to_create_user` errors.
 
-5. **Drizzle Relations**: Required for the adapter - defined in `schema.ts` as `baUserRelations`, `baSessionRelations`, etc.
+5. **OAuth Providers**: GitHub, Google, Apple, GitLab, Atlassian
 
 ### Debugging Auth Issues
 
-Use `wrangler tail` to capture production logs:
 ```bash
 cd apps/api
 npx wrangler tail thalamus-api --format json
 ```
 
 Common errors:
-- `unable_to_create_user`: Usually a schema mismatch - check that all required fields exist
+- `unable_to_create_user`: Schema mismatch - check all required fields exist
 - `Model X not found in DB`: Schema key mismatch in drizzleAdapter config
+
+---
 
 ## Deployment
 
 ### GitHub Actions
 
-CI/CD is configured in `.github/workflows/`:
 - `deploy-staging.yml` - Deploys on push to dev/develop/staging branches and PRs to main
 - `deploy-production.yml` - Deploys on push to main
-
-Both workflows deploy the Worker. D1 migrations are run manually via wrangler or MCP.
 
 ### Manual Deployment
 
 ```bash
 cd apps/api
-
-# Staging
-npm run deploy:staging
-
-# Production
-npm run deploy:production
+npm run deploy:staging     # Staging
+npm run deploy:production  # Production
 ```
 
 ### Environment Variables
 
-Required secrets in GitHub Actions:
+**GitHub Actions Secrets**:
 - `CLOUDFLARE_API_TOKEN` - Cloudflare API token with Workers and D1 permissions
 
-Worker environment variables (set in Cloudflare dashboard or wrangler.toml):
+**Worker Environment** (Cloudflare dashboard or wrangler.toml):
 - `BETTER_AUTH_SECRET` - Auth secret key
 - `BETTER_AUTH_URL` - API URL (e.g., https://api.thalamus.sh)
 - `FRONTEND_URL` - Frontend URL (e.g., https://thalamus.sh)
@@ -124,352 +291,110 @@ Worker environment variables (set in Cloudflare dashboard or wrangler.toml):
 
 ---
 
-## System Documentation
+## Code Style Guidelines
 
-### Master Index
+### Naming Conventions
 
-```
-Thalamus/
-├── apps/
-│   ├── api/                    # Cloudflare Workers API (Hono + D1)
-│   │   ├── src/
-│   │   │   ├── index.worker.ts # Entry point, middleware pipeline
-│   │   │   ├── lib/
-│   │   │   │   ├── auth.ts     # BetterAuth configuration (309 lines)
-│   │   │   │   ├── db.ts       # D1 database factory (42 lines)
-│   │   │   │   ├── email.ts    # Resend email service
-│   │   │   │   └── schema.ts   # Drizzle schema (162 lines)
-│   │   │   ├── routes/
-│   │   │   │   ├── graphs.ts   # Graph CRUD with quota (193 lines)
-│   │   │   │   ├── share.ts    # Share link generation
-│   │   │   │   ├── profile.ts  # User profile management
-│   │   │   │   └── unsubscribe.ts
-│   │   │   ├── middleware/
-│   │   │   │   └── session.ts  # Auth session validation
-│   │   │   └── emails/         # Email templates (React Email)
-│   │   ├── migrations/         # D1 SQL migrations
-│   │   └── wrangler.toml       # Cloudflare config
-│   │
-│   └── web/                    # React frontend (Vite + React Flow)
-│       └── src/
-│           ├── store/
-│           │   ├── graphStore.ts      # Core editor state (1519 lines, 20 imports)
-│           │   ├── authStore.ts       # Auth state wrapper (188 lines, 7 imports)
-│           │   └── editorSettingsStore.ts
-│           ├── lib/
-│           │   ├── authClient.ts      # BetterAuth client (22 lines, 4 imports)
-│           │   └── apiClient.ts       # Fetch wrapper (36 lines, 3 imports)
-│           ├── features/
-│           │   ├── cloud/             # Cloud sync
-│           │   │   ├── graphApi.ts    # Graph API client (60 lines)
-│           │   │   └── CloudPanel.tsx
-│           │   ├── auth/              # Auth UI components
-│           │   ├── graph/             # Graph editor
-│           │   └── nodes/             # Node type components
-│           ├── components/
-│           │   └── ui/                # shadcn/ui components (70 imports)
-│           └── pages/                 # Route pages
-│
-├── packages/                   # Shared packages (currently empty)
-├── .github/workflows/          # CI/CD
-└── turbo.json                  # Turborepo config
-```
+| Type | Convention | Example |
+|------|------------|---------|
+| Variables | camelCase | `userData`, `isLoading` |
+| Functions | camelCase | `processItems()`, `handleClick()` |
+| Components | PascalCase | `NodeStyleInspector`, `CloudPanel` |
+| Types/Interfaces | PascalCase | `GraphState`, `NodeGroup` |
+| Constants | SCREAMING_SNAKE | `MAX_RETRIES`, `API_URL` |
+| Files (Components) | PascalCase | `GraphCanvas.tsx` |
+| Files (Utilities) | camelCase | `apiClient.ts` |
+| DB Columns | camelCase | `emailVerified`, `createdAt` |
 
-### Level 2: System Documentation
+### TypeScript
 
-#### 1. Authentication System
+- Use strict mode (enabled)
+- Prefer interfaces for object shapes
+- Use generics for reusable utilities
+- Avoid `any` - use `unknown` with type guards when needed
 
-**Location**: `apps/api/src/lib/auth.ts`, `apps/web/src/lib/authClient.ts`, `apps/web/src/store/authStore.ts`
+### State Management
 
-**Purpose**: Full authentication with email/password, OAuth, 2FA, and session management.
+- Zustand for global state (`graphStore`, `authStore`)
+- React state for component-local state
+- No Redux - keep it simple
 
-**Server Components** (`auth.ts`):
-- BetterAuth with Drizzle adapter for D1/SQLite
-- OAuth: GitHub, Google, Apple, GitLab, Atlassian
-- Plugins: twoFactor, haveIBeenPwned, captcha (Cloudflare Turnstile)
-- Email verification with welcome emails
-- Session: 7-day expiry, 1-day refresh, 5-min cookie cache
+### Error Handling
 
-**Client Components** (`authClient.ts`):
-```typescript
-export const authClient = createAuthClient({
-  baseURL: API_URL,
-  basePath: "/auth",
-  plugins: [twoFactorClient()],
-});
-```
+- Use try/catch for async operations
+- Log errors with `console.error` (appropriate for production)
+- Return meaningful error messages to frontend
 
-**State Management** (`authStore.ts`):
-```typescript
-type AuthState = {
-  user: User | null;
-  status: "loading" | "authenticated" | "unauthenticated";
-  initialize: () => Promise<void>;
-  signIn: (email, password, captchaToken?) => Promise<SignInResult>;
-  signInWithProvider: (provider: OAuthProvider) => Promise<void>;
-  signUp: (email, password, captchaToken?) => Promise<boolean>;
-  signOut: () => Promise<void>;
-};
-```
+---
 
-**Data Flow**:
-```
-Frontend authStore → authClient → /auth/* → BetterAuth → D1
-```
+## Critical Modules
 
-#### 2. Data Storage System
+### graphStore.ts (20 imports)
 
-**Location**: `apps/api/src/lib/db.ts`, `apps/api/src/lib/schema.ts`
-
-**Purpose**: D1 SQLite database with Drizzle ORM.
-
-**Database Factory** (`db.ts`):
-```typescript
-export function setD1(d1: D1Database): void     // Set binding per-request
-export function getDb(): DrizzleD1Database      // Get Drizzle instance
-export function resetDb(): void                 // Reset cache per-request
-export { schema }
-```
-
-**Schema Tables** (`schema.ts`):
-| Table | Purpose |
-|-------|---------|
-| `ba_user` | User accounts (id, email, emailVerified, twoFactorEnabled) |
-| `ba_session` | Auth sessions (token, userId, expiresAt) |
-| `ba_account` | OAuth accounts (providerId, accessToken) |
-| `ba_verification` | Email verification tokens |
-| `ba_two_factor` | 2FA secrets and backup codes |
-| `graphs` | User diagrams (ownerId, title, data JSON) |
-| `share_links` | Share tokens (graphId, token, expiresAt) |
-| `profiles` | User quotas (plan, maxGraphs, retentionDays) |
-| `email_preferences` | Marketing opt-outs |
-
-#### 3. API Routing System
-
-**Location**: `apps/api/src/index.worker.ts`, `apps/api/src/routes/*.ts`
-
-**Purpose**: Hono-based REST API on Cloudflare Workers.
-
-**Entry Point** (`index.worker.ts`):
-```typescript
-// Middleware pipeline
-app.use("*", async (c, next) => {
-  resetDb();
-  setD1(c.env.DB);
-  setAuthD1(c.env.DB);
-  (globalThis as any).process = { env: c.env };
-  await next();
-});
-
-// Routes
-app.all("/auth/*", handler);    // BetterAuth passthrough
-app.route("/graphs", graphs);   // CRUD with auth
-app.route("/share", share);     // Public share access
-app.route("/profile", profile);
-```
-
-**Route Contracts**:
-| Endpoint | Method | Auth | Description |
-|----------|--------|------|-------------|
-| `/health` | GET | No | Health check |
-| `/auth/*` | ALL | No | BetterAuth handlers |
-| `/graphs` | GET | Yes | List user graphs |
-| `/graphs/:id` | GET/PUT/DELETE | Yes | Graph CRUD |
-| `/graphs` | POST | Yes | Create (quota checked) |
-| `/graphs/:id/share` | POST | Yes | Generate share link |
-| `/share/:token` | GET | No | Get shared graph |
-
-#### 4. Graph Editor System
-
-**Location**: `apps/web/src/store/graphStore.ts`, `apps/web/src/features/graph/`, `apps/web/src/features/nodes/`
-
-**Purpose**: Visual diagram editor using React Flow.
-
-**State Store** (`graphStore.ts` - 1519 lines, 20 imports):
-```typescript
-export type GraphState = {
-  // Data
-  nodes: Node<GraphNodeData>[];
-  edges: Edge<RelationshipData>[];
-  groups: NodeGroup[];
-  graphTitle: string;
-
-  // Selection & UI
-  selectedNodes: string[];
-  hoveredNodeId: string | null;
-  isSelecting: boolean;
-
-  // History
-  history: HistoryEntry[];
-  historyIndex: number;
-
-  // Actions (50+)
-  addNode: (type, position, data) => void;
-  updateNode: (id, data) => void;
-  deleteNode: (id) => void;
-  addEdge: (source, target, data) => void;
-  // ... many more
-};
-```
-
-**Node Types**: Event, Actor, System, State, Read Model, Command, Saga, Policy, Aggregate
-
-**Key Features**:
-- Undo/redo with full history
-- Node grouping
-- Custom edge labels
-- Multiple selection
-- Copy/paste/duplicate
-- Auto-layout
-- Export to JSON/PNG
-
-#### 5. Cloud Sync System
-
-**Location**: `apps/web/src/features/cloud/`
-
-**Purpose**: Persist graphs to server with offline-first approach.
-
-**API Client** (`graphApi.ts`):
-```typescript
-export async function listGraphs(): Promise<GraphRecord[]>
-export async function getGraph(graphId: string): Promise<GraphRecord>
-export async function createGraph(title, payload): Promise<GraphRecord>
-export async function updateGraph(graphId, title, payload): Promise<GraphRecord>
-export async function deleteGraph(graphId): Promise<void>
-```
-
-**Sync Flow**:
-```
-User edits → graphStore → CloudPanel → graphApi → /graphs/* → D1
-                              ↓
-                        debounced save (2s)
-```
-
-#### 6. Sharing System
-
-**Location**: `apps/api/src/routes/share.ts`, `apps/api/src/routes/graphs.ts:157-190`
-
-**Purpose**: Generate time-limited share links for read-only graph access.
-
-**Flow**:
-1. Owner calls `POST /graphs/:id/share`
-2. Server generates UUID token, stores with 7-day expiry
-3. Returns `{ token, expiresAt }`
-4. Anyone with token calls `GET /share/:token`
-5. Returns graph data (no auth required)
-
-#### 7. Email System
-
-**Location**: `apps/api/src/lib/email.ts`, `apps/api/src/emails/`
-
-**Purpose**: Transactional and marketing emails via Resend.
-
-**Templates** (React Email):
-- `welcome.tsx` - Welcome after verification
-- `confirmEmail.tsx` - Email verification
-- `passwordReset.tsx` - Password reset link
-
-**Categories**: `transactional` (always sent), `marketing` (respects preferences)
-
-#### 8. UI Component System
-
-**Location**: `apps/web/src/components/ui/`
-
-**Purpose**: Shared UI primitives from shadcn/ui.
-
-**Components** (70 total imports across codebase):
-- `button`, `dialog`, `dropdown-menu`, `input`, `tooltip`
-- `select`, `switch`, `tabs`, `checkbox`, `popover`
-- `scroll-area`, `separator`, `slider`, `toast`
-
-### Level 3: Critical Modules (3+ imports)
-
-#### graphStore.ts (20 imports)
-
-The central state store for the graph editor. Contains:
-- All node/edge/group data
-- 50+ actions for manipulation
-- Full undo/redo history
-- Selection state
-- Style definitions
-
-**Key exports**:
+Central state store for the graph editor:
 ```typescript
 export const useGraphStore: UseBoundStore<StoreApi<GraphState>>
 export type RelationshipData = { label?: string; style?: EdgeStyle }
 export type NodeGroup = { id, name, color, nodeIds[] }
-export type NodeStyle = { fill, stroke, textColor, borderWidth, borderRadius }
-export type EdgeStyle = { stroke, strokeWidth, animated, markerEnd }
-export function getMarkerId(edgeStyle?: EdgeStyle): string
 ```
 
-#### authStore.ts (7 imports)
+### authStore.ts (7 imports)
 
-Wraps BetterAuth client with Zustand for reactive state:
+Auth state wrapper:
 ```typescript
 export const useAuthStore: UseBoundStore<StoreApi<AuthState>>
 export type OAuthProvider = "github" | "google" | "apple" | "gitlab" | "atlassian"
 ```
 
-#### authClient.ts (4 imports)
+### apiClient.ts (3 imports)
 
-BetterAuth client singleton:
-```typescript
-export const authClient: ReturnType<typeof createAuthClient>
-export const { signIn, signUp, signOut, useSession, getSession, twoFactor, requestPasswordReset, changeEmail }
-```
-
-#### apiClient.ts (3 imports)
-
-Generic fetch wrapper with credentials:
+Generic fetch wrapper:
 ```typescript
 export class ApiError extends Error { status: number }
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T>
 ```
 
-#### db.ts (4 imports)
+### db.ts (4 imports)
 
 D1 connection factory:
 ```typescript
 export function setD1(d1: D1Database): void
 export function getDb(): DrizzleD1Database<typeof schema>
 export function resetDb(): void
-export { schema }
 ```
 
-### Dependency Graph
+---
+
+## Data Flow
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Frontend (React)                          │
 ├─────────────────────────────────────────────────────────────────┤
-│  pages/* ──┬── features/graph/* ───── store/graphStore ◄────────┤
-│            │                                  │                  │
-│            ├── features/auth/* ──────── store/authStore ◄───────┤
-│            │                                  │                  │
-│            └── features/cloud/* ─────── lib/authClient ◄────────┤
-│                      │                                           │
-│                      └─────────────── lib/apiClient ◄────────────┤
-│                                              │                   │
-├──────────────────────────────────────────────┼───────────────────┤
+│  routes/* ──┬── features/graph/* ───── store/graphStore         │
+│             ├── features/auth/* ────── store/authStore          │
+│             └── features/cloud/* ───── lib/apiClient            │
+├─────────────────────────────────────────────────────────────────┤
 │                     HTTP (credentials: include)                  │
-├──────────────────────────────────────────────┼───────────────────┤
-│                        Backend (Hono)         │                  │
-├──────────────────────────────────────────────┼───────────────────┤
-│  index.worker.ts                             ▼                   │
-│       │                              /auth/*  ───► lib/auth      │
-│       │                                              │           │
-│       ├── routes/graphs.ts ──────────────────────────┤           │
-│       ├── routes/share.ts ───────────────────────────┤           │
-│       ├── routes/profile.ts ─────────────────────────┤           │
-│       │                                              │           │
-│       └── middleware/session.ts ─────────────────────┤           │
-│                                                      ▼           │
-│                                              lib/db ────► D1     │
-│                                                 │                │
-│                                              lib/schema          │
+├─────────────────────────────────────────────────────────────────┤
+│                        Backend (Hono)                            │
+├─────────────────────────────────────────────────────────────────┤
+│  index.worker.ts                                                 │
+│       ├── /auth/*  ────────► lib/auth (BetterAuth)              │
+│       ├── routes/graphs.ts ─► lib/db                            │
+│       ├── routes/share.ts ──► lib/db                            │
+│       └── routes/profile.ts ► lib/db ────────► D1               │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Pitfalls to Avoid
+
+- **BetterAuth schema mismatch**: Always verify field mappings match between `auth.ts` and `schema.ts`
+- **D1 type assertions**: Use `as unknown as` pattern for Cloudflare Workers env types
+- **Missing twoFactorEnabled**: Required column if using twoFactor plugin
+- **Icon library types**: Use type assertions for dynamic icon imports (lucide, simple-icons)
 
 ---
 
