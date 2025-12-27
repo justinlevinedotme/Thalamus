@@ -6,9 +6,9 @@ Welcome to Clavix! This directory contains your local Clavix configuration and d
 
 **Your command format depends on your AI tool:**
 
-| Tool Type | Format | Example |
-|-----------|--------|---------|
-| **CLI tools** (Claude Code, Gemini, Qwen) | Colon (`:`) | `/clavix:improve` |
+| Tool Type                                    | Format       | Example           |
+| -------------------------------------------- | ------------ | ----------------- |
+| **CLI tools** (Claude Code, Gemini, Qwen)    | Colon (`:`)  | `/clavix:improve` |
 | **IDE extensions** (Cursor, Windsurf, Cline) | Hyphen (`-`) | `/clavix-improve` |
 
 **Rule of thumb:** CLI tools use colon, IDE extensions use hyphen.
@@ -34,31 +34,32 @@ Welcome to Clavix! This directory contains your local Clavix configuration and d
 
 ### Setup Commands (CLI)
 
-| Command | Purpose |
-|---------|---------|
-| `clavix init` | Initialize Clavix in a project |
-| `clavix update` | Update templates after package update |
-| `clavix diagnose` | Check installation health |
-| `clavix version` | Show version |
+| Command           | Purpose                               |
+| ----------------- | ------------------------------------- |
+| `clavix init`     | Initialize Clavix in a project        |
+| `clavix update`   | Update templates after package update |
+| `clavix diagnose` | Check installation health             |
+| `clavix version`  | Show version                          |
 
 ### Workflow Commands (Slash Commands)
 
 All workflows are executed via slash commands that AI agents read and follow:
 
-| Slash Command | Purpose |
-|---------------|---------|
-| `/clavix:improve` | Optimize prompts (auto-selects depth) |
-| `/clavix:prd` | Generate PRD through guided questions |
-| `/clavix:plan` | Create task breakdown from PRD |
+| Slash Command       | Purpose                                        |
+| ------------------- | ---------------------------------------------- |
+| `/clavix:improve`   | Optimize prompts (auto-selects depth)          |
+| `/clavix:prd`       | Generate PRD through guided questions          |
+| `/clavix:plan`      | Create task breakdown from PRD                 |
 | `/clavix:implement` | Execute tasks or prompts (auto-detects source) |
-| `/clavix:start` | Begin conversational session |
-| `/clavix:summarize` | Extract requirements from conversation |
-| `/clavix:verify` | Verify implementation |
-| `/clavix:archive` | Archive completed projects |
+| `/clavix:start`     | Begin conversational session                   |
+| `/clavix:summarize` | Extract requirements from conversation         |
+| `/clavix:verify`    | Verify implementation                          |
+| `/clavix:archive`   | Archive completed projects                     |
 
 **Note:** Running `clavix init` or `clavix update` will regenerate all slash commands from templates. Any manual edits to generated commands will be lost. If you need custom commands, create new command files instead of modifying generated ones.
 
 **Command format varies by integration:**
+
 - Claude Code, Gemini, Qwen: `/clavix:improve` (colon format)
 - Cursor, Droid, Windsurf, etc.: `/clavix-improve` (hyphen format)
 

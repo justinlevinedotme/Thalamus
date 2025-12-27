@@ -10,9 +10,7 @@ import { AccountDeletion } from "./AccountDeletion";
 export { PasswordReset, ConfirmEmail, Welcome, AccountDeletion };
 
 // Helper function to render email templates to HTML
-export async function renderEmail(
-  template: React.ReactElement
-): Promise<string> {
+export async function renderEmail(template: React.ReactElement): Promise<string> {
   return render(template);
 }
 
@@ -22,11 +20,7 @@ export const emails = {
     return renderEmail(React.createElement(PasswordReset, props));
   },
 
-  confirmEmail: async (props: {
-    userName?: string;
-    verifyUrl: string;
-    newEmail?: string;
-  }) => {
+  confirmEmail: async (props: { userName?: string; verifyUrl: string; newEmail?: string }) => {
     return renderEmail(React.createElement(ConfirmEmail, props));
   },
 
@@ -34,11 +28,7 @@ export const emails = {
     return renderEmail(React.createElement(Welcome, props));
   },
 
-  accountDeletion: async (props: {
-    userName?: string;
-    confirmUrl: string;
-    expiresIn?: string;
-  }) => {
+  accountDeletion: async (props: { userName?: string; confirmUrl: string; expiresIn?: string }) => {
     return renderEmail(React.createElement(AccountDeletion, props));
   },
 };

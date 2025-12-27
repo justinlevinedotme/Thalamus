@@ -113,7 +113,7 @@ export default function RichTextEditor({
   useEffect(() => {
     if (editor && !isEditingRef.current && value !== editor.getHTML()) {
       // Wrap plain text in paragraph tags if needed for consistency
-      const content = singleLine ? value : (value.startsWith("<") ? value : `<p>${value}</p>`);
+      const content = singleLine ? value : value.startsWith("<") ? value : `<p>${value}</p>`;
       editor.commands.setContent(content);
     }
   }, [editor, value, singleLine]);
@@ -187,71 +187,74 @@ export default function RichTextEditor({
   }
 
   // Render bubble menu in portal to escape stacking context
-  const bubbleMenu = hasSelection && selectionRect && createPortal(
-    <div
-      className="fixed flex gap-0.5 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"
-      style={{
-        left: selectionRect.left + selectionRect.width / 2,
-        top: selectionRect.top - 8,
-        transform: "translate(-50%, -100%)",
-        zIndex: 99999,
-      }}
-      onMouseDown={(e) => e.preventDefault()}
-    >
-      <button
-        type="button"
-        onMouseDown={(e) => {
-          e.preventDefault();
-          editor.chain().focus().toggleBold().run();
+  const bubbleMenu =
+    hasSelection &&
+    selectionRect &&
+    createPortal(
+      <div
+        className="fixed flex gap-0.5 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"
+        style={{
+          left: selectionRect.left + selectionRect.width / 2,
+          top: selectionRect.top - 8,
+          transform: "translate(-50%, -100%)",
+          zIndex: 99999,
         }}
-        className={cn(
-          "flex h-7 w-7 items-center justify-center rounded transition",
-          editor.isActive("bold")
-            ? "bg-slate-200 text-slate-900"
-            : "text-slate-600 hover:bg-slate-100"
-        )}
-        aria-label="Bold"
-        title="Bold (Cmd+B)"
+        onMouseDown={(e) => e.preventDefault()}
       >
-        <Bold className="h-4 w-4" />
-      </button>
-      <button
-        type="button"
-        onMouseDown={(e) => {
-          e.preventDefault();
-          editor.chain().focus().toggleItalic().run();
-        }}
-        className={cn(
-          "flex h-7 w-7 items-center justify-center rounded transition",
-          editor.isActive("italic")
-            ? "bg-slate-200 text-slate-900"
-            : "text-slate-600 hover:bg-slate-100"
-        )}
-        aria-label="Italic"
-        title="Italic (Cmd+I)"
-      >
-        <Italic className="h-4 w-4" />
-      </button>
-      <button
-        type="button"
-        onMouseDown={(e) => {
-          e.preventDefault();
-          editor.chain().focus().toggleUnderline().run();
-        }}
-        className={cn(
-          "flex h-7 w-7 items-center justify-center rounded transition",
-          editor.isActive("underline")
-            ? "bg-slate-200 text-slate-900"
-            : "text-slate-600 hover:bg-slate-100"
-        )}
-        aria-label="Underline"
-        title="Underline (Cmd+U)"
-      >
-        <UnderlineIcon className="h-4 w-4" />
-      </button>
-    </div>,
-    document.body
-  );
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleBold().run();
+          }}
+          className={cn(
+            "flex h-7 w-7 items-center justify-center rounded transition",
+            editor.isActive("bold")
+              ? "bg-slate-200 text-slate-900"
+              : "text-slate-600 hover:bg-slate-100"
+          )}
+          aria-label="Bold"
+          title="Bold (Cmd+B)"
+        >
+          <Bold className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleItalic().run();
+          }}
+          className={cn(
+            "flex h-7 w-7 items-center justify-center rounded transition",
+            editor.isActive("italic")
+              ? "bg-slate-200 text-slate-900"
+              : "text-slate-600 hover:bg-slate-100"
+          )}
+          aria-label="Italic"
+          title="Italic (Cmd+I)"
+        >
+          <Italic className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault();
+            editor.chain().focus().toggleUnderline().run();
+          }}
+          className={cn(
+            "flex h-7 w-7 items-center justify-center rounded transition",
+            editor.isActive("underline")
+              ? "bg-slate-200 text-slate-900"
+              : "text-slate-600 hover:bg-slate-100"
+          )}
+          aria-label="Underline"
+          title="Underline (Cmd+U)"
+        >
+          <UnderlineIcon className="h-4 w-4" />
+        </button>
+      </div>,
+      document.body
+    );
 
   return (
     <div className="relative w-full">

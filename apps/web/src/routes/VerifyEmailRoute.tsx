@@ -65,13 +65,12 @@ export default function VerifyEmailRoute() {
           </p>
         </div>
         <p className="text-sm text-slate-500">
-          Click the link in the email to verify your account. If you don't see the email, check your spam folder.
+          Click the link in the email to verify your account. If you don't see the email, check your
+          spam folder.
         </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
         {resent && (
-          <p className="text-sm text-emerald-600">
-            Verification email sent! Check your inbox.
-          </p>
+          <p className="text-sm text-emerald-600">Verification email sent! Check your inbox.</p>
         )}
         {email && (
           <button

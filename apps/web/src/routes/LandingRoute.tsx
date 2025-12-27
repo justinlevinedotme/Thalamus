@@ -19,8 +19,8 @@ export default function LandingRoute() {
               <span className="text-slate-500">Connect your thoughts.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">
-              Thalamus is a visual thinking tool for building knowledge graphs.
-              Create nodes, draw connections, and see your ideas take shape.
+              Thalamus is a visual thinking tool for building knowledge graphs. Create nodes, draw
+              connections, and see your ideas take shape.
             </p>
             <div className="mt-10 flex items-center justify-center gap-4">
               <Link
@@ -46,9 +46,7 @@ export default function LandingRoute() {
         {/* Features */}
         <section className="border-t border-slate-100 bg-slate-50 px-6 py-24">
           <div className="mx-auto max-w-6xl">
-            <h2 className="text-center text-3xl font-bold text-slate-900">
-              Think visually
-            </h2>
+            <h2 className="text-center text-3xl font-bold text-slate-900">Think visually</h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-slate-600">
               Everything you need to organize complex ideas and see the big picture.
             </p>
@@ -58,12 +56,10 @@ export default function LandingRoute() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100">
                   <Sparkles className="h-6 w-6 text-slate-700" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-slate-900">
-                  Intuitive Editing
-                </h3>
+                <h3 className="mt-4 text-lg font-semibold text-slate-900">Intuitive Editing</h3>
                 <p className="mt-2 text-sm text-slate-600">
-                  Double-click to edit nodes, drag to connect, and use keyboard
-                  shortcuts for a smooth workflow.
+                  Double-click to edit nodes, drag to connect, and use keyboard shortcuts for a
+                  smooth workflow.
                 </p>
               </div>
 
@@ -71,12 +67,10 @@ export default function LandingRoute() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100">
                   <Layout className="h-6 w-6 text-slate-700" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-slate-900">
-                  Auto Layout
-                </h3>
+                <h3 className="mt-4 text-lg font-semibold text-slate-900">Auto Layout</h3>
                 <p className="mt-2 text-sm text-slate-600">
-                  Automatically arrange your graph with multiple layout algorithms.
-                  Choose the direction and spacing that works best.
+                  Automatically arrange your graph with multiple layout algorithms. Choose the
+                  direction and spacing that works best.
                 </p>
               </div>
 
@@ -84,12 +78,10 @@ export default function LandingRoute() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100">
                   <Share2 className="h-6 w-6 text-slate-700" />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-slate-900">
-                  Share & Export
-                </h3>
+                <h3 className="mt-4 text-lg font-semibold text-slate-900">Share & Export</h3>
                 <p className="mt-2 text-sm text-slate-600">
-                  Generate shareable links, export as PNG, PDF, or JSON.
-                  Collaborate with your team or publish your work.
+                  Generate shareable links, export as PNG, PDF, or JSON. Collaborate with your team
+                  or publish your work.
                 </p>
               </div>
             </div>
@@ -99,9 +91,7 @@ export default function LandingRoute() {
         {/* CTA */}
         <section className="px-6 py-24">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold text-slate-900">
-              Ready to start mapping?
-            </h2>
+            <h2 className="text-3xl font-bold text-slate-900">Ready to start mapping?</h2>
             <p className="mt-4 text-slate-600">
               Create your first graph in seconds. No account required to try.
             </p>

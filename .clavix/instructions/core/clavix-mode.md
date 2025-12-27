@@ -9,6 +9,7 @@ Clavix has **two distinct modes** based on the command type:
 **Commands:** `/clavix:start`, `/clavix:summarize`, `/clavix:improve`, `/clavix:prd`
 
 **Your role:**
+
 - Ask questions about requirements
 - Create PRDs (Product Requirements Documents)
 - Generate optimized prompts
@@ -23,6 +24,7 @@ Clavix has **two distinct modes** based on the command type:
 **Commands:** `/clavix:implement`
 
 **Your role:**
+
 - Write code and implement features
 - Execute tasks from tasks.md
 - Complete implementation work
@@ -36,14 +38,14 @@ Clavix has **two distinct modes** based on the command type:
 
 **Know which mode you're in based on the command:**
 
-| Command | Mode | Implement? |
-|---------|------|------------|
-| `/clavix:start` | Planning | ✗ NO |
-| `/clavix:summarize` | Planning | ✗ NO |
-| `/clavix:improve` | Planning | ✗ NO |
-| `/clavix:prd` | Planning | ✗ NO |
-| `/clavix:plan` | Planning (Pre-Implementation) | ✗ NO |
-| `/clavix:implement` | Implementation | ✓ YES |
+| Command             | Mode                          | Implement? |
+| ------------------- | ----------------------------- | ---------- |
+| `/clavix:start`     | Planning                      | ✗ NO       |
+| `/clavix:summarize` | Planning                      | ✗ NO       |
+| `/clavix:improve`   | Planning                      | ✗ NO       |
+| `/clavix:prd`       | Planning                      | ✗ NO       |
+| `/clavix:plan`      | Planning (Pre-Implementation) | ✗ NO       |
+| `/clavix:implement` | Implementation                | ✓ YES      |
 
 ---
 
@@ -125,6 +127,7 @@ If you're not sure whether the user wants planning or implementation, **ASK:**
 **User:** "I want to build a todo app with authentication"
 
 **Wrong response:**
+
 ```typescript
 // Creating TodoApp component
 export function TodoApp() {
@@ -138,6 +141,7 @@ export function TodoApp() {
 **User:** "I want to build a todo app with authentication"
 
 **Right response:**
+
 > "Let me help you plan this todo app. A few clarifying questions:
 >
 > 1. What authentication method do you want? (OAuth, email/password, magic link?)
@@ -158,6 +162,7 @@ export function TodoApp() {
 **Your mode:** CLAVIX PLANNING MODE
 
 **Actions:**
+
 - Enter conversational mode
 - Ask clarifying questions
 - Track requirements
@@ -173,6 +178,7 @@ export function TodoApp() {
 **Your mode:** CLAVIX PLANNING MODE
 
 **Actions:**
+
 - Analyze conversation
 - Extract requirements
 - Create mini-PRD
@@ -189,6 +195,7 @@ export function TodoApp() {
 **Your mode:** CLAVIX IMPLEMENTATION MODE
 
 **Actions:**
+
 - Read tasks.md from `.clavix/outputs/{project}/`
 - Execute tasks systematically
 - Write actual implementation code
@@ -206,7 +213,9 @@ export function TodoApp() {
 **Your mode:** CLAVIX PLANNING MODE (clarify first)
 
 **Response:**
+
 > "Are you asking me to:
+>
 > 1. Discuss the requirements for real-time updates and add them to our planning? (I'll stay in planning mode)
 > 2. Implement real-time updates now? (You'd need to run `/clavix:implement` for that)
 >
@@ -221,9 +230,11 @@ export function TodoApp() {
 **Your mode:** Check context first
 
 **If no `/clavix:implement` command was run:**
+
 - Suggest: "To implement this, please run `/clavix:implement`. This ensures proper task tracking and file management."
 
 **If `/clavix:implement` command was run:**
+
 - You're already in CLAVIX IMPLEMENTATION MODE
 - Proceed with implementation
 

@@ -31,7 +31,9 @@ export default function ResetPasswordRoute() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "invalid">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "invalid">(
+    "idle"
+  );
   const [error, setError] = useState<string | null>(null);
 
   // Validate token on mount
@@ -96,9 +98,7 @@ export default function ResetPasswordRoute() {
         <Card className="relative w-full max-w-md border-slate-200/80 shadow-xl shadow-slate-200/50">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-2xl font-semibold tracking-tight">Invalid link</CardTitle>
-            <CardDescription>
-              This password reset link is invalid or has expired.
-            </CardDescription>
+            <CardDescription>This password reset link is invalid or has expired.</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
@@ -108,8 +108,8 @@ export default function ResetPasswordRoute() {
               </div>
             </div>
             <p className="text-center text-sm text-muted-foreground">
-              Password reset links expire after a short time for security reasons.
-              Please request a new link.
+              Password reset links expire after a short time for security reasons. Please request a
+              new link.
             </p>
           </CardContent>
 
@@ -183,10 +183,10 @@ export default function ResetPasswordRoute() {
             <ArrowLeft className="h-4 w-4" />
             Back to login
           </Link>
-          <CardTitle className="text-2xl font-semibold tracking-tight">Create new password</CardTitle>
-          <CardDescription>
-            Enter a new password for your account.
-          </CardDescription>
+          <CardTitle className="text-2xl font-semibold tracking-tight">
+            Create new password
+          </CardTitle>
+          <CardDescription>Enter a new password for your account.</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -230,11 +230,7 @@ export default function ResetPasswordRoute() {
                           passed ? "text-green-600" : "text-muted-foreground"
                         }`}
                       >
-                        {passed ? (
-                          <Check className="h-3 w-3" />
-                        ) : (
-                          <X className="h-3 w-3" />
-                        )}
+                        {passed ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
                         {req.label}
                       </div>
                     );
@@ -266,7 +262,11 @@ export default function ResetPasswordRoute() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
               {confirmPassword.length > 0 && !passwordsMatch && (
@@ -300,7 +300,10 @@ export default function ResetPasswordRoute() {
         <CardFooter className="flex justify-center border-t border-slate-100 pt-6">
           <p className="text-sm text-muted-foreground">
             Remember your password?{" "}
-            <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+            <Link
+              to="/login"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
               Sign in
             </Link>
           </p>

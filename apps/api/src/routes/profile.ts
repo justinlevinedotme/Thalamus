@@ -15,7 +15,11 @@ profile.get("/", async (c) => {
 
   try {
     // Try to get profile, but handle case where profiles table may not exist yet
-    let profileData: { plan?: string | null; maxGraphs?: number | null; retentionDays?: number | null } = {};
+    let profileData: {
+      plan?: string | null;
+      maxGraphs?: number | null;
+      retentionDays?: number | null;
+    } = {};
     try {
       const profiles = await db
         .select({

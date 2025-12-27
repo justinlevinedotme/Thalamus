@@ -27,11 +27,7 @@ const slugify = (value: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-export function exportGraphJson(
-  title: string,
-  nodes: Node[],
-  edges: Edge<RelationshipData>[]
-) {
+export function exportGraphJson(title: string, nodes: Node[], edges: Edge<RelationshipData>[]) {
   const payload: GraphExport = {
     title,
     exportedAt: new Date().toISOString(),

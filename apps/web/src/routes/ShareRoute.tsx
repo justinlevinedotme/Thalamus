@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import ReactFlow, {
-  Background,
-  Controls,
-  type ReactFlowInstance,
-} from "reactflow";
+import ReactFlow, { Background, Controls, type ReactFlowInstance } from "reactflow";
 import "reactflow/dist/style.css";
 
 import { getSharedGraph } from "../features/share/shareApi";
@@ -16,9 +12,7 @@ export default function ShareRoute() {
   const [error, setError] = useState<string | null>(null);
   const [graphTitle, setGraphTitle] = useState<string>("Shared graph");
   const [payload, setPayload] = useState<GraphPayload | null>(null);
-  const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(
-    null
-  );
+  const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(null);
 
   useEffect(() => {
     if (!token) {

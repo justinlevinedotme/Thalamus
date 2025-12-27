@@ -49,7 +49,13 @@ const nodeShapes: Array<{ value: NodeShape; label: string; icon: ReactNode }> = 
     value: "rounded",
     label: "Rounded",
     icon: (
-      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
         <rect x="2" y="4" width="12" height="8" rx="2" />
       </svg>
     ),
@@ -58,7 +64,13 @@ const nodeShapes: Array<{ value: NodeShape; label: string; icon: ReactNode }> = 
     value: "pill",
     label: "Pill",
     icon: (
-      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
         <rect x="2" y="4" width="12" height="8" rx="4" />
       </svg>
     ),
@@ -67,7 +79,13 @@ const nodeShapes: Array<{ value: NodeShape; label: string; icon: ReactNode }> = 
     value: "circle",
     label: "Circle",
     icon: (
-      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
         <circle cx="8" cy="8" r="5" />
       </svg>
     ),
@@ -76,7 +94,13 @@ const nodeShapes: Array<{ value: NodeShape; label: string; icon: ReactNode }> = 
     value: "square",
     label: "Square",
     icon: (
-      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
         <rect x="3" y="4" width="10" height="8" />
       </svg>
     ),
@@ -94,7 +118,13 @@ const borderStyles: Array<{ value: NodeBorderStyle; label: string; icon: ReactNo
     value: "solid",
     label: "Solid",
     icon: (
-      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
         <line x1="2" y1="8" x2="14" y2="8" />
       </svg>
     ),
@@ -103,7 +133,14 @@ const borderStyles: Array<{ value: NodeBorderStyle; label: string; icon: ReactNo
     value: "dashed",
     label: "Dashed",
     icon: (
-      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="3 2">
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeDasharray="3 2"
+      >
         <line x1="2" y1="8" x2="14" y2="8" />
       </svg>
     ),
@@ -112,7 +149,15 @@ const borderStyles: Array<{ value: NodeBorderStyle; label: string; icon: ReactNo
     value: "dotted",
     label: "Dotted",
     icon: (
-      <svg className="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="1 2" strokeLinecap="round">
+      <svg
+        className="h-4 w-4"
+        viewBox="0 0 16 16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeDasharray="1 2"
+        strokeLinecap="round"
+      >
         <line x1="2" y1="8" x2="14" y2="8" />
       </svg>
     ),
@@ -128,18 +173,10 @@ const borderWidths: Array<{ value: number; label: string }> = [
 ];
 
 export default function NodeStyleInspector() {
-  const {
-    nodes,
-    updateNodeStyle,
-    updateNodeHandles,
-    updateSelectedNodesStyle,
-  } = useGraphStore();
+  const { nodes, updateNodeStyle, updateNodeHandles, updateSelectedNodesStyle } = useGraphStore();
 
   // Get all selected nodes from React Flow's selection state
-  const selectedNodes = useMemo(
-    () => nodes.filter((node) => node.selected),
-    [nodes]
-  );
+  const selectedNodes = useMemo(() => nodes.filter((node) => node.selected), [nodes]);
 
   const isMultiSelect = selectedNodes.length > 1;
   const selectedNode = selectedNodes.length === 1 ? selectedNodes[0] : null;
@@ -147,11 +184,16 @@ export default function NodeStyleInspector() {
   // Check if we're dealing with text nodes (headings)
   const isTextNode = selectedNode?.data?.kind === "text";
   const isShapeNode = selectedNode?.data?.kind === "shape";
-  const isKeyNode = selectedNode?.data?.kind === "pathKey" || selectedNode?.data?.kind === "nodeKey";
+  const isKeyNode =
+    selectedNode?.data?.kind === "pathKey" || selectedNode?.data?.kind === "nodeKey";
   // For multi-select, check if all selected are text/shape/key nodes
-  const allTextNodes = selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "text");
-  const allShapeNodes = selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "shape");
-  const allKeyNodes = selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "pathKey" || n.data?.kind === "nodeKey");
+  const allTextNodes =
+    selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "text");
+  const allShapeNodes =
+    selectedNodes.length > 0 && selectedNodes.every((n) => n.data?.kind === "shape");
+  const allKeyNodes =
+    selectedNodes.length > 0 &&
+    selectedNodes.every((n) => n.data?.kind === "pathKey" || n.data?.kind === "nodeKey");
 
   // For multi-selection, compute common values
   const commonStyles = useMemo(() => {
@@ -197,18 +239,36 @@ export default function NodeStyleInspector() {
   const currentColor = isMultiSelect ? commonStyles?.color : selectedNode?.data?.style?.color;
   const currentShape = isMultiSelect ? commonStyles?.shape : selectedNode?.data?.style?.shape;
   const currentSize = isMultiSelect ? commonStyles?.size : selectedNode?.data?.style?.size;
-  const currentEdgePadding = isMultiSelect ? commonStyles?.edgePadding : selectedNode?.data?.style?.edgePadding;
-  const currentTextColor = isMultiSelect ? commonStyles?.textColor : selectedNode?.data?.style?.textColor;
-  const currentBodyTextColor = isMultiSelect ? commonStyles?.bodyTextColor : selectedNode?.data?.style?.bodyTextColor;
-  const currentIconColor = isMultiSelect ? commonStyles?.iconColor : selectedNode?.data?.style?.iconColor;
-  const currentSeparatorColor = isMultiSelect ? commonStyles?.separatorColor : selectedNode?.data?.style?.separatorColor;
-  const currentBorderColor = isMultiSelect ? commonStyles?.borderColor : selectedNode?.data?.style?.borderColor;
-  const currentBorderWidth = isMultiSelect ? commonStyles?.borderWidth : selectedNode?.data?.style?.borderWidth;
-  const currentBorderStyle = isMultiSelect ? commonStyles?.borderStyle : selectedNode?.data?.style?.borderStyle;
+  const currentEdgePadding = isMultiSelect
+    ? commonStyles?.edgePadding
+    : selectedNode?.data?.style?.edgePadding;
+  const currentTextColor = isMultiSelect
+    ? commonStyles?.textColor
+    : selectedNode?.data?.style?.textColor;
+  const currentBodyTextColor = isMultiSelect
+    ? commonStyles?.bodyTextColor
+    : selectedNode?.data?.style?.bodyTextColor;
+  const currentIconColor = isMultiSelect
+    ? commonStyles?.iconColor
+    : selectedNode?.data?.style?.iconColor;
+  const currentSeparatorColor = isMultiSelect
+    ? commonStyles?.separatorColor
+    : selectedNode?.data?.style?.separatorColor;
+  const currentBorderColor = isMultiSelect
+    ? commonStyles?.borderColor
+    : selectedNode?.data?.style?.borderColor;
+  const currentBorderWidth = isMultiSelect
+    ? commonStyles?.borderWidth
+    : selectedNode?.data?.style?.borderWidth;
+  const currentBorderStyle = isMultiSelect
+    ? commonStyles?.borderStyle
+    : selectedNode?.data?.style?.borderStyle;
 
   // For icon, we need to parse the JSON back
   const currentIcon = isMultiSelect
-    ? (commonStyles?.icon ? JSON.parse(commonStyles.icon) : undefined)
+    ? commonStyles?.icon
+      ? JSON.parse(commonStyles.icon)
+      : undefined
     : selectedNode?.data?.style?.icon;
 
   // Determine header text
@@ -228,9 +288,7 @@ export default function NodeStyleInspector() {
   return (
     <TooltipProvider delayDuration={300}>
       <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-        <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">
-          {getHeaderText()}
-        </h2>
+        <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">{getHeaderText()}</h2>
 
         {/* Handles - only show for single selection of regular nodes */}
         {showHandles && (
@@ -316,10 +374,7 @@ export default function NodeStyleInspector() {
             <div className="flex items-center justify-between gap-4">
               <label className="text-xs font-semibold uppercase text-slate-500">Icon</label>
               <div className="flex items-center gap-1">
-                <IconPicker
-                  value={currentIcon}
-                  onChange={(icon) => handleStyleUpdate({ icon })}
-                >
+                <IconPicker value={currentIcon} onChange={(icon) => handleStyleUpdate({ icon })}>
                   <button
                     type="button"
                     className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
@@ -342,10 +397,7 @@ export default function NodeStyleInspector() {
                       className="flex h-7 w-7 cursor-pointer items-center justify-center"
                       title="Icon color"
                     >
-                      <ColorSwatch
-                        color={currentIconColor ?? "#1e293b"}
-                        className="h-5 w-5"
-                      />
+                      <ColorSwatch color={currentIconColor ?? "#1e293b"} className="h-5 w-5" />
                     </button>
                   </ColorPicker>
                 )}
@@ -372,7 +424,7 @@ export default function NodeStyleInspector() {
         )}
 
         {/* Text node simplified controls - just color, size, icon */}
-        {(isTextNode || allTextNodes) ? (
+        {isTextNode || allTextNodes ? (
           <div className="space-y-3 px-3 py-3 border-t border-slate-200">
             <div className="flex items-center justify-between gap-4">
               <label className="text-xs text-slate-500">Color</label>
@@ -388,7 +440,10 @@ export default function NodeStyleInspector() {
                   {currentTextColor ? (
                     <ColorSwatch color={currentTextColor} className="h-5 w-5" />
                   ) : (
-                    <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                    <div
+                      className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                      title="Mixed"
+                    />
                   )}
                 </button>
               </ColorPicker>
@@ -428,10 +483,7 @@ export default function NodeStyleInspector() {
             <div className="flex items-center justify-between gap-4">
               <label className="text-xs text-slate-500">Icon</label>
               <div className="flex items-center gap-1">
-                <IconPicker
-                  value={currentIcon}
-                  onChange={(icon) => handleStyleUpdate({ icon })}
-                >
+                <IconPicker value={currentIcon} onChange={(icon) => handleStyleUpdate({ icon })}>
                   <button
                     type="button"
                     className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
@@ -454,10 +506,7 @@ export default function NodeStyleInspector() {
                       className="flex h-7 w-7 cursor-pointer items-center justify-center"
                       title="Icon color"
                     >
-                      <ColorSwatch
-                        color={currentIconColor ?? "#1e293b"}
-                        className="h-5 w-5"
-                      />
+                      <ColorSwatch color={currentIconColor ?? "#1e293b"} className="h-5 w-5" />
                     </button>
                   </ColorPicker>
                 )}
@@ -474,7 +523,7 @@ export default function NodeStyleInspector() {
               </div>
             </div>
           </div>
-        ) : (isKeyNode || allKeyNodes) ? (
+        ) : isKeyNode || allKeyNodes ? (
           /* Key node controls - background, border, title color, body color, separator/icon color, icon */
           <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
             <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">
@@ -497,7 +546,10 @@ export default function NodeStyleInspector() {
                         {currentColor ? (
                           <ColorSwatch color={currentColor} className="h-5 w-5" />
                         ) : (
-                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          <div
+                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            title="Mixed"
+                          />
                         )}
                       </button>
                     </ColorPicker>
@@ -526,7 +578,10 @@ export default function NodeStyleInspector() {
                         {currentBorderColor ? (
                           <ColorSwatch color={currentBorderColor} className="h-5 w-5" />
                         ) : (
-                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          <div
+                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            title="Mixed"
+                          />
                         )}
                       </button>
                     </ColorPicker>
@@ -617,7 +672,10 @@ export default function NodeStyleInspector() {
                         {currentTextColor ? (
                           <ColorSwatch color={currentTextColor} className="h-5 w-5" />
                         ) : (
-                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          <div
+                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            title="Mixed"
+                          />
                         )}
                       </button>
                     </ColorPicker>
@@ -637,7 +695,10 @@ export default function NodeStyleInspector() {
                         {currentBodyTextColor ? (
                           <ColorSwatch color={currentBodyTextColor} className="h-5 w-5" />
                         ) : (
-                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          <div
+                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            title="Mixed"
+                          />
                         )}
                       </button>
                     </ColorPicker>
@@ -657,7 +718,10 @@ export default function NodeStyleInspector() {
                         {currentSeparatorColor ? (
                           <ColorSwatch color={currentSeparatorColor} className="h-5 w-5" />
                         ) : (
-                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          <div
+                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            title="Mixed"
+                          />
                         )}
                       </button>
                     </ColorPicker>
@@ -703,7 +767,9 @@ export default function NodeStyleInspector() {
                         <button
                           className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
                           type="button"
-                          onClick={() => handleStyleUpdate({ icon: undefined, iconColor: undefined })}
+                          onClick={() =>
+                            handleStyleUpdate({ icon: undefined, iconColor: undefined })
+                          }
                           aria-label="Clear icon"
                         >
                           ×
@@ -738,7 +804,10 @@ export default function NodeStyleInspector() {
                         {currentColor ? (
                           <ColorSwatch color={currentColor} className="h-5 w-5" />
                         ) : (
-                          <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                          <div
+                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            title="Mixed"
+                          />
                         )}
                       </button>
                     </ColorPicker>
@@ -865,7 +934,10 @@ export default function NodeStyleInspector() {
                           {currentTextColor ? (
                             <ColorSwatch color={currentTextColor} className="h-5 w-5" />
                           ) : (
-                            <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                            <div
+                              className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                              title="Mixed"
+                            />
                           )}
                         </button>
                       </ColorPicker>
@@ -883,9 +955,15 @@ export default function NodeStyleInspector() {
                           title="Body text color"
                         >
                           {currentBodyTextColor || currentTextColor ? (
-                            <ColorSwatch color={currentBodyTextColor ?? currentTextColor ?? "#475569"} className="h-5 w-5" />
+                            <ColorSwatch
+                              color={currentBodyTextColor ?? currentTextColor ?? "#475569"}
+                              className="h-5 w-5"
+                            />
                           ) : (
-                            <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                            <div
+                              className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                              title="Mixed"
+                            />
                           )}
                         </button>
                       </ColorPicker>
@@ -906,7 +984,10 @@ export default function NodeStyleInspector() {
                     <div className="flex items-center justify-between gap-4">
                       <label className="text-xs text-slate-500">Color</label>
                       <ColorPicker
-                        value={currentBorderColor ?? (isShapeNode || allShapeNodes ? "#3B82F6" : "#e2e8f0")}
+                        value={
+                          currentBorderColor ??
+                          (isShapeNode || allShapeNodes ? "#3B82F6" : "#e2e8f0")
+                        }
                         onChange={(color) => handleStyleUpdate({ borderColor: color })}
                       >
                         <button
@@ -917,7 +998,10 @@ export default function NodeStyleInspector() {
                           {currentBorderColor ? (
                             <ColorSwatch color={currentBorderColor} className="h-5 w-5" />
                           ) : (
-                            <div className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200" title="Mixed" />
+                            <div
+                              className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                              title="Mixed"
+                            />
                           )}
                         </button>
                       </ColorPicker>

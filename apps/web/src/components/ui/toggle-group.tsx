@@ -51,9 +51,10 @@ const ToggleGroupItem = React.forwardRef<
 >(({ className, variant, size, value, ...props }, ref) => {
   const context = React.useContext(ToggleGroupContext);
 
-  const isSelected = context.type === "multiple"
-    ? Array.isArray(context.value) && context.value.includes(value)
-    : context.value === value;
+  const isSelected =
+    context.type === "multiple"
+      ? Array.isArray(context.value) && context.value.includes(value)
+      : context.value === value;
 
   return (
     <ToggleGroupPrimitive.Item

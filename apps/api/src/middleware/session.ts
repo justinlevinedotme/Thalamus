@@ -1,11 +1,16 @@
 import { Context, Next } from "hono";
 import { auth, Session } from "../lib/auth";
 
+// Type for the user returned from getSession (may not have twoFactorEnabled)
+type SessionUser = Omit<Session["user"], "twoFactorEnabled"> & {
+  twoFactorEnabled?: boolean | null;
+};
+
 // Extend Hono context with session
 declare module "hono" {
   interface ContextVariableMap {
     session: Session["session"];
-    user: Session["user"];
+    user: SessionUser;
   }
 }
 
@@ -19,7 +24,7 @@ export async function sessionMiddleware(c: Context, next: Next) {
   }
 
   c.set("session", session.session);
-  c.set("user", session.user);
+  c.set("user", session.user as SessionUser);
 
   await next();
 }
@@ -31,7 +36,7 @@ export async function optionalSessionMiddleware(c: Context, next: Next) {
 
   if (session) {
     c.set("session", session.session);
-    c.set("user", session.user);
+    c.set("user", session.user as SessionUser);
   }
 
   await next();

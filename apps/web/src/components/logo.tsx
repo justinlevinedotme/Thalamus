@@ -38,11 +38,7 @@ interface LogoBrandDownloadProps {
   className?: string;
 }
 
-const LogoBrandDownload = ({
-  children,
-  files,
-  className,
-}: LogoBrandDownloadProps) => {
+const LogoBrandDownload = ({ children, files, className }: LogoBrandDownloadProps) => {
   const handleDownload = async (file: LogoBrandDownloadProps["files"][0]) => {
     try {
       const response = await fetch(file.path);
@@ -85,11 +81,7 @@ const LogoBrandDownload = ({
 
 const Logo = ({ url, className, children, ...props }: LogoProps) => {
   return (
-    <a
-      href={url}
-      className={cn("flex max-h-8 items-center gap-2", className)}
-      {...props}
-    >
+    <a href={url} className={cn("flex max-h-8 items-center gap-2", className)} {...props}>
       {children}
     </a>
   );
@@ -100,55 +92,28 @@ const LogoImage = ({ src, alt, className, ...props }: LogoImageProps) => (
 );
 
 const LogoImageMobile = ({ src, alt, className, ...props }: LogoImageProps) => (
-  <img
-    src={src}
-    alt={alt}
-    className={cn("flex h-8 md:hidden", className)}
-    {...props}
-  />
+  <img src={src} alt={alt} className={cn("flex h-8 md:hidden", className)} {...props} />
 );
 
-const LogoImageDesktop = ({
-  src,
-  alt,
-  className,
-  ...props
-}: LogoImageProps) => (
-  <img
-    src={src}
-    alt={alt}
-    className={cn("hidden h-8 md:flex", className)}
-    {...props}
-  />
+const LogoImageDesktop = ({ src, alt, className, ...props }: LogoImageProps) => (
+  <img src={src} alt={alt} className={cn("hidden h-8 md:flex", className)} {...props} />
 );
 
 const LogoText = ({ children, className, ...props }: LogoTextProps) => (
-  <span
-    className={cn("text-lg font-semibold tracking-tighter", className)}
-    {...props}
-  >
+  <span className={cn("text-lg font-semibold tracking-tighter", className)} {...props}>
     {children}
   </span>
 );
 
 const LogoTextMobile = ({ children, className, ...props }: LogoTextProps) => (
-  <span
-    className={cn(
-      "text-lg font-semibold tracking-tighter md:hidden",
-      className,
-    )}
-    {...props}
-  >
+  <span className={cn("text-lg font-semibold tracking-tighter md:hidden", className)} {...props}>
     {children}
   </span>
 );
 
 const LogoTextDesktop = ({ children, className, ...props }: LogoTextProps) => (
   <span
-    className={cn(
-      "hidden text-lg font-semibold tracking-tighter md:flex",
-      className,
-    )}
+    className={cn("hidden text-lg font-semibold tracking-tighter md:flex", className)}
     {...props}
   >
     {children}

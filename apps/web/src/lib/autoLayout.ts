@@ -37,7 +37,8 @@ export async function getLayoutedElements<T extends NodeDataWithHandles, E>(
   }
 
   const elkOptions: Record<string, string> = {
-    "elk.algorithm": options.algorithm === "layered" ? "layered" : `org.eclipse.elk.${options.algorithm}`,
+    "elk.algorithm":
+      options.algorithm === "layered" ? "layered" : `org.eclipse.elk.${options.algorithm}`,
     "elk.spacing.nodeNode": String(options.nodeSpacing),
     "elk.direction": options.direction,
   };
@@ -106,10 +107,10 @@ export async function getLayoutedElements<T extends NodeDataWithHandles, E>(
       const targetNode = nodes.find((n) => n.id === edge.target);
 
       // Use specific handle IDs if edge has them, otherwise use first available
-      const sourceHandleId = edge.sourceHandle ??
-        sourceNode?.data?.sourceHandles?.[0]?.id ?? "source";
-      const targetHandleId = edge.targetHandle ??
-        targetNode?.data?.targetHandles?.[0]?.id ?? "target";
+      const sourceHandleId =
+        edge.sourceHandle ?? sourceNode?.data?.sourceHandles?.[0]?.id ?? "source";
+      const targetHandleId =
+        edge.targetHandle ?? targetNode?.data?.targetHandles?.[0]?.id ?? "target";
 
       return {
         id: edge.id,

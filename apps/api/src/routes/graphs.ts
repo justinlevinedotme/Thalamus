@@ -79,10 +79,7 @@ graphs.post("/", async (c) => {
   const maxGraphs = profileResult.length > 0 ? (profileResult[0].maxGraphs ?? 20) : 20;
 
   if (currentCount >= maxGraphs) {
-    return c.json(
-      { error: `Graph limit reached (${maxGraphs} graphs maximum)` },
-      403
-    );
+    return c.json({ error: `Graph limit reached (${maxGraphs} graphs maximum)` }, 403);
   }
 
   const now = new Date();

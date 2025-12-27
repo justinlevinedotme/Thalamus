@@ -31,27 +31,24 @@ export const AccountDeletion = ({
       <Text style={paragraph}>Hi{userName ? ` ${userName}` : ""},</Text>
 
       <Text style={paragraph}>
-        We received a request to permanently delete your Thalamus account. This
-        action cannot be undone.
+        We received a request to permanently delete your Thalamus account. This action cannot be
+        undone.
       </Text>
 
       <Section style={dangerBox}>
         <Text style={dangerText}>
-          <strong>Warning:</strong> Deleting your account will permanently
-          remove:
+          <strong>Warning:</strong> Deleting your account will permanently remove:
         </Text>
         <Text style={{ ...dangerText, marginTop: "8px" }}>
           - All your graphs and data
           <br />
           - All shared links and collaborations
-          <br />
-          - Your profile and settings
+          <br />- Your profile and settings
         </Text>
       </Section>
 
       <Text style={paragraph}>
-        If you're sure you want to delete your account, click the button below
-        to confirm:
+        If you're sure you want to delete your account, click the button below to confirm:
       </Text>
 
       <Section style={buttonContainer}>
@@ -61,8 +58,8 @@ export const AccountDeletion = ({
       </Section>
 
       <Text style={mutedText}>
-        This confirmation link will expire in {expiresIn}. After that, you'll
-        need to request deletion again.
+        This confirmation link will expire in {expiresIn}. After that, you'll need to request
+        deletion again.
       </Text>
 
       <Section
@@ -91,10 +88,9 @@ export const AccountDeletion = ({
       <Hr style={{ borderTop: "1px solid #e2e8f0", margin: "24px 0" }} />
 
       <Text style={mutedText}>
-        <strong>Didn't request this?</strong> If you didn't request to delete
-        your account, please ignore this email. Your account will remain safe.
-        Consider changing your password if you're concerned about unauthorized
-        access.
+        <strong>Didn't request this?</strong> If you didn't request to delete your account, please
+        ignore this email. Your account will remain safe. Consider changing your password if you're
+        concerned about unauthorized access.
       </Text>
     </Layout>
   );

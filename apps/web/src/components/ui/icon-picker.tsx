@@ -22,46 +22,226 @@ type EmojiData = {
 
 // Popular/common Lucide icons for quick access
 const popularLucideIcons = [
-  "Star", "Heart", "Check", "X", "Plus", "Minus",
-  "Home", "User", "Settings", "Search", "Mail", "Phone",
-  "Calendar", "Clock", "Bell", "Bookmark", "Flag", "Tag",
-  "Folder", "File", "FileText", "Image", "Video", "Music",
-  "Link", "ExternalLink", "Download", "Upload", "Share", "Send",
-  "Edit", "Trash", "Copy", "Clipboard", "Save", "Undo",
-  "Eye", "EyeOff", "Lock", "Unlock", "Key", "Shield",
-  "Zap", "Flame", "Sun", "Moon", "Cloud", "Droplet",
-  "Map", "MapPin", "Navigation", "Compass", "Globe", "Building",
-  "Car", "Plane", "Ship", "Bike", "Train", "Bus",
-  "Gift", "Award", "Trophy", "Medal", "Crown", "Diamond",
-  "Lightbulb", "Target", "Crosshair", "Focus", "Layers", "Grid",
-  "BarChart", "PieChart", "TrendingUp", "Activity", "Gauge", "Signal",
-  "Wifi", "Bluetooth", "Battery", "Power", "Cpu", "HardDrive",
-  "Code", "Terminal", "Database", "Server", "GitBranch", "Github",
-  "MessageCircle", "MessageSquare", "AtSign", "Hash", "Smile", "Frown",
-  "ThumbsUp", "ThumbsDown", "AlertCircle", "AlertTriangle", "Info", "HelpCircle",
-  "CheckCircle", "XCircle", "PlayCircle", "PauseCircle", "StopCircle", "SkipForward",
-  "Volume", "VolumeX", "Mic", "MicOff", "Camera", "CameraOff",
-  "Maximize", "Minimize", "Move", "RotateCw", "RefreshCw", "Repeat",
+  "Star",
+  "Heart",
+  "Check",
+  "X",
+  "Plus",
+  "Minus",
+  "Home",
+  "User",
+  "Settings",
+  "Search",
+  "Mail",
+  "Phone",
+  "Calendar",
+  "Clock",
+  "Bell",
+  "Bookmark",
+  "Flag",
+  "Tag",
+  "Folder",
+  "File",
+  "FileText",
+  "Image",
+  "Video",
+  "Music",
+  "Link",
+  "ExternalLink",
+  "Download",
+  "Upload",
+  "Share",
+  "Send",
+  "Edit",
+  "Trash",
+  "Copy",
+  "Clipboard",
+  "Save",
+  "Undo",
+  "Eye",
+  "EyeOff",
+  "Lock",
+  "Unlock",
+  "Key",
+  "Shield",
+  "Zap",
+  "Flame",
+  "Sun",
+  "Moon",
+  "Cloud",
+  "Droplet",
+  "Map",
+  "MapPin",
+  "Navigation",
+  "Compass",
+  "Globe",
+  "Building",
+  "Car",
+  "Plane",
+  "Ship",
+  "Bike",
+  "Train",
+  "Bus",
+  "Gift",
+  "Award",
+  "Trophy",
+  "Medal",
+  "Crown",
+  "Diamond",
+  "Lightbulb",
+  "Target",
+  "Crosshair",
+  "Focus",
+  "Layers",
+  "Grid",
+  "BarChart",
+  "PieChart",
+  "TrendingUp",
+  "Activity",
+  "Gauge",
+  "Signal",
+  "Wifi",
+  "Bluetooth",
+  "Battery",
+  "Power",
+  "Cpu",
+  "HardDrive",
+  "Code",
+  "Terminal",
+  "Database",
+  "Server",
+  "GitBranch",
+  "Github",
+  "MessageCircle",
+  "MessageSquare",
+  "AtSign",
+  "Hash",
+  "Smile",
+  "Frown",
+  "ThumbsUp",
+  "ThumbsDown",
+  "AlertCircle",
+  "AlertTriangle",
+  "Info",
+  "HelpCircle",
+  "CheckCircle",
+  "XCircle",
+  "PlayCircle",
+  "PauseCircle",
+  "StopCircle",
+  "SkipForward",
+  "Volume",
+  "VolumeX",
+  "Mic",
+  "MicOff",
+  "Camera",
+  "CameraOff",
+  "Maximize",
+  "Minimize",
+  "Move",
+  "RotateCw",
+  "RefreshCw",
+  "Repeat",
 ] as const;
 
 // Popular Simple Icons (brand icons)
 const popularSimpleIcons = [
-  "SiGithub", "SiGoogle", "SiApple", "SiMicrosoft", "SiAmazon", "SiFacebook",
-  "SiX", "SiInstagram", "SiLinkedin", "SiYoutube", "SiTiktok", "SiDiscord",
-  "SiSlack", "SiNotion", "SiFigma", "SiSketch", "SiAdobecreativecloud", "SiCanva",
-  "SiReact", "SiVuedotjs", "SiAngular", "SiSvelte", "SiNextdotjs", "SiNuxtdotjs",
-  "SiTypescript", "SiJavascript", "SiPython", "SiRust", "SiGo", "SiSwift",
-  "SiNodedotjs", "SiDeno", "SiBun", "SiDocker", "SiKubernetes", "SiVercel",
-  "SiNetlify", "SiAws", "SiGooglecloud", "SiCloudflare", "SiFirebase", "SiSupabase",
-  "SiMongodb", "SiPostgresql", "SiRedis", "SiElasticsearch", "SiGraphql", "SiPrisma",
-  "SiTailwindcss", "SiBootstrap", "SiSass", "SiPostcss", "SiVite", "SiWebpack",
-  "SiGit", "SiGitlab", "SiBitbucket", "SiJira", "SiConfluence", "SiTrello",
-  "SiSpotify", "SiNetflix", "SiTwitch", "SiSteam", "SiPlaystation", "SiXbox",
-  "SiNintendo", "SiUnity", "SiUnrealengine", "SiBlender", "SiAutodesk", "SiAdobe",
-  "SiOpenai", "SiAnthropic", "SiHuggingface", "SiTensorflow", "SiPytorch", "SiOpencv",
-  "SiStripe", "SiPaypal", "SiShopify", "SiSquare", "SiVisa", "SiMastercard",
-  "SiUber", "SiLyft", "SiAirbnb", "SiBookingdotcom", "SiTripadvisor", "SiYelp",
-  "SiReddit", "SiPinterest", "SiSnapchat", "SiWhatsapp", "SiTelegram", "SiSignal",
+  "SiGithub",
+  "SiGoogle",
+  "SiApple",
+  "SiMicrosoft",
+  "SiAmazon",
+  "SiFacebook",
+  "SiX",
+  "SiInstagram",
+  "SiLinkedin",
+  "SiYoutube",
+  "SiTiktok",
+  "SiDiscord",
+  "SiSlack",
+  "SiNotion",
+  "SiFigma",
+  "SiSketch",
+  "SiAdobecreativecloud",
+  "SiCanva",
+  "SiReact",
+  "SiVuedotjs",
+  "SiAngular",
+  "SiSvelte",
+  "SiNextdotjs",
+  "SiNuxtdotjs",
+  "SiTypescript",
+  "SiJavascript",
+  "SiPython",
+  "SiRust",
+  "SiGo",
+  "SiSwift",
+  "SiNodedotjs",
+  "SiDeno",
+  "SiBun",
+  "SiDocker",
+  "SiKubernetes",
+  "SiVercel",
+  "SiNetlify",
+  "SiAws",
+  "SiGooglecloud",
+  "SiCloudflare",
+  "SiFirebase",
+  "SiSupabase",
+  "SiMongodb",
+  "SiPostgresql",
+  "SiRedis",
+  "SiElasticsearch",
+  "SiGraphql",
+  "SiPrisma",
+  "SiTailwindcss",
+  "SiBootstrap",
+  "SiSass",
+  "SiPostcss",
+  "SiVite",
+  "SiWebpack",
+  "SiGit",
+  "SiGitlab",
+  "SiBitbucket",
+  "SiJira",
+  "SiConfluence",
+  "SiTrello",
+  "SiSpotify",
+  "SiNetflix",
+  "SiTwitch",
+  "SiSteam",
+  "SiPlaystation",
+  "SiXbox",
+  "SiNintendo",
+  "SiUnity",
+  "SiUnrealengine",
+  "SiBlender",
+  "SiAutodesk",
+  "SiAdobe",
+  "SiOpenai",
+  "SiAnthropic",
+  "SiHuggingface",
+  "SiTensorflow",
+  "SiPytorch",
+  "SiOpencv",
+  "SiStripe",
+  "SiPaypal",
+  "SiShopify",
+  "SiSquare",
+  "SiVisa",
+  "SiMastercard",
+  "SiUber",
+  "SiLyft",
+  "SiAirbnb",
+  "SiBookingdotcom",
+  "SiTripadvisor",
+  "SiYelp",
+  "SiReddit",
+  "SiPinterest",
+  "SiSnapchat",
+  "SiWhatsapp",
+  "SiTelegram",
+  "SiSignal",
 ] as const;
 
 // Get the Lucide icon component by name
@@ -71,8 +251,13 @@ function getLucideIconComponent(name: string): LucideIcon | null {
 }
 
 // Get the Simple Icon component by name
-function getSimpleIconComponent(name: string): React.ComponentType<{ size?: number; color?: string }> | null {
-  const icons = SimpleIcons as unknown as Record<string, React.ComponentType<{ size?: number; color?: string }>>;
+function getSimpleIconComponent(
+  name: string
+): React.ComponentType<{ size?: number; color?: string }> | null {
+  const icons = SimpleIcons as unknown as Record<
+    string,
+    React.ComponentType<{ size?: number; color?: string }>
+  >;
   return icons[name] || null;
 }
 
@@ -94,10 +279,7 @@ function getAllLucideIconNames(): string[] {
 function getAllSimpleIconNames(): string[] {
   const icons = SimpleIcons as unknown as Record<string, unknown>;
   return Object.keys(icons).filter(
-    (key) =>
-      typeof icons[key] === "object" &&
-      key.startsWith("Si") &&
-      key !== "SiDefault"
+    (key) => typeof icons[key] === "object" && key.startsWith("Si") && key !== "SiDefault"
   );
 }
 
@@ -114,9 +296,7 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
       return popularLucideIcons as unknown as string[];
     }
     const query = lucideSearch.toLowerCase();
-    return allLucideIcons
-      .filter((name) => name.toLowerCase().includes(query))
-      .slice(0, 60);
+    return allLucideIcons.filter((name) => name.toLowerCase().includes(query)).slice(0, 60);
   }, [lucideSearch, allLucideIcons]);
 
   const filteredSimpleIcons = useMemo(() => {
@@ -124,9 +304,7 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
       return popularSimpleIcons as unknown as string[];
     }
     const query = simpleSearch.toLowerCase();
-    return allSimpleIcons
-      .filter((name) => name.toLowerCase().includes(query))
-      .slice(0, 60);
+    return allSimpleIcons.filter((name) => name.toLowerCase().includes(query)).slice(0, 60);
   }, [simpleSearch, allSimpleIcons]);
 
   const handleEmojiSelect = (emoji: EmojiData) => {
@@ -147,11 +325,7 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent
-        className="w-[352px] p-0"
-        side="right"
-        align="start"
-      >
+      <PopoverContent className="w-[352px] p-0" side="right" align="start">
         <Tabs defaultValue="emoji" className="w-full">
           <TabsList className="w-full rounded-none border-b bg-transparent p-0">
             <TabsTrigger
@@ -212,9 +386,7 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
               })}
             </div>
             {filteredLucideIcons.length === 0 && (
-              <div className="py-8 text-center text-sm text-slate-500">
-                No icons found
-              </div>
+              <div className="py-8 text-center text-sm text-slate-500">No icons found</div>
             )}
           </TabsContent>
 
@@ -244,9 +416,7 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
               })}
             </div>
             {filteredSimpleIcons.length === 0 && (
-              <div className="py-8 text-center text-sm text-slate-500">
-                No brands found
-              </div>
+              <div className="py-8 text-center text-sm text-slate-500">No brands found</div>
             )}
           </TabsContent>
         </Tabs>

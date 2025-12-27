@@ -44,6 +44,7 @@ Branches must follow the pattern: `type/description` (alphanumeric + hyphens)
 **Valid types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`, `hotfix`, `claude`
 
 **Examples**:
+
 - `feat/add-export-button`
 - `fix/auth-session-bug`
 - `claude/code-review-ABC123` (session IDs with mixed case allowed)
@@ -57,6 +58,7 @@ type: description
 ```
 
 **Examples**:
+
 - `feat: add graph export functionality`
 - `fix: resolve session timeout issue`
 - `claude: update CLAUDE.md configuration`
@@ -114,12 +116,14 @@ Use these context keywords to activate specialized behavior.
 **Focus**: `apps/api/` - Hono routes, D1 database, BetterAuth
 
 **Key Files**:
+
 - `src/index.worker.ts` - Entry point, middleware
 - `src/lib/auth.ts` - BetterAuth config (OAuth, 2FA, sessions)
 - `src/lib/schema.ts` - Drizzle schema definitions
 - `src/routes/*.ts` - API endpoints
 
 **Before Starting**:
+
 1. Check existing route patterns in `src/routes/`
 2. Review schema in `src/lib/schema.ts`
 3. Understand auth middleware in `src/middleware/session.ts`
@@ -142,6 +146,7 @@ Use these context keywords to activate specialized behavior.
 **Focus**: `apps/web/` - React Flow editor, shadcn/ui components
 
 **Key Files**:
+
 - `src/store/graphStore.ts` - Central state (nodes, edges, history)
 - `src/store/authStore.ts` - Auth state wrapper
 - `src/features/graph/` - Editor components
@@ -149,6 +154,7 @@ Use these context keywords to activate specialized behavior.
 - `src/components/ui/` - shadcn/ui primitives
 
 **Before Starting**:
+
 1. Check component patterns in `src/components/ui/`
 2. Review graphStore for state management patterns
 3. Understand React Flow integration in `src/features/graph/`
@@ -160,6 +166,7 @@ Use these context keywords to activate specialized behavior.
 ### `/fullstack` - End-to-End Features
 
 **Workflow**:
+
 1. Design schema changes in `apps/api/src/lib/schema.ts`
 2. Create migration in `apps/api/migrations/`
 3. Implement API route in `apps/api/src/routes/`
@@ -178,17 +185,17 @@ Use these context keywords to activate specialized behavior.
 
 ### Schema Tables
 
-| Table | Purpose |
-|-------|---------|
-| `ba_user` | User accounts (id, email, emailVerified, twoFactorEnabled) |
-| `ba_session` | Auth sessions (token, userId, expiresAt) |
-| `ba_account` | OAuth accounts (providerId, accessToken) |
-| `ba_verification` | Email verification tokens |
-| `ba_two_factor` | 2FA secrets and backup codes |
-| `graphs` | User diagrams (ownerId, title, data JSON) |
-| `share_links` | Share tokens (graphId, token, expiresAt) |
-| `profiles` | User quotas (plan, maxGraphs, retentionDays) |
-| `email_preferences` | Marketing opt-outs |
+| Table               | Purpose                                                    |
+| ------------------- | ---------------------------------------------------------- |
+| `ba_user`           | User accounts (id, email, emailVerified, twoFactorEnabled) |
+| `ba_session`        | Auth sessions (token, userId, expiresAt)                   |
+| `ba_account`        | OAuth accounts (providerId, accessToken)                   |
+| `ba_verification`   | Email verification tokens                                  |
+| `ba_two_factor`     | 2FA secrets and backup codes                               |
+| `graphs`            | User diagrams (ownerId, title, data JSON)                  |
+| `share_links`       | Share tokens (graphId, token, expiresAt)                   |
+| `profiles`          | User quotas (plan, maxGraphs, retentionDays)               |
+| `email_preferences` | Marketing opt-outs                                         |
 
 ### Running Migrations
 
@@ -224,6 +231,7 @@ npx wrangler d1 execute thalamus-auth --env production --command "SELECT * FROM 
 1. **Custom Table Names**: BetterAuth tables use `ba_` prefix (e.g., `ba_user`, `ba_session`)
 
 2. **Field Mappings**: D1 uses camelCase column names. Explicit field mappings in `auth.ts`:
+
    ```typescript
    user: {
      modelName: "ba_user",
@@ -235,6 +243,7 @@ npx wrangler d1 execute thalamus-auth --env production --command "SELECT * FROM 
    ```
 
 3. **Schema Keys**: The drizzleAdapter schema uses custom modelNames as keys:
+
    ```typescript
    drizzleAdapter(db, {
      provider: "sqlite",
@@ -243,7 +252,7 @@ npx wrangler d1 execute thalamus-auth --env production --command "SELECT * FROM 
        ba_user: schema.baUser,
        ba_session: schema.baSession,
      },
-   })
+   });
    ```
 
 4. **twoFactor Plugin**: User table MUST include `twoFactorEnabled` column. Common source of `unable_to_create_user` errors.
@@ -258,6 +267,7 @@ npx wrangler tail thalamus-api --format json
 ```
 
 Common errors:
+
 - `unable_to_create_user`: Schema mismatch - check all required fields exist
 - `Model X not found in DB`: Schema key mismatch in drizzleAdapter config
 
@@ -281,9 +291,11 @@ npm run deploy:production  # Production
 ### Environment Variables
 
 **GitHub Actions Secrets**:
+
 - `CLOUDFLARE_API_TOKEN` - Cloudflare API token with Workers and D1 permissions
 
 **Worker Environment** (Cloudflare dashboard or wrangler.toml):
+
 - `BETTER_AUTH_SECRET` - Auth secret key
 - `BETTER_AUTH_URL` - API URL (e.g., https://api.thalamus.sh)
 - `FRONTEND_URL` - Frontend URL (e.g., https://thalamus.sh)
@@ -295,16 +307,16 @@ npm run deploy:production  # Production
 
 ### Naming Conventions
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Variables | camelCase | `userData`, `isLoading` |
-| Functions | camelCase | `processItems()`, `handleClick()` |
-| Components | PascalCase | `NodeStyleInspector`, `CloudPanel` |
-| Types/Interfaces | PascalCase | `GraphState`, `NodeGroup` |
-| Constants | SCREAMING_SNAKE | `MAX_RETRIES`, `API_URL` |
-| Files (Components) | PascalCase | `GraphCanvas.tsx` |
-| Files (Utilities) | camelCase | `apiClient.ts` |
-| DB Columns | camelCase | `emailVerified`, `createdAt` |
+| Type               | Convention      | Example                            |
+| ------------------ | --------------- | ---------------------------------- |
+| Variables          | camelCase       | `userData`, `isLoading`            |
+| Functions          | camelCase       | `processItems()`, `handleClick()`  |
+| Components         | PascalCase      | `NodeStyleInspector`, `CloudPanel` |
+| Types/Interfaces   | PascalCase      | `GraphState`, `NodeGroup`          |
+| Constants          | SCREAMING_SNAKE | `MAX_RETRIES`, `API_URL`           |
+| Files (Components) | PascalCase      | `GraphCanvas.tsx`                  |
+| Files (Utilities)  | camelCase       | `apiClient.ts`                     |
+| DB Columns         | camelCase       | `emailVerified`, `createdAt`       |
 
 ### TypeScript
 
@@ -332,6 +344,7 @@ npm run deploy:production  # Production
 ### graphStore.ts (20 imports)
 
 Central state store for the graph editor:
+
 ```typescript
 export const useGraphStore: UseBoundStore<StoreApi<GraphState>>
 export type RelationshipData = { label?: string; style?: EdgeStyle }
@@ -341,26 +354,31 @@ export type NodeGroup = { id, name, color, nodeIds[] }
 ### authStore.ts (7 imports)
 
 Auth state wrapper:
+
 ```typescript
-export const useAuthStore: UseBoundStore<StoreApi<AuthState>>
-export type OAuthProvider = "github" | "google" | "apple" | "gitlab" | "atlassian"
+export const useAuthStore: UseBoundStore<StoreApi<AuthState>>;
+export type OAuthProvider = "github" | "google" | "apple" | "gitlab" | "atlassian";
 ```
 
 ### apiClient.ts (3 imports)
 
 Generic fetch wrapper:
+
 ```typescript
-export class ApiError extends Error { status: number }
-export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T>
+export class ApiError extends Error {
+  status: number;
+}
+export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T>;
 ```
 
 ### db.ts (4 imports)
 
 D1 connection factory:
+
 ```typescript
-export function setD1(d1: D1Database): void
-export function getDb(): DrizzleD1Database<typeof schema>
-export function resetDb(): void
+export function setD1(d1: D1Database): void;
+export function getDb(): DrizzleD1Database<typeof schema>;
+export function resetDb(): void;
 ```
 
 ---
@@ -399,6 +417,7 @@ export function resetDb(): void
 ---
 
 <!-- CLAVIX:START -->
+
 ## Clavix Integration
 
 This project uses Clavix for prompt improvement and PRD generation. The following slash commands are available:
@@ -408,17 +427,21 @@ This project uses Clavix for prompt improvement and PRD generation. The followin
 ### Prompt Optimization
 
 #### /clavix:improve [prompt]
+
 Optimize prompts with smart depth auto-selection. Clavix analyzes your prompt quality and automatically selects the appropriate depth (standard or comprehensive). Use for all prompt optimization needs.
 
 ### PRD & Planning
 
 #### /clavix:prd
+
 Launch the PRD generation workflow. Clavix will guide you through strategic questions and generate both a comprehensive PRD and a quick-reference version optimized for AI consumption.
 
 #### /clavix:plan
+
 Generate an optimized implementation task breakdown from your PRD. Creates a phased task plan with dependencies and priorities.
 
 #### /clavix:implement
+
 Execute tasks or prompts with AI assistance. Auto-detects source: tasks.md (from PRD workflow) or prompts/ (from improve workflow). Supports automatic git commits and progress tracking.
 
 Use `--latest` to implement most recent prompt, `--tasks` to force task mode.
@@ -426,14 +449,17 @@ Use `--latest` to implement most recent prompt, `--tasks` to force task mode.
 ### Session Management
 
 #### /clavix:start
+
 Enter conversational mode for iterative prompt development. Discuss your requirements naturally, and later use `/clavix:summarize` to extract an optimized prompt.
 
 #### /clavix:summarize
+
 Analyze the current conversation and extract key requirements into a structured prompt and mini-PRD.
 
 ### Refinement
 
 #### /clavix:refine
+
 Refine existing PRD or prompt through continued discussion. Detects available PRDs and saved prompts, then guides you through updating them with tracked changes.
 
 ### Agentic Utilities
@@ -444,10 +470,12 @@ These utilities provide structured workflows for common tasks. Invoke them using
 - **Archive** (`/clavix:archive`): Archive completed work. Moves finished PRDs and outputs to archive for future reference.
 
 **When to use which mode:**
+
 - **Improve mode** (`/clavix:improve`): Smart prompt optimization with auto-depth selection
 - **PRD mode** (`/clavix:prd`): Strategic planning with architecture and business impact
 
 **Recommended Workflow:**
+
 1. Start with `/clavix:prd` or `/clavix:start` for complex features
 2. Refine requirements with `/clavix:refine` as needed
 3. Generate tasks with `/clavix:plan`
@@ -456,4 +484,5 @@ These utilities provide structured workflows for common tasks. Invoke them using
 6. Archive when complete with `/clavix:archive`
 
 **Pro tip**: Start complex features with `/clavix:prd` or `/clavix:start` to ensure clear requirements before implementation.
+
 <!-- CLAVIX:END -->

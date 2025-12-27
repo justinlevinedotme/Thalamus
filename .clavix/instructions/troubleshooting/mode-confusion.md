@@ -40,12 +40,14 @@ When uncertain, agent should ALWAYS ask:
 Just to clarify - which mode should I be in?
 
 **Option 1: Planning Mode (Clavix)**
+
 - Gather requirements and create planning documents
 - Generate PRDs and optimized prompts
 - Ask clarifying questions
 - **No implementation yet**
 
 **Option 2: Implementation Mode**
+
 - Write actual code
 - Build the feature
 - Create components/functions
@@ -61,11 +63,13 @@ Which would you like me to do?
 User should explicitly state:
 
 **For planning:**
+
 ```markdown
 Just planning for now. Help me create a solid PRD first.
 ```
 
 **For implementation:**
+
 ```markdown
 Let's implement this now. Build the feature based on what we've discussed.
 ```
@@ -77,6 +81,7 @@ Let's implement this now. Build the feature based on what we've discussed.
 Agent should acknowledge:
 
 **Planning mode:**
+
 ```markdown
 Got it - I'm in planning mode. I'll gather requirements and create documentation, but won't implement yet.
 
@@ -84,6 +89,7 @@ Let's start with some clarifying questions...
 ```
 
 **Implementation mode:**
+
 ```markdown
 Understood - I'll implement this now based on our requirements.
 
@@ -143,11 +149,13 @@ Ask user: "Should I implement this now, or continue planning?"
 **1. Use Explicit Commands**
 
 **For planning:**
+
 - `/clavix:start` - Start conversational planning
 - `/clavix:prd` - Generate PRD
 - `/clavix:summarize` - Extract requirements
 
 **For implementation:**
+
 - "Now implement this"
 - "Build the feature"
 - "Start coding"
@@ -187,12 +195,14 @@ To be clear: we're just planning right now. Don't implement yet.
 **User says:** "Help me build an authentication system"
 
 **Agent thinks:**
+
 - Option A: Help plan how to build it (planning mode)
 - Option B: Implement it now (implementation mode)
 
 **Solution:**
 
 Agent asks:
+
 ```markdown
 When you say "build an authentication system," do you want me to:
 
@@ -207,6 +217,7 @@ Which would you prefer?
 ### Scenario 2: Mid-Conversation Shift
 
 **Starts in planning:**
+
 ```markdown
 User: /clavix:start
 User: I want a dashboard
@@ -220,6 +231,7 @@ User: Looks good, let's do it!
 **Solution:**
 
 Agent asks:
+
 ```markdown
 When you say "let's do it," do you mean:
 
@@ -232,6 +244,7 @@ When you say "let's do it," do you mean:
 ### Scenario 3: PRD Then Implementation
 
 **Flow:**
+
 ```markdown
 User: /clavix:prd
 Agent: [Creates PRD]
@@ -243,6 +256,7 @@ User: Perfect! Now make it happen.
 **Solution:**
 
 Agent interprets:
+
 ```markdown
 **TRANSITION:** You've approved the PRD. I understand you want implementation now.
 
@@ -250,8 +264,10 @@ I'll build the features described in the PRD. Starting with [first feature]...
 ```
 
 But if uncertain:
+
 ```markdown
 By "make it happen," do you mean:
+
 1. Implement the features in the PRD now?
 2. Create additional planning documents?
 ```
@@ -323,15 +339,18 @@ User request received
 ### Test: Ambiguous Request Handling
 
 **Input:**
+
 ```markdown
 User: Help me build a todo app
 ```
 
 **Expected behavior:**
+
 - Agent asks: "Should I help plan it, or implement it now?"
 - Agent does NOT assume one or the other
 
 **Failure indicator:**
+
 - Agent immediately starts planning without asking
 - Agent immediately starts implementing without asking
 
@@ -340,6 +359,7 @@ User: Help me build a todo app
 ### Test: Mid-Workflow Ambiguity
 
 **Input:**
+
 ```markdown
 User: /clavix:start
 [Conversation about requirements]
@@ -347,6 +367,7 @@ User: Sounds great, let's go!
 ```
 
 **Expected behavior:**
+
 - Agent asks: "Should I summarize our requirements, or start implementing?"
 - Agent does NOT assume "let's go" means implement
 
@@ -355,6 +376,7 @@ User: Sounds great, let's go!
 ## Success Indicators
 
 Mode clarity is working when:
+
 - ✓ Agent knows whether to plan or implement
 - ✓ Agent asks when uncertain instead of guessing
 - ✓ User and agent expectations are aligned
@@ -368,8 +390,10 @@ Mode clarity is working when:
 **Agent is confused?**
 
 Agent should ask:
+
 ```markdown
 Should I:
+
 1. Plan and document (create PRDs, gather requirements)?
 2. Implement (write code and build features)?
 ```
@@ -377,6 +401,7 @@ Should I:
 **User wants to clarify?**
 
 User should say:
+
 ```markdown
 Planning mode: "Just create a PRD / gather requirements for now"
 Implementation mode: "Implement this now / start coding"
@@ -385,6 +410,7 @@ Implementation mode: "Implement this now / start coding"
 **Template authors preventing confusion?**
 
 Add to templates:
+
 ```markdown
 ## CLAVIX MODE: Requirements & Planning Only
 

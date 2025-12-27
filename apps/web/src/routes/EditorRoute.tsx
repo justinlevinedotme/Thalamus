@@ -1,21 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Focus, Heading, LayoutGrid, Paintbrush, Palette, Route, Search, Settings, Square, StickyNote, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Focus,
+  Heading,
+  LayoutGrid,
+  Paintbrush,
+  Palette,
+  Route,
+  Search,
+  Settings,
+  Square,
+  StickyNote,
+  X,
+} from "lucide-react";
 
 import { Card } from "../components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Kbd } from "../components/ui/kbd";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
 import { SpeedDial, type SpeedDialAction } from "../components/ui/speed-dial";
 import EditorSettingsInspector from "../features/editor/EditorSettingsInspector";
 import EditorToolbar from "../features/editor/EditorToolbar";
@@ -60,9 +64,7 @@ export default function EditorRoute() {
     undo,
     redo,
   } = useGraphStore();
-  const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
@@ -323,9 +325,7 @@ export default function EditorRoute() {
         setLoadError(null);
       } catch (error) {
         if (!ignore) {
-          setLoadError(
-            error instanceof Error ? error.message : "Failed to load graph"
-          );
+          setLoadError(error instanceof Error ? error.message : "Failed to load graph");
         }
       }
     };
@@ -378,8 +378,7 @@ export default function EditorRoute() {
   };
 
   const isMac =
-    typeof navigator !== "undefined" &&
-    navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+    typeof navigator !== "undefined" && navigator.platform.toUpperCase().indexOf("MAC") >= 0;
   const modKeyLabel = isMac ? "⌘" : "Ctrl";
 
   return (
@@ -434,9 +433,7 @@ export default function EditorRoute() {
                       <Focus className="h-5 w-5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Focus on node
-                  </TooltipContent>
+                  <TooltipContent side="right">Focus on node</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -453,9 +450,7 @@ export default function EditorRoute() {
                       <Paintbrush className="h-5 w-5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Map Style
-                  </TooltipContent>
+                  <TooltipContent side="right">Map Style</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -472,9 +467,7 @@ export default function EditorRoute() {
                       <LayoutGrid className="h-5 w-5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Auto Layout
-                  </TooltipContent>
+                  <TooltipContent side="right">Auto Layout</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -491,9 +484,7 @@ export default function EditorRoute() {
                       <Settings className="h-5 w-5" />
                     </button>
                   </TooltipTrigger>
-                  <TooltipContent side="right">
-                    Editor Settings
-                  </TooltipContent>
+                  <TooltipContent side="right">Editor Settings</TooltipContent>
                 </Tooltip>
               </div>
               <button
@@ -621,10 +612,7 @@ export default function EditorRoute() {
           {!canSave ? (
             <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-600 shadow-sm">
               <p>Cloud saves are available for account holders.</p>
-              <Link
-                className="mt-1 inline-block text-slate-900 underline"
-                to="/login"
-              >
+              <Link className="mt-1 inline-block text-slate-900 underline" to="/login">
                 Sign in to save and share
               </Link>
             </div>
@@ -641,11 +629,7 @@ export default function EditorRoute() {
           ) : null}
         </div>
 
-        <ShareDialog
-          open={shareOpen}
-          graphId={graphId}
-          onClose={() => setShareOpen(false)}
-        />
+        <ShareDialog open={shareOpen} graphId={graphId} onClose={() => setShareOpen(false)} />
       </div>
     </TooltipProvider>
   );

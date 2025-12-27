@@ -16,11 +16,13 @@ Used in: `improve.md`, `prd.md`, `start.md`, `summarize.md`, `plan.md`
 **You are in Clavix [workflow type] mode. You help [action], NOT implement features.**
 
 **YOUR ROLE:**
+
 - ✓ [Specific allowed action 1]
 - ✓ [Specific allowed action 2]
 - ✓ [Specific allowed action 3]
 
 **DO NOT IMPLEMENT. DO NOT IMPLEMENT. DO NOT IMPLEMENT.**
+
 - ✗ DO NOT write application code for the feature
 - ✗ DO NOT implement what the prompt/PRD describes
 - ✗ DO NOT generate actual components/functions
@@ -40,12 +42,14 @@ Used in: `implement.md`
 **You are in Clavix implementation mode. You ARE authorized to write code and implement features.**
 
 **YOUR ROLE:**
+
 - ✓ Read and understand requirements from [source]
 - ✓ Write application code to implement features
 - ✓ Create/modify files as needed
 - ✓ Run tests to verify implementation
 
 **IMPLEMENTATION AUTHORIZED:**
+
 - ✓ Writing functions, classes, and components
 - ✓ Creating new files and modifying existing ones
 - ✓ Implementing features described in requirements
@@ -53,6 +57,7 @@ Used in: `implement.md`
 
 **MODE ENTRY VALIDATION:**
 Before implementing, verify:
+
 1. Source documents exist ([source type])
 2. Output assertion: "Entering IMPLEMENTATION mode. I will implement [source]."
 
@@ -66,6 +71,7 @@ For complete mode documentation, see: `.clavix/instructions/core/clavix-mode.md`
 ### Planning Mode Assertion
 
 Output at workflow start:
+
 ```
 Entering CLAVIX PLANNING MODE. I will [action] without implementing code.
 ```
@@ -73,6 +79,7 @@ Entering CLAVIX PLANNING MODE. I will [action] without implementing code.
 ### Implementation Mode Assertion
 
 Output at workflow start:
+
 ```
 Entering IMPLEMENTATION mode. I will implement [source description].
 ```
@@ -86,18 +93,21 @@ Entering IMPLEMENTATION mode. I will implement [source description].
 The AI is violating planning mode if it:
 
 1. **Writes function definitions** for the user's actual feature
+
    ```typescript
    // VIOLATION: Creating actual implementation
    function authenticateUser(email: string, password: string) { ... }
    ```
 
 2. **Creates component implementations** for the described feature
+
    ```jsx
    // VIOLATION: Building the actual component
    export function LoginForm() { ... }
    ```
 
 3. **Generates API endpoint code** for the described feature
+
    ```typescript
    // VIOLATION: Implementing actual endpoints
    app.post('/api/login', (req, res) => { ... });
@@ -127,6 +137,7 @@ All planning templates MUST include this protocol:
 ## Self-Correction Protocol
 
 **DETECT**: If you find yourself:
+
 - Writing function/class definitions for the user's feature
 - Creating component implementations
 - Generating API endpoint code
@@ -206,26 +217,26 @@ When updating templates, verify:
 
 ### Planning Templates (5 total)
 
-| Template | Mode Type | Self-Correction | Primary Action |
-|----------|-----------|-----------------|----------------|
-| `improve.md` | Requirements & Planning | Required | Smart prompt optimization (auto-depth) |
-| `prd.md` | Requirements & Planning | Required | PRD generation |
-| `start.md` | Requirements & Planning | Required | Requirements gathering |
-| `summarize.md` | Requirements & Planning | Required | Requirements extraction |
-| `plan.md` | Pre-Implementation Planning | Required | Task breakdown |
+| Template       | Mode Type                   | Self-Correction | Primary Action                         |
+| -------------- | --------------------------- | --------------- | -------------------------------------- |
+| `improve.md`   | Requirements & Planning     | Required        | Smart prompt optimization (auto-depth) |
+| `prd.md`       | Requirements & Planning     | Required        | PRD generation                         |
+| `start.md`     | Requirements & Planning     | Required        | Requirements gathering                 |
+| `summarize.md` | Requirements & Planning     | Required        | Requirements extraction                |
+| `plan.md`      | Pre-Implementation Planning | Required        | Task breakdown                         |
 
 ### Implementation Templates (1 total)
 
-| Template | Mode Type | Entry Validation | Primary Action |
-|----------|-----------|------------------|----------------|
-| `implement.md` | Implementation | Required | Task or prompt execution (auto-detects source) |
+| Template       | Mode Type      | Entry Validation | Primary Action                                 |
+| -------------- | -------------- | ---------------- | ---------------------------------------------- |
+| `implement.md` | Implementation | Required         | Task or prompt execution (auto-detects source) |
 
 ### Utility Templates (2 total)
 
-| Template | Mode | Notes |
-|----------|------|-------|
-| `archive.md` | Management | Project archival |
-| `verify.md` | Verification | Post-implementation verification |
+| Template     | Mode         | Notes                            |
+| ------------ | ------------ | -------------------------------- |
+| `archive.md` | Management   | Project archival                 |
+| `verify.md`  | Verification | Post-implementation verification |
 
 ---
 

@@ -21,10 +21,7 @@ export function getNodeBox(node: Node): Box {
 /**
  * Build helper lines from all nodes (excluding the dragged node)
  */
-export function buildHelperLines(
-  nodes: Node[],
-  excludeNodeIds: string[]
-): HelperLine[] {
+export function buildHelperLines(nodes: Node[], excludeNodeIds: string[]): HelperLine[] {
   const lines: HelperLine[] = [];
 
   for (const node of nodes) {

@@ -14,10 +14,14 @@ import {
 
 const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
   switch (padding) {
-    case "sm": return 8;
-    case "md": return 16;
-    case "lg": return 24;
-    default: return 0;
+    case "sm":
+      return 8;
+    case "md":
+      return 16;
+    case "lg":
+      return 24;
+    default:
+      return 0;
   }
 };
 
@@ -40,13 +44,8 @@ export default function EditableNode({
   targetHandles?: NodeHandle[];
   groupId?: string;
 }>) {
-  const {
-    editingNodeId,
-    startEditingNode,
-    stopEditingNode,
-    updateNodeLabel,
-    updateNodeBody,
-  } = useGraphStore();
+  const { editingNodeId, startEditingNode, stopEditingNode, updateNodeLabel, updateNodeBody } =
+    useGraphStore();
   const updateNodeInternals = useUpdateNodeInternals();
   const isEditing = editingNodeId === id;
   const [draftLabel, setDraftLabel] = useState(data.label);
@@ -149,8 +148,10 @@ export default function EditableNode({
   const borderStyle = data.style?.borderStyle ?? "solid";
   const hasBorder = borderWidth > 0;
   const borderColor = selected
-    ? (hasBorder ? undefined : undefined)  // Let CSS class handle selected state
-    : (data.style?.borderColor ?? "#e2e8f0");  // Default to slate-200
+    ? hasBorder
+      ? undefined
+      : undefined // Let CSS class handle selected state
+    : (data.style?.borderColor ?? "#e2e8f0"); // Default to slate-200
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color,
@@ -207,38 +208,41 @@ export default function EditableNode({
       {/* Title */}
       <div className="flex items-center gap-1.5">
         {data.style?.icon && (
-          <span className="flex-shrink-0 flex items-center" style={{ color: data.style?.iconColor ?? data.style?.textColor ?? "#1e293b" }}>
+          <span
+            className="flex-shrink-0 flex items-center"
+            style={{ color: data.style?.iconColor ?? data.style?.textColor ?? "#1e293b" }}
+          >
             <NodeIconDisplay icon={data.style.icon} className="h-4 w-4" />
           </span>
         )}
         <div className="flex-1 min-w-0">
-      {isEditing ? (
-        <RichTextEditor
-          value={draftLabel}
-          onChange={setDraftLabel}
-          onBlur={() => {
-            // Only commit if we're actually editing the title
-            if (editingField === "title") {
-              commitLabel();
-            }
-          }}
-          onEnter={handleTitleEnter}
-          onEscape={handleTitleEscape}
-          onTab={handleTitleTab}
-          onFocus={() => setEditingField("title")}
-          placeholder="Node title"
-          className="w-full bg-transparent font-medium"
-          textColor={data.style?.textColor ?? "#1e293b"}
-          singleLine
-          autoFocus={editingField === "title"}
-        />
-      ) : (
-        <div
-          className="node-rich-text font-medium w-full"
-          style={{ color: data.style?.textColor ?? "#1e293b" }}
-          dangerouslySetInnerHTML={{ __html: data.label }}
-        />
-      )}
+          {isEditing ? (
+            <RichTextEditor
+              value={draftLabel}
+              onChange={setDraftLabel}
+              onBlur={() => {
+                // Only commit if we're actually editing the title
+                if (editingField === "title") {
+                  commitLabel();
+                }
+              }}
+              onEnter={handleTitleEnter}
+              onEscape={handleTitleEscape}
+              onTab={handleTitleTab}
+              onFocus={() => setEditingField("title")}
+              placeholder="Node title"
+              className="w-full bg-transparent font-medium"
+              textColor={data.style?.textColor ?? "#1e293b"}
+              singleLine
+              autoFocus={editingField === "title"}
+            />
+          ) : (
+            <div
+              className="node-rich-text font-medium w-full"
+              style={{ color: data.style?.textColor ?? "#1e293b" }}
+              dangerouslySetInnerHTML={{ __html: data.label }}
+            />
+          )}
         </div>
       </div>
 

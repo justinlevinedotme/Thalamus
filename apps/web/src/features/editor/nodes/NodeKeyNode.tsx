@@ -9,11 +9,7 @@ import RichTextEditor from "../../../components/RichTextEditor";
 import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
 import { Kbd } from "../../../components/ui/kbd";
-import {
-  type NodeKind,
-  type NodeStyle,
-  useGraphStore,
-} from "../../../store/graphStore";
+import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
 // Strip HTML tags for plain text comparison
 const stripHtml = (html: string): string => {
@@ -42,11 +38,7 @@ type NodeKeyData = {
   entries?: NodeKeyEntry[];
 };
 
-export default function NodeKeyNode({
-  id,
-  data,
-  selected,
-}: NodeProps<NodeKeyData>) {
+export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyData>) {
   const { selectGroupNodes, updateNodeLabel, updateNodeBody } = useGraphStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(data.label);
@@ -101,9 +93,7 @@ export default function NodeKeyNode({
   };
 
   const handleEntryLabelChange = (entryId: string, newLabel: string) => {
-    const newEntries = entries.map((e) =>
-      e.id === entryId ? { ...e, label: newLabel } : e
-    );
+    const newEntries = entries.map((e) => (e.id === entryId ? { ...e, label: newLabel } : e));
     saveEntries(newEntries);
   };
 
@@ -120,16 +110,12 @@ export default function NodeKeyNode({
   };
 
   const handleEntryColorChange = (entryId: string, newColor: string) => {
-    const newEntries = entries.map((e) =>
-      e.id === entryId ? { ...e, color: newColor } : e
-    );
+    const newEntries = entries.map((e) => (e.id === entryId ? { ...e, color: newColor } : e));
     saveEntries(newEntries);
   };
 
   const handleEntryShapeChange = (entryId: string, newShape: NodeKeyEntry["shape"]) => {
-    const newEntries = entries.map((e) =>
-      e.id === entryId ? { ...e, shape: newShape } : e
-    );
+    const newEntries = entries.map((e) => (e.id === entryId ? { ...e, shape: newShape } : e));
     saveEntries(newEntries);
   };
 
@@ -154,7 +140,8 @@ export default function NodeKeyNode({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Tab" && !event.shiftKey) {
         const activeElement = document.activeElement;
-        const isInInput = activeElement?.tagName === "INPUT" || activeElement?.tagName === "TEXTAREA";
+        const isInInput =
+          activeElement?.tagName === "INPUT" || activeElement?.tagName === "TEXTAREA";
 
         if (containerRef.current?.contains(activeElement as Node) || !isInInput) {
           event.preventDefault();
@@ -169,19 +156,27 @@ export default function NodeKeyNode({
 
   const getShapeClass = (shape: NodeKeyEntry["shape"]) => {
     switch (shape) {
-      case "circle": return "rounded-full";
-      case "pill": return "rounded-full";
-      case "square": return "rounded-none";
-      default: return "rounded";
+      case "circle":
+        return "rounded-full";
+      case "pill":
+        return "rounded-full";
+      case "square":
+        return "rounded-none";
+      default:
+        return "rounded";
     }
   };
 
   const getShapeLabel = (shape: NodeKeyEntry["shape"]) => {
     switch (shape) {
-      case "circle": return "●";
-      case "pill": return "⬬";
-      case "square": return "■";
-      default: return "▢";
+      case "circle":
+        return "●";
+      case "pill":
+        return "⬬";
+      case "square":
+        return "■";
+      default:
+        return "▢";
     }
   };
 
@@ -194,9 +189,7 @@ export default function NodeKeyNode({
   const borderWidth = data.style?.borderWidth ?? 1;
   const borderStyle = data.style?.borderStyle ?? "solid";
   const hasBorder = borderWidth > 0;
-  const borderColor = selected && hasBorder
-    ? "#64748b"
-    : (data.style?.borderColor ?? "#e2e8f0");
+  const borderColor = selected && hasBorder ? "#64748b" : (data.style?.borderColor ?? "#e2e8f0");
 
   // Text colors from style
   const titleColor = data.style?.textColor ?? "#334155";
@@ -228,16 +221,10 @@ export default function NodeKeyNode({
         tabIndex={0}
       >
         {/* Title with optional icon */}
-        <div
-          className="mb-2 border-b pb-2 flex-shrink-0"
-          style={{ borderColor: separatorColor }}
-        >
+        <div className="mb-2 border-b pb-2 flex-shrink-0" style={{ borderColor: separatorColor }}>
           <div className="flex items-center gap-1.5">
             {data.style?.icon && (
-              <span
-                className="flex-shrink-0 flex items-center"
-                style={{ color: iconColor }}
-              >
+              <span className="flex-shrink-0 flex items-center" style={{ color: iconColor }}>
                 <NodeIconDisplay icon={data.style.icon} className="h-3.5 w-3.5" />
               </span>
             )}
