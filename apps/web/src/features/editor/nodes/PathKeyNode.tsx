@@ -1,9 +1,7 @@
-import { NodeResizer } from "@reactflow/node-resizer";
-import "@reactflow/node-resizer/dist/style.css";
 import { Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { type NodeProps } from "reactflow";
+import { NodeResizer, type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
@@ -37,7 +35,9 @@ type PathKeyData = {
   entries?: PathKeyEntry[];
 };
 
-export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyData>) {
+type PathKeyNodeType = Node<PathKeyData, "pathKey">;
+
+export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyNodeType>) {
   const { selectGroupNodes, updateNodeLabel, updateNodeBody } = useGraphStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(data.label);
@@ -145,7 +145,7 @@ export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyDat
           activeElement?.tagName === "INPUT" || activeElement?.tagName === "TEXTAREA";
 
         // Only add entry if Tab is pressed while the node container is focused or we're in an entry input
-        if (containerRef.current?.contains(activeElement as Node) || !isInInput) {
+        if (containerRef.current?.contains(activeElement as globalThis.Node) || !isInInput) {
           event.preventDefault();
           addEntry();
         }

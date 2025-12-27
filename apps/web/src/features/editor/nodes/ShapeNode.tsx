@@ -1,22 +1,21 @@
-import { NodeResizer } from "@reactflow/node-resizer";
-import "@reactflow/node-resizer/dist/style.css";
+import { NodeResizer, type Node, type NodeProps } from "@xyflow/react";
 import { flushSync } from "react-dom";
-import { type NodeProps } from "reactflow";
 
 import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
-const MIN_WIDTH = 100;
-const MIN_HEIGHT = 60;
-
-export default function ShapeNode({
-  data,
-  selected,
-}: NodeProps<{
+type ShapeNodeData = {
   label: string;
   kind: NodeKind;
   style?: NodeStyle;
   groupId?: string;
-}>) {
+};
+
+type ShapeNodeType = Node<ShapeNodeData, "shape">;
+
+const MIN_WIDTH = 100;
+const MIN_HEIGHT = 60;
+
+export default function ShapeNode({ data, selected }: NodeProps<ShapeNodeType>) {
   const { selectGroupNodes } = useGraphStore();
 
   // Handle mousedown to select all group nodes BEFORE React Flow starts dragging

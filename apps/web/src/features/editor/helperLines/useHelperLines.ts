@@ -1,24 +1,24 @@
 import { useCallback, useState } from "react";
-import type { Node, NodeChange, NodePositionChange } from "reactflow";
+import type { Node, NodeChange, NodePositionChange } from "@xyflow/react";
 import type { HelperLine, HelperLinesState } from "./types";
 import { buildHelperLines, calculateSnapOffset, findClosestHelperLines } from "./utils";
 
-export type UseHelperLinesResult = {
+export type UseHelperLinesResult<T extends Node = Node> = {
   helperLines: HelperLinesState;
-  applyHelperLines: (changes: NodeChange[], nodes: Node[]) => NodeChange[];
+  applyHelperLines: (changes: NodeChange<T>[], nodes: T[]) => NodeChange<T>[];
   resetHelperLines: () => void;
 };
 
 /**
  * Hook for managing helper lines during node dragging
  */
-export function useHelperLines(): UseHelperLinesResult {
+export function useHelperLines<T extends Node = Node>(): UseHelperLinesResult<T> {
   const [helperLines, setHelperLines] = useState<HelperLinesState>({
     horizontal: null,
     vertical: null,
   });
 
-  const applyHelperLines = useCallback((changes: NodeChange[], nodes: Node[]): NodeChange[] => {
+  const applyHelperLines = useCallback((changes: NodeChange<T>[], nodes: T[]): NodeChange<T>[] => {
     // Find position changes that are actively dragging
     const positionChanges = changes.filter(
       (change): change is NodePositionChange =>

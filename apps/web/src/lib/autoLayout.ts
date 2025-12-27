@@ -1,4 +1,4 @@
-import type { Edge, Node } from "reactflow";
+import type { Edge, Node } from "@xyflow/react";
 
 import type { NodeHandle } from "../store/graphStore";
 
@@ -22,6 +22,7 @@ export const defaultLayoutOptions: LayoutOptions = {
 type NodeDataWithHandles = {
   sourceHandles?: NodeHandle[];
   targetHandles?: NodeHandle[];
+  [key: string]: unknown; // Index signature for v12 compatibility
 };
 
 // Lazy-loaded worker instance
@@ -37,7 +38,10 @@ function getLayoutWorker(): Worker {
 }
 
 // Worker-based layout for non-blocking UI
-export async function getLayoutedElements<T extends NodeDataWithHandles, E>(
+export async function getLayoutedElements<
+  T extends NodeDataWithHandles,
+  E extends Record<string, unknown> = Record<string, unknown>,
+>(
   nodes: Node<T>[],
   edges: Edge<E>[],
   options: LayoutOptions = defaultLayoutOptions

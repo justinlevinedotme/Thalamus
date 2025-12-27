@@ -1,6 +1,7 @@
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 
+import { useTheme } from "../../lib/theme";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 type EmojiPickerProps = {
@@ -16,6 +17,8 @@ type EmojiData = {
 };
 
 export function EmojiPicker({ value, onChange, children }: EmojiPickerProps) {
+  const { resolvedTheme } = useTheme();
+
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
@@ -23,7 +26,7 @@ export function EmojiPicker({ value, onChange, children }: EmojiPickerProps) {
         <Picker
           data={data}
           onEmojiSelect={(emoji: EmojiData) => onChange(emoji.native)}
-          theme="light"
+          theme={resolvedTheme}
           previewPosition="none"
           skinTonePosition="none"
           maxFrequentRows={1}

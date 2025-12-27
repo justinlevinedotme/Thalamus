@@ -202,7 +202,27 @@
 }
 
 .dark .react-flow__edge-path {
-  stroke: #525252;
+  stroke: #6b7280;
+}
+
+/* Dark mode handle styling */
+.dark .react-flow__handle {
+  background: #404040;
+  border-color: #525252;
+}
+
+.dark .react-flow__handle:hover {
+  background: #525252;
+}
+
+.dark .react-flow__handle.connecting,
+.dark .react-flow__handle.valid {
+  background: #00d4ff;
+}
+
+/* Dark mode connection line */
+.dark .react-flow__connection-path {
+  stroke: #6b7280;
 }
 
 .dark .react-flow__selection {

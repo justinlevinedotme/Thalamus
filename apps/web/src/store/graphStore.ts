@@ -10,7 +10,7 @@ import {
   type Node,
   type NodeChange,
   type ReactFlowInstance,
-} from "reactflow";
+} from "@xyflow/react";
 
 import { getLayoutedElements, type LayoutOptions } from "../lib/autoLayout";
 
@@ -99,7 +99,8 @@ export type RelationshipData = {
   style?: EdgeStyle;
 };
 
-type GraphNodeData = {
+// Node data type - extends Record<string, unknown> for v12 compatibility
+export type GraphNodeData = {
   label: string;
   body?: string;
   kind: NodeKind;
@@ -107,23 +108,30 @@ type GraphNodeData = {
   sourceHandles?: NodeHandle[];
   targetHandles?: NodeHandle[];
   groupId?: string;
+  [key: string]: unknown; // Index signature for v12 compatibility
 };
 
+// App-wide node type for React Flow v12
+export type AppNode = Node<GraphNodeData>;
+
+// Edge type alias for app
+export type AppEdge = Edge<RelationshipData>;
+
 type GraphSnapshot = {
-  nodes: Node<GraphNodeData>[];
-  edges: Edge<RelationshipData>[];
+  nodes: AppNode[];
+  edges: AppEdge[];
   groups: NodeGroup[];
 };
 
 type GraphState = {
-  nodes: Node<GraphNodeData>[];
-  edges: Edge<RelationshipData>[];
+  nodes: AppNode[];
+  edges: AppEdge[];
   groups: NodeGroup[];
   graphTitle: string;
   selectedEdgeId?: string;
   selectedNodeId?: string;
   editingNodeId?: string;
-  flowInstance: ReactFlowInstance | null;
+  flowInstance: ReactFlowInstance<AppNode, AppEdge> | null;
   isFocusMode: boolean;
   focusNodeId?: string;
   historyPast: GraphSnapshot[];
@@ -132,17 +140,17 @@ type GraphState = {
   canRedo: boolean;
   // Version counter for efficient dirty detection - increments on every data change
   dataVersion: number;
-  setNodes: (nodes: Node<GraphNodeData>[]) => void;
-  setEdges: (edges: Edge<RelationshipData>[]) => void;
-  onNodesChange: (changes: NodeChange[]) => void;
-  onEdgesChange: (changes: EdgeChange[]) => void;
+  setNodes: (nodes: AppNode[]) => void;
+  setEdges: (edges: AppEdge[]) => void;
+  onNodesChange: (changes: NodeChange<AppNode>[]) => void;
+  onEdgesChange: (changes: EdgeChange<AppEdge>[]) => void;
   onConnect: (connection: Connection) => void;
   setGraphTitle: (title: string) => void;
   selectEdge: (edgeId?: string) => void;
   selectNode: (nodeId?: string) => void;
   startEditingNode: (nodeId: string) => void;
   stopEditingNode: () => void;
-  setFlowInstance: (instance: ReactFlowInstance | null) => void;
+  setFlowInstance: (instance: ReactFlowInstance<AppNode, AppEdge> | null) => void;
   setFocusNode: (nodeId?: string) => void;
   clearFocus: () => void;
   updateNodeLabel: (nodeId: string, label: string) => void;
@@ -162,7 +170,7 @@ type GraphState = {
   duplicateNode: (nodeId: string) => void;
   deleteNode: (nodeId: string) => void;
   deleteEdge: (edgeId: string) => void;
-  reconnectEdge: (oldEdge: Edge<RelationshipData>, newConnection: Connection) => void;
+  reconnectEdge: (oldEdge: AppEdge, newConnection: Connection) => void;
   connectNodes: (sourceId: string, targetId: string) => void;
   updateAllNodeStyles: (style: Partial<NodeStyle>) => void;
   updateAllEdgeStyles: (style: Partial<EdgeStyle>) => void;
@@ -193,12 +201,15 @@ type GraphState = {
   getSelectedGroupId: () => string | undefined;
 };
 
+// Default text color for nodes (dark gray for readability on light backgrounds)
+const DEFAULT_NODE_TEXT_COLOR = "#1f2937"; // gray-800
+
 const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
-  idea: { color: "#E2E8F0", shape: "rounded", size: "md" },
-  question: { color: "#FDE68A", shape: "circle", size: "md" },
-  evidence: { color: "#BBF7D0", shape: "rounded", size: "sm" },
-  goal: { color: "#BFDBFE", shape: "pill", size: "lg" },
-  text: { color: "transparent", shape: "rounded", size: "md" },
+  idea: { color: "#E2E8F0", shape: "rounded", size: "md", textColor: DEFAULT_NODE_TEXT_COLOR },
+  question: { color: "#FDE68A", shape: "circle", size: "md", textColor: DEFAULT_NODE_TEXT_COLOR },
+  evidence: { color: "#BBF7D0", shape: "rounded", size: "sm", textColor: DEFAULT_NODE_TEXT_COLOR },
+  goal: { color: "#BFDBFE", shape: "pill", size: "lg", textColor: DEFAULT_NODE_TEXT_COLOR },
+  text: { color: "transparent", shape: "rounded", size: "md" }, // text nodes inherit color
   shape: {
     color: "#DBEAFE",
     shape: "rounded",
@@ -206,6 +217,7 @@ const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
     borderColor: "#3B82F6",
     borderWidth: 2,
     borderStyle: "solid",
+    textColor: DEFAULT_NODE_TEXT_COLOR,
   },
   pathKey: {
     color: "#FFFFFF",
@@ -214,6 +226,7 @@ const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
     borderColor: "#e2e8f0",
     borderWidth: 1,
     borderStyle: "solid",
+    textColor: DEFAULT_NODE_TEXT_COLOR,
   },
   nodeKey: {
     color: "#FFFFFF",
@@ -222,6 +235,7 @@ const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
     borderColor: "#e2e8f0",
     borderWidth: 1,
     borderStyle: "solid",
+    textColor: DEFAULT_NODE_TEXT_COLOR,
   },
 };
 

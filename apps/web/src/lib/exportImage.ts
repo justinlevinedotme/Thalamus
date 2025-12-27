@@ -2,7 +2,11 @@
 // exporting with edge labels doesn't work for some reason, we need to hide them during export
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
-import { getNodesBounds, type Node as ReactFlowNode, type Edge as ReactFlowEdge } from "reactflow";
+import {
+  getNodesBounds,
+  type Node as ReactFlowNode,
+  type Edge as ReactFlowEdge,
+} from "@xyflow/react";
 
 const slugify = (value: string) =>
   value

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ReactFlow, {
+import {
+  ReactFlow,
   Background,
   Controls,
   Panel,
@@ -8,12 +9,14 @@ import ReactFlow, {
   type Edge,
   type Node,
   type NodeChange,
-  type NodeDragHandler,
+  type OnNodeDrag,
   type ReactFlowInstance,
-} from "reactflow";
-import "reactflow/dist/style.css";
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 
 import {
+  type AppEdge,
+  type AppNode,
   type EdgeMarkerSize,
   type EdgeMarkerType,
   getMarkerId,
@@ -23,6 +26,7 @@ import {
   useGraphStore,
 } from "../../store/graphStore";
 import { useEditorSettingsStore } from "../../store/editorSettingsStore";
+import { useTheme } from "../../lib/theme";
 import { nodeTypes } from "./nodeTypes";
 import { getFocusSubgraph } from "../search/focus";
 import CanvasContextMenu, { type ContextMenuState } from "./CanvasContextMenu";
@@ -189,7 +193,7 @@ function CustomMarkerDefs({ edges }: { edges: Array<{ data?: RelationshipData }>
 }
 
 // Component to render group backgrounds - must be inside ReactFlow
-function GroupBackgrounds({ groups, nodes }: { groups: NodeGroup[]; nodes: Node[] }) {
+function GroupBackgrounds({ groups, nodes }: { groups: NodeGroup[]; nodes: AppNode[] }) {
   const { x, y, zoom } = useViewport();
 
   // Only show groups that have at least one selected node
@@ -304,10 +308,13 @@ export default function GraphCanvas() {
     reconnectEdge,
     deleteSelectedNodes,
   } = useGraphStore();
-  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance<
+    AppNode,
+    AppEdge
+  > | null>(null);
   const lastCenteredNodeId = useRef<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
-  const { helperLines, applyHelperLines, resetHelperLines } = useHelperLines();
+  const { helperLines, applyHelperLines, resetHelperLines } = useHelperLines<AppNode>();
 
   // Track group dragging state
   const groupDragRef = useRef<{
@@ -316,6 +323,7 @@ export default function GraphCanvas() {
     initialPositions: Map<string, { x: number; y: number }>;
   } | null>(null);
   const { helperLinesEnabled, connectionSuggestionsEnabled } = useEditorSettingsStore();
+  const { resolvedTheme } = useTheme();
   const [proximityTarget, setProximityTarget] = useState<{
     sourceNodeId: string;
     targetNodeId: string;
@@ -338,7 +346,7 @@ export default function GraphCanvas() {
   }, [edges]);
 
   const handleInit = useCallback(
-    (instance: ReactFlowInstance) => {
+    (instance: ReactFlowInstance<AppNode, AppEdge>) => {
       setReactFlowInstance(instance);
       setFlowInstance(instance);
     },
@@ -346,7 +354,7 @@ export default function GraphCanvas() {
   );
 
   const handleEdgeClick = useCallback(
-    (_event: React.MouseEvent, edge: Edge<RelationshipData>) => {
+    (_event: React.MouseEvent, edge: AppEdge) => {
       selectEdge(edge.id);
       selectNode(undefined);
     },
@@ -354,7 +362,7 @@ export default function GraphCanvas() {
   );
 
   const handleNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
+    (_event: React.MouseEvent, node: AppNode) => {
       // Group selection is now handled in handleNodesChange for proper timing
       // This handler just updates our store's selectedNodeId for the inspector
       selectNode(node.id);
@@ -363,15 +371,18 @@ export default function GraphCanvas() {
     [selectEdge, selectNode]
   );
 
-  const handlePaneClick = useCallback(() => {
-    selectEdge(undefined);
-    selectNode(undefined);
-    stopEditingNode();
-    setContextMenu(null);
-  }, [selectEdge, selectNode, stopEditingNode]);
+  const handlePaneClick = useCallback(
+    (_event: MouseEvent | React.MouseEvent) => {
+      selectEdge(undefined);
+      selectNode(undefined);
+      stopEditingNode();
+      setContextMenu(null);
+    },
+    [selectEdge, selectNode, stopEditingNode]
+  );
 
   const handleNodeContextMenu = useCallback(
-    (event: React.MouseEvent, node: Node) => {
+    (event: React.MouseEvent, node: AppNode) => {
       event.preventDefault();
       // Check if multiple nodes are selected
       const selectedNodes = nodes.filter((n) => n.selected);
@@ -402,7 +413,7 @@ export default function GraphCanvas() {
     });
   }, []);
 
-  const handlePaneContextMenu = useCallback((event: React.MouseEvent) => {
+  const handlePaneContextMenu = useCallback((event: MouseEvent | React.MouseEvent) => {
     event.preventDefault();
     setContextMenu({
       type: "pane",
@@ -428,7 +439,7 @@ export default function GraphCanvas() {
   );
 
   const displayNodes = useMemo(
-    () =>
+    (): AppNode[] =>
       focusedSubgraph.nodes.map((node) => ({
         ...node,
         type: node.type ?? "editable",
@@ -446,11 +457,14 @@ export default function GraphCanvas() {
     [focusedSubgraph.nodes]
   );
 
+  // Default edge color based on theme
+  const defaultEdgeColor = resolvedTheme === "dark" ? "#6b7280" : "#94A3B8";
+
   const displayEdges = useMemo(
-    () =>
+    (): AppEdge[] =>
       focusedSubgraph.edges.map((edge) => {
         const isSelected = edge.id === selectedEdgeId;
-        const baseColor = edge.data?.style?.color ?? "#94A3B8";
+        const baseColor = edge.data?.style?.color ?? defaultEdgeColor;
         const baseThickness = edge.data?.style?.thickness ?? 2;
         const lineStyle = edge.data?.style?.lineStyle ?? "solid";
         const labelStyle = edge.data?.style?.labelStyle;
@@ -494,7 +508,7 @@ export default function GraphCanvas() {
           },
         };
       }),
-    [focusedSubgraph.edges, selectedEdgeId]
+    [focusedSubgraph.edges, selectedEdgeId, defaultEdgeColor]
   );
 
   useEffect(() => {
@@ -581,7 +595,7 @@ export default function GraphCanvas() {
 
   // When a grouped node starts dragging, capture initial positions of all group members
   // and select all group nodes so the visual feedback is correct
-  const handleNodeDragStart: NodeDragHandler = useCallback(
+  const handleNodeDragStart: OnNodeDrag<AppNode> = useCallback(
     (_event, draggedNode) => {
       const groupId = draggedNode.data?.groupId;
       if (!groupId) {
@@ -611,7 +625,7 @@ export default function GraphCanvas() {
       // Select all group nodes for visual feedback
       // This happens after drag starts, so it doesn't affect which nodes React Flow drags,
       // but it shows the user that all group nodes are selected
-      const selectionChanges: NodeChange[] = nodes.map((node) => ({
+      const selectionChanges: NodeChange<AppNode>[] = nodes.map((node) => ({
         type: "select" as const,
         id: node.id,
         selected: node.data?.groupId === groupId,
@@ -621,7 +635,7 @@ export default function GraphCanvas() {
     [nodes, onNodesChange]
   );
 
-  const handleNodeDrag: NodeDragHandler = useCallback(
+  const handleNodeDrag: OnNodeDrag<AppNode> = useCallback(
     (_event, draggedNode) => {
       // Handle group dragging - move all group members together
       if (groupDragRef.current && groupDragRef.current.draggedNodeId === draggedNode.id) {
@@ -634,7 +648,7 @@ export default function GraphCanvas() {
           const deltaY = draggedNode.position.y - draggedInitialPos.y;
 
           // Apply delta to all other group nodes
-          const positionChanges: NodeChange[] = [];
+          const positionChanges: NodeChange<AppNode>[] = [];
           for (const [nodeId, initialPos] of initialPositions) {
             if (nodeId !== draggedNodeId) {
               positionChanges.push({
@@ -753,7 +767,7 @@ export default function GraphCanvas() {
     ]
   );
 
-  const handleNodeDragStop: NodeDragHandler = useCallback(
+  const handleNodeDragStop: OnNodeDrag<AppNode> = useCallback(
     (_event, _node) => {
       // Clear group drag state
       groupDragRef.current = null;
@@ -769,8 +783,8 @@ export default function GraphCanvas() {
 
   // Wrap onNodesChange to apply helper lines snapping and group selection
   const handleNodesChange = useCallback(
-    (changes: NodeChange[]) => {
-      let modifiedChanges = changes;
+    (changes: NodeChange<AppNode>[]) => {
+      let modifiedChanges: NodeChange<AppNode>[] = changes;
 
       // Check for selection changes that involve grouped nodes
       // When a grouped node is selected (without shift), select all nodes in the group
@@ -798,7 +812,7 @@ export default function GraphCanvas() {
 
             if (isRegularClick) {
               // Add selection changes for all group nodes
-              const additionalSelections: NodeChange[] = groupNodeIds
+              const additionalSelections: NodeChange<AppNode>[] = groupNodeIds
                 .filter((id) => id !== selectedNodeId)
                 .map((id) => ({
                   type: "select" as const,
@@ -873,6 +887,7 @@ export default function GraphCanvas() {
         minZoom={0.2}
         maxZoom={2}
         fitView
+        colorMode={resolvedTheme}
         proOptions={{ hideAttribution: true }}
       >
         <Background gap={24} size={1} />

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Download, Loader2, Moon, Sun } from "lucide-react";
-import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "reactflow";
+import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
 
 import { Button } from "../../components/ui/button";
 import { Checkbox } from "../../components/ui/checkbox";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import ReactFlow, { Background, Controls, type ReactFlowInstance } from "reactflow";
-import "reactflow/dist/style.css";
+import { ReactFlow, Background, Controls, type ReactFlowInstance } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 
 import { getSharedGraph } from "../features/share/shareApi";
 import type { GraphPayload } from "../features/cloud/graphApi";

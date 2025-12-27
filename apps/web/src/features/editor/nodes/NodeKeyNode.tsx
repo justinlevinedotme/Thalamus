@@ -1,9 +1,7 @@
-import { NodeResizer } from "@reactflow/node-resizer";
-import "@reactflow/node-resizer/dist/style.css";
 import { Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { type NodeProps } from "reactflow";
+import { NodeResizer, type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
@@ -38,7 +36,9 @@ type NodeKeyData = {
   entries?: NodeKeyEntry[];
 };
 
-export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyData>) {
+type NodeKeyNodeType = Node<NodeKeyData, "nodeKey">;
+
+export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyNodeType>) {
   const { selectGroupNodes, updateNodeLabel, updateNodeBody } = useGraphStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(data.label);
@@ -143,7 +143,7 @@ export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyDat
         const isInInput =
           activeElement?.tagName === "INPUT" || activeElement?.tagName === "TEXTAREA";
 
-        if (containerRef.current?.contains(activeElement as Node) || !isInInput) {
+        if (containerRef.current?.contains(activeElement as globalThis.Node) || !isInInput) {
           event.preventDefault();
           addEntry();
         }

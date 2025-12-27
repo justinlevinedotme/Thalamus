@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
-import { type NodeProps } from "reactflow";
+import { type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
 import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
+
+type TextNodeData = {
+  label: string;
+  kind: NodeKind;
+  style?: NodeStyle;
+  groupId?: string;
+};
+
+type TextNodeType = Node<TextNodeData, "text">;
 
 // Strip HTML tags for plain text display
 const stripHtml = (html: string): string => {
@@ -24,16 +33,7 @@ const sizeToTextClass = (size: string | undefined): string => {
   }
 };
 
-export default function TextNode({
-  id,
-  data,
-  selected,
-}: NodeProps<{
-  label: string;
-  kind: NodeKind;
-  style?: NodeStyle;
-  groupId?: string;
-}>) {
+export default function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
   const { editingNodeId, startEditingNode, stopEditingNode, updateNodeLabel, selectGroupNodes } =
     useGraphStore();
   const isEditing = editingNodeId === id;

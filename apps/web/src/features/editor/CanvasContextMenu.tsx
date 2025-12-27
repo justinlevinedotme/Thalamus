@@ -316,7 +316,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
   const dangerItemClass =
     "flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition cursor-pointer";
   const subMenuClass =
-    "absolute left-full top-0 ml-1 min-w-[160px] rounded-lg border border-border bg-background py-1 shadow-lg";
+    "absolute left-full top-0 min-w-[160px] rounded-lg border border-border bg-background py-1 shadow-lg";
 
   const renderKbd = (keys: string) => (
     <span className="ml-auto flex items-center gap-0.5 text-xs text-muted-foreground">
@@ -373,28 +373,32 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
                 <ChevronRight className="h-4 w-4" />
               </button>
               {openSubMenu === "group" && (
-                <div className={subMenuClass}>
-                  <button
-                    className={canGroup ? menuItemClass : disabledItemClass}
-                    type="button"
-                    onClick={canGroup ? handleGroup : undefined}
-                    disabled={!canGroup}
-                  >
-                    <Group className="h-4 w-4" />
-                    Group
-                    {renderKbd(`${modKeyLabel}+G`)}
-                  </button>
-                  <button
-                    className={canUngroup ? menuItemClass : disabledItemClass}
-                    type="button"
-                    onClick={canUngroup ? handleUngroup : undefined}
-                    disabled={!canUngroup}
-                  >
-                    <Ungroup className="h-4 w-4" />
-                    Ungroup
-                    {renderKbd(`${modKeyLabel}+⇧+G`)}
-                  </button>
-                </div>
+                <>
+                  {/* Invisible bridge to prevent hover gap */}
+                  <div className="absolute left-full top-0 h-full w-2" />
+                  <div className={subMenuClass}>
+                    <button
+                      className={canGroup ? menuItemClass : disabledItemClass}
+                      type="button"
+                      onClick={canGroup ? handleGroup : undefined}
+                      disabled={!canGroup}
+                    >
+                      <Group className="h-4 w-4" />
+                      Group
+                      {renderKbd(`${modKeyLabel}+G`)}
+                    </button>
+                    <button
+                      className={canUngroup ? menuItemClass : disabledItemClass}
+                      type="button"
+                      onClick={canUngroup ? handleUngroup : undefined}
+                      disabled={!canUngroup}
+                    >
+                      <Ungroup className="h-4 w-4" />
+                      Ungroup
+                      {renderKbd(`${modKeyLabel}+⇧+G`)}
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -414,33 +418,37 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
                 <ChevronRight className="h-4 w-4" />
               </button>
               {openSubMenu === "align" && (
-                <div className={subMenuClass}>
-                  <button className={menuItemClass} type="button" onClick={handleAlignLeft}>
-                    <AlignStartHorizontal className="h-4 w-4" />
-                    Left
-                  </button>
-                  <button className={menuItemClass} type="button" onClick={handleAlignCenter}>
-                    <AlignCenterHorizontal className="h-4 w-4" />
-                    Center
-                  </button>
-                  <button className={menuItemClass} type="button" onClick={handleAlignRight}>
-                    <AlignEndHorizontal className="h-4 w-4" />
-                    Right
-                  </button>
-                  <div className="my-1 h-px bg-border" />
-                  <button className={menuItemClass} type="button" onClick={handleAlignTop}>
-                    <AlignStartVertical className="h-4 w-4" />
-                    Top
-                  </button>
-                  <button className={menuItemClass} type="button" onClick={handleAlignMiddle}>
-                    <AlignCenterVertical className="h-4 w-4" />
-                    Middle
-                  </button>
-                  <button className={menuItemClass} type="button" onClick={handleAlignBottom}>
-                    <AlignEndVertical className="h-4 w-4" />
-                    Bottom
-                  </button>
-                </div>
+                <>
+                  {/* Invisible bridge to prevent hover gap */}
+                  <div className="absolute left-full top-0 h-full w-2" />
+                  <div className={subMenuClass}>
+                    <button className={menuItemClass} type="button" onClick={handleAlignLeft}>
+                      <AlignStartHorizontal className="h-4 w-4" />
+                      Left
+                    </button>
+                    <button className={menuItemClass} type="button" onClick={handleAlignCenter}>
+                      <AlignCenterHorizontal className="h-4 w-4" />
+                      Center
+                    </button>
+                    <button className={menuItemClass} type="button" onClick={handleAlignRight}>
+                      <AlignEndHorizontal className="h-4 w-4" />
+                      Right
+                    </button>
+                    <div className="my-1 h-px bg-border" />
+                    <button className={menuItemClass} type="button" onClick={handleAlignTop}>
+                      <AlignStartVertical className="h-4 w-4" />
+                      Top
+                    </button>
+                    <button className={menuItemClass} type="button" onClick={handleAlignMiddle}>
+                      <AlignCenterVertical className="h-4 w-4" />
+                      Middle
+                    </button>
+                    <button className={menuItemClass} type="button" onClick={handleAlignBottom}>
+                      <AlignEndVertical className="h-4 w-4" />
+                      Bottom
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           )}
@@ -460,24 +468,28 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
                 <ChevronRight className="h-4 w-4" />
               </button>
               {openSubMenu === "distribute" && (
-                <div className={subMenuClass}>
-                  <button
-                    className={menuItemClass}
-                    type="button"
-                    onClick={handleDistributeHorizontally}
-                  >
-                    <AlignHorizontalSpaceAround className="h-4 w-4" />
-                    Horizontally
-                  </button>
-                  <button
-                    className={menuItemClass}
-                    type="button"
-                    onClick={handleDistributeVertically}
-                  >
-                    <AlignVerticalSpaceAround className="h-4 w-4" />
-                    Vertically
-                  </button>
-                </div>
+                <>
+                  {/* Invisible bridge to prevent hover gap */}
+                  <div className="absolute left-full top-0 h-full w-2" />
+                  <div className={subMenuClass}>
+                    <button
+                      className={menuItemClass}
+                      type="button"
+                      onClick={handleDistributeHorizontally}
+                    >
+                      <AlignHorizontalSpaceAround className="h-4 w-4" />
+                      Horizontally
+                    </button>
+                    <button
+                      className={menuItemClass}
+                      type="button"
+                      onClick={handleDistributeVertically}
+                    >
+                      <AlignVerticalSpaceAround className="h-4 w-4" />
+                      Vertically
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           )}

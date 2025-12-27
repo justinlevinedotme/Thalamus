@@ -1,4 +1,4 @@
-import type { Node } from "reactflow";
+import type { Node } from "@xyflow/react";
 import type { Box, HelperLine, HelperLineMatch, Orientation } from "./types";
 import { ANCHORS, SNAP_THRESHOLD } from "./config";
 

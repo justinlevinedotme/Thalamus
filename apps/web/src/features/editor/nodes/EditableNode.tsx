@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "reactflow";
+import { Handle, Position, useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
@@ -11,6 +11,18 @@ import {
   type NodeStyle,
   useGraphStore,
 } from "../../../store/graphStore";
+
+type EditableNodeData = {
+  label: string;
+  body?: string;
+  kind: NodeKind;
+  style?: NodeStyle;
+  sourceHandles?: NodeHandle[];
+  targetHandles?: NodeHandle[];
+  groupId?: string;
+};
+
+type EditableNodeType = Node<EditableNodeData, "editable">;
 
 const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
   switch (padding) {
@@ -31,19 +43,7 @@ const stripHtml = (html: string): string => {
   return doc.body.textContent || "";
 };
 
-export default function EditableNode({
-  id,
-  data,
-  selected,
-}: NodeProps<{
-  label: string;
-  body?: string;
-  kind: NodeKind;
-  style?: NodeStyle;
-  sourceHandles?: NodeHandle[];
-  targetHandles?: NodeHandle[];
-  groupId?: string;
-}>) {
+export default function EditableNode({ id, data, selected }: NodeProps<EditableNodeType>) {
   const { editingNodeId, startEditingNode, stopEditingNode, updateNodeLabel, updateNodeBody } =
     useGraphStore();
   const updateNodeInternals = useUpdateNodeInternals();
