@@ -23,10 +23,9 @@ Visual diagram editor for event-driven architecture modeling with React Flow, ba
 # Install dependencies
 npm install
 
-# Run migrations and seed the database (first time only)
+# Apply migrations to local D1 database (first time only)
 cd apps/api
-npm run db:migrate:local
-npm run db:seed
+npx wrangler d1 migrations apply thalamus-auth --local --env dev
 cd ../..
 
 # Start development servers
@@ -38,9 +37,16 @@ This starts:
 - **Frontend**: http://localhost:5173
 - **API**: http://localhost:8787
 
-### Test Credentials
+### Test Credentials (Optional)
 
-After running `npm run db:seed`:
+To seed the database with test data, run the standalone seed script:
+
+```bash
+cd apps/api
+npm run db:seed
+```
+
+This creates:
 
 - **Email**: `admin@admin.com`
 - **Password**: `root123`
@@ -59,14 +65,23 @@ From the root directory:
 
 From `apps/api`:
 
-| Command                    | Description                        |
-| -------------------------- | ---------------------------------- |
-| `npm run dev`              | Start API in development mode      |
-| `npm run db:migrate:local` | Apply migrations to local SQLite   |
-| `npm run db:seed`          | Seed database with test data       |
-| `npm run db:generate`      | Generate new migration from schema |
-| `npm run db:studio`        | Open Drizzle Studio (database GUI) |
-| `npm run deploy`           | Deploy to production               |
+| Command               | Description                        |
+| --------------------- | ---------------------------------- |
+| `npm run dev`         | Start API in development mode      |
+| `npm run db:seed`     | Seed database with test data       |
+| `npm run db:generate` | Generate new migration from schema |
+| `npm run db:studio`   | Open Drizzle Studio (database GUI) |
+| `npm run deploy`      | Deploy to production               |
+
+Apply migrations with wrangler:
+
+```bash
+# Local (Miniflare D1 simulation)
+npx wrangler d1 migrations apply thalamus-auth --local --env dev
+
+# Production
+npx wrangler d1 migrations apply thalamus-auth --env production
+```
 
 ### Environment Variables
 
@@ -80,15 +95,15 @@ OAuth providers are optional - email/password authentication works without them.
 
 ### Local Database
 
-Local development uses SQLite (`apps/api/local.db`) instead of Cloudflare D1. The database is automatically created when you run migrations.
+Local development uses Miniflare's D1 simulation, which stores data in `.wrangler/state/`. The database is automatically created when you run migrations.
 
 To reset the database:
 
 ```bash
 cd apps/api
-rm local.db
-npm run db:migrate:local
-npm run db:seed
+rm -rf .wrangler/state
+npx wrangler d1 migrations apply thalamus-auth --local --env dev
+npm run db:seed  # Optional: add test data
 ```
 
 ## Production Deployment
