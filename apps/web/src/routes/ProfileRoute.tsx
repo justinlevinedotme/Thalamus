@@ -326,10 +326,10 @@ export default function ProfileRoute() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="flex min-h-screen flex-col bg-slate-50">
+      <div className="flex min-h-screen flex-col bg-secondary">
         <Header />
         <div className="flex flex-1 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
         <Footer />
       </div>
@@ -338,10 +338,10 @@ export default function ProfileRoute() {
 
   if (!profile) {
     return (
-      <div className="flex min-h-screen flex-col bg-slate-50">
+      <div className="flex min-h-screen flex-col bg-secondary">
         <Header />
         <div className="flex flex-1 items-center justify-center">
-          <p className="text-slate-500">Unable to load profile</p>
+          <p className="text-muted-foreground">Unable to load profile</p>
         </div>
         <Footer />
       </div>
@@ -349,11 +349,11 @@ export default function ProfileRoute() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-secondary">
       <Header />
       <div className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-2xl space-y-8">
-          <h1 className="text-2xl font-semibold text-slate-900">Profile Settings</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Profile Settings</h1>
 
           {error && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
@@ -365,8 +365,8 @@ export default function ProfileRoute() {
           )}
 
           {/* Profile Picture Section */}
-          <section className="rounded-lg border border-slate-200 bg-white p-6">
-            <h2 className="mb-4 text-lg font-medium text-slate-900">Profile Picture</h2>
+          <section className="rounded-lg border border-border bg-card p-6">
+            <h2 className="mb-4 text-lg font-medium text-foreground">Profile Picture</h2>
             <div className="flex items-center gap-6">
               <div className="relative">
                 {profile.image ? (
@@ -376,12 +376,12 @@ export default function ProfileRoute() {
                     className="h-24 w-24 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-100">
-                    <User className="h-12 w-12 text-slate-400" />
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary">
+                    <User className="h-12 w-12 text-muted-foreground" />
                   </div>
                 )}
                 <button
-                  className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-slate-900 text-white transition hover:bg-slate-800"
+                  className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-card bg-foreground text-background transition hover:bg-foreground/90"
                   onClick={() => {
                     setNewImage(profile.image || "");
                     setEditImageOpen(true);
@@ -391,10 +391,10 @@ export default function ProfileRoute() {
                 </button>
               </div>
               <div>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   Your profile picture is visible to others when you share graphs.
                 </p>
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Enter a URL to an image hosted elsewhere (e.g., GitHub, Gravatar).
                 </p>
               </div>
@@ -402,16 +402,16 @@ export default function ProfileRoute() {
           </section>
 
           {/* Account Details Section */}
-          <section className="rounded-lg border border-slate-200 bg-white p-6">
-            <h2 className="mb-4 text-lg font-medium text-slate-900">Account Details</h2>
+          <section className="rounded-lg border border-border bg-card p-6">
+            <h2 className="mb-4 text-lg font-medium text-foreground">Account Details</h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-700">Name</p>
-                  <p className="text-sm text-slate-500">{profile.name || "Not set"}</p>
+                  <p className="text-sm font-medium text-foreground">Name</p>
+                  <p className="text-sm text-muted-foreground">{profile.name || "Not set"}</p>
                 </div>
                 <button
-                  className="text-sm text-slate-600 underline hover:text-slate-900"
+                  className="text-sm text-muted-foreground underline hover:text-foreground"
                   onClick={() => {
                     setNewName(profile.name || "");
                     setEditNameOpen(true);
@@ -420,14 +420,14 @@ export default function ProfileRoute() {
                   Edit
                 </button>
               </div>
-              <div className="border-t border-slate-100" />
+              <div className="border-t border-border" />
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-700">Email</p>
-                  <p className="text-sm text-slate-500">{profile.email}</p>
+                  <p className="text-sm font-medium text-foreground">Email</p>
+                  <p className="text-sm text-muted-foreground">{profile.email}</p>
                 </div>
                 <button
-                  className="text-sm text-slate-600 underline hover:text-slate-900"
+                  className="text-sm text-muted-foreground underline hover:text-foreground"
                   onClick={() => {
                     setNewEmail("");
                     setEmailChangeError(null);
@@ -438,22 +438,22 @@ export default function ProfileRoute() {
                   Edit
                 </button>
               </div>
-              <div className="border-t border-slate-100" />
+              <div className="border-t border-border" />
               <div>
-                <p className="text-sm font-medium text-slate-700">Plan</p>
-                <p className="text-sm capitalize text-slate-500">{profile.plan}</p>
+                <p className="text-sm font-medium text-foreground">Plan</p>
+                <p className="text-sm capitalize text-muted-foreground">{profile.plan}</p>
               </div>
             </div>
           </section>
 
           {/* Two-Factor Authentication Section */}
-          <section className="rounded-lg border border-slate-200 bg-white p-6">
+          <section className="rounded-lg border border-border bg-card p-6">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
-                <Shield className="mt-0.5 h-5 w-5 text-slate-600" />
+                <Shield className="mt-0.5 h-5 w-5 text-muted-foreground" />
                 <div>
-                  <h2 className="text-lg font-medium text-slate-900">Two-Factor Authentication</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <h2 className="text-lg font-medium text-foreground">Two-Factor Authentication</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Add an extra layer of security to your account using an authenticator app.
                   </p>
                 </div>
@@ -473,7 +473,7 @@ export default function ProfileRoute() {
                 </div>
               ) : hasPassword ? (
                 <button
-                  className="rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white transition hover:bg-slate-800"
+                  className="rounded-md bg-foreground px-3 py-1.5 text-sm text-background transition hover:bg-foreground/90"
                   onClick={() => {
                     setTwoFactorPassword("");
                     setTwoFactorError(null);
@@ -485,7 +485,7 @@ export default function ProfileRoute() {
                 </button>
               ) : (
                 <button
-                  className="rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white transition hover:bg-slate-800"
+                  className="rounded-md bg-foreground px-3 py-1.5 text-sm text-background transition hover:bg-foreground/90"
                   onClick={() => setSetPasswordOpen(true)}
                 >
                   Set Password First
@@ -501,29 +501,29 @@ export default function ProfileRoute() {
           </section>
 
           {/* Linked Accounts Section */}
-          <section className="rounded-lg border border-slate-200 bg-white p-6">
+          <section className="rounded-lg border border-border bg-card p-6">
             <div className="mb-4 flex items-center gap-2">
-              <Link2 className="h-5 w-5 text-slate-600" />
-              <h2 className="text-lg font-medium text-slate-900">Linked Accounts</h2>
+              <Link2 className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-medium text-foreground">Linked Accounts</h2>
             </div>
             {profile.linkedAccounts.length === 0 ? (
-              <p className="text-sm text-slate-500">No linked accounts.</p>
+              <p className="text-sm text-muted-foreground">No linked accounts.</p>
             ) : (
               <div className="space-y-3">
                 {profile.linkedAccounts.map((account) => (
                   <div
                     key={account.provider}
-                    className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50 px-4 py-3"
+                    className="flex items-center justify-between rounded-md border border-border bg-secondary px-4 py-3"
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-slate-600">
+                      <span className="text-muted-foreground">
                         {providerIcons[account.provider] || <User className="h-5 w-5" />}
                       </span>
-                      <span className="text-sm font-medium text-slate-700">
+                      <span className="text-sm font-medium text-foreground">
                         {providerLabels[account.provider] || account.provider}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-muted-foreground">
                       Connected {new Date(account.linkedAt).toLocaleDateString()}
                     </span>
                   </div>
@@ -533,20 +533,20 @@ export default function ProfileRoute() {
           </section>
 
           {/* Email Preferences Section */}
-          <section className="rounded-lg border border-slate-200 bg-white p-6">
+          <section className="rounded-lg border border-border bg-card p-6">
             <div className="mb-4 flex items-center gap-2">
-              <Mail className="h-5 w-5 text-slate-600" />
-              <h2 className="text-lg font-medium text-slate-900">Email Preferences</h2>
+              <Mail className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-medium text-foreground">Email Preferences</h2>
             </div>
-            <p className="mb-4 text-sm text-slate-500">
+            <p className="mb-4 text-sm text-muted-foreground">
               Choose which emails you'd like to receive. Transactional emails (password resets,
               security alerts) cannot be disabled.
             </p>
             <div className="space-y-4">
               <label className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-700">Marketing emails</p>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-sm font-medium text-foreground">Marketing emails</p>
+                  <p className="text-xs text-muted-foreground">
                     Product announcements and promotional content
                   </p>
                 </div>
@@ -558,22 +558,22 @@ export default function ProfileRoute() {
                   onClick={() =>
                     handleUpdateEmailPrefs("marketingEmails", !emailPrefs.marketingEmails)
                   }
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 ${
-                    emailPrefs.marketingEmails ? "bg-slate-900" : "bg-slate-200"
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 ${
+                    emailPrefs.marketingEmails ? "bg-foreground" : "bg-border"
                   }`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow ring-0 transition duration-200 ease-in-out ${
                       emailPrefs.marketingEmails ? "translate-x-5" : "translate-x-0"
                     }`}
                   />
                 </button>
               </label>
-              <div className="border-t border-slate-100" />
+              <div className="border-t border-border" />
               <label className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-700">Product updates</p>
-                  <p className="text-xs text-slate-500">New features and improvements</p>
+                  <p className="text-sm font-medium text-foreground">Product updates</p>
+                  <p className="text-xs text-muted-foreground">New features and improvements</p>
                 </div>
                 <button
                   type="button"
@@ -583,12 +583,12 @@ export default function ProfileRoute() {
                   onClick={() =>
                     handleUpdateEmailPrefs("productUpdates", !emailPrefs.productUpdates)
                   }
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 ${
-                    emailPrefs.productUpdates ? "bg-slate-900" : "bg-slate-200"
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 ${
+                    emailPrefs.productUpdates ? "bg-foreground" : "bg-border"
                   }`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow ring-0 transition duration-200 ease-in-out ${
                       emailPrefs.productUpdates ? "translate-x-5" : "translate-x-0"
                     }`}
                   />
@@ -623,14 +623,14 @@ export default function ProfileRoute() {
             <DialogFooter className="mt-4">
               <button
                 type="button"
-                className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
                 onClick={() => setEditNameOpen(false)}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                 disabled={saving}
               >
                 {saving ? "Saving..." : "Save"}
@@ -675,14 +675,14 @@ export default function ProfileRoute() {
             <DialogFooter className="mt-4">
               <button
                 type="button"
-                className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
                 onClick={() => setEditImageOpen(false)}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                 disabled={saving || !newImage.trim()}
               >
                 {saving ? "Saving..." : "Save"}
@@ -718,7 +718,7 @@ export default function ProfileRoute() {
           <div className="py-4">
             {twoFactorLoading ? (
               <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : totpUri ? (
               <div className="space-y-4">
@@ -730,11 +730,11 @@ export default function ProfileRoute() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-sm font-medium text-foreground mb-1">
                     Or enter this code manually
                   </label>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 rounded-md bg-slate-100 px-3 py-2 text-sm font-mono text-slate-800 break-all">
+                    <code className="flex-1 rounded-md bg-secondary px-3 py-2 text-sm font-mono text-foreground break-all">
                       {new URL(totpUri).searchParams.get("secret") || ""}
                     </code>
                     <button
@@ -747,7 +747,7 @@ export default function ProfileRoute() {
                           setTimeout(() => setSecretCopied(false), 2000);
                         }
                       }}
-                      className="shrink-0 rounded-md border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50"
+                      className="shrink-0 rounded-md border border-border p-2 text-muted-foreground transition hover:bg-secondary"
                       title="Copy secret"
                     >
                       {secretCopied ? (
@@ -759,7 +759,7 @@ export default function ProfileRoute() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">
+                  <label className="block text-sm font-medium text-foreground">
                     Verification Code
                   </label>
                   <Input
@@ -782,7 +782,7 @@ export default function ProfileRoute() {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">Password</label>
+                  <label className="block text-sm font-medium text-foreground">Password</label>
                   <Input
                     type="password"
                     value={twoFactorPassword}
@@ -799,7 +799,7 @@ export default function ProfileRoute() {
           <DialogFooter>
             <button
               type="button"
-              className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+              className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
               onClick={() => setSetup2FAOpen(false)}
             >
               Cancel
@@ -807,7 +807,7 @@ export default function ProfileRoute() {
             {totpUri ? (
               <button
                 type="button"
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                 disabled={twoFactorLoading || verifyCode.length !== 6}
                 onClick={handleVerify2FA}
               >
@@ -816,7 +816,7 @@ export default function ProfileRoute() {
             ) : (
               <button
                 type="button"
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                 disabled={twoFactorLoading || !twoFactorPassword.trim()}
                 onClick={handleEnable2FA}
               >
@@ -848,7 +848,7 @@ export default function ProfileRoute() {
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700">Password</label>
+              <label className="block text-sm font-medium text-foreground">Password</label>
               <Input
                 type="password"
                 value={twoFactorPassword}
@@ -863,7 +863,7 @@ export default function ProfileRoute() {
           <DialogFooter>
             <button
               type="button"
-              className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+              className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
               onClick={() => setDisable2FAOpen(false)}
             >
               Cancel
@@ -906,14 +906,14 @@ export default function ProfileRoute() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
                   <Check className="h-6 w-6 text-green-600" />
                 </div>
-                <p className="text-center text-sm text-slate-600">
+                <p className="text-center text-sm text-muted-foreground">
                   We've sent a password reset link to <strong>{profile?.email}</strong>. After
                   setting your password, return here to enable 2FA.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   We'll send a password setup link to your email address ({profile?.email}). Once
                   you've set a password, you'll be able to enable two-factor authentication.
                 </p>
@@ -924,7 +924,7 @@ export default function ProfileRoute() {
           <DialogFooter>
             <button
               type="button"
-              className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+              className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
               onClick={() => setSetPasswordOpen(false)}
             >
               {passwordResetSent ? "Close" : "Cancel"}
@@ -932,7 +932,7 @@ export default function ProfileRoute() {
             {!passwordResetSent && (
               <button
                 type="button"
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                 disabled={passwordLoading}
                 onClick={handleSendPasswordReset}
               >
@@ -970,7 +970,7 @@ export default function ProfileRoute() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
                   <Check className="h-6 w-6 text-green-600" />
                 </div>
-                <p className="text-center text-sm text-slate-600">
+                <p className="text-center text-sm text-muted-foreground">
                   We've sent a verification link to <strong>{newEmail}</strong>. Click the link in
                   the email to complete the change.
                 </p>
@@ -978,11 +978,11 @@ export default function ProfileRoute() {
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">Current Email</label>
-                  <p className="mt-1 text-sm text-slate-500">{profile?.email}</p>
+                  <label className="block text-sm font-medium text-foreground">Current Email</label>
+                  <p className="mt-1 text-sm text-muted-foreground">{profile?.email}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">New Email</label>
+                  <label className="block text-sm font-medium text-foreground">New Email</label>
                   <Input
                     type="email"
                     value={newEmail}
@@ -999,7 +999,7 @@ export default function ProfileRoute() {
           <DialogFooter>
             <button
               type="button"
-              className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+              className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
               onClick={() => setEditEmailOpen(false)}
             >
               {emailChangeSent ? "Close" : "Cancel"}
@@ -1007,7 +1007,7 @@ export default function ProfileRoute() {
             {!emailChangeSent && (
               <button
                 type="button"
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                 disabled={emailChangeLoading || !newEmail.trim()}
                 onClick={handleChangeEmail}
               >

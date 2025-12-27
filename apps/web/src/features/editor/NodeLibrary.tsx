@@ -12,9 +12,9 @@ export default function NodeLibrary() {
   };
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-3">
+    <section className="rounded-lg border border-border bg-background p-3">
       <button
-        className="flex w-full items-center justify-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+        className="flex w-full items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-muted-foreground transition hover:border-muted hover:bg-secondary"
         type="button"
         draggable
         onDragStart={handleDragStart}

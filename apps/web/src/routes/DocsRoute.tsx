@@ -67,7 +67,7 @@ function GraphPreview({ graph }: { graph: GraphRecord }) {
 
   if (nodes.length === 0) {
     return (
-      <div className="flex h-full w-full items-center justify-center text-xs text-slate-300">
+      <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
         Empty graph
       </div>
     );
@@ -195,16 +195,16 @@ export default function DocsRoute() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-card">
       <Header />
       <div className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-4xl space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-slate-900">
+              <h1 className="text-2xl font-semibold text-foreground">
                 {isAuthenticated ? "Your graphs" : "Thalamus workspace"}
               </h1>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {isAuthenticated
                   ? `${graphs.length}/20 saved. Each graph keeps a one-year retention window.`
                   : "Start a graph in the browser. Saving and sharing require an account."}
@@ -212,7 +212,7 @@ export default function DocsRoute() {
             </div>
             {isAuthenticated ? (
               <button
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-50"
+                className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
                 type="button"
                 onClick={handleOpenCreate}
                 disabled={graphs.length >= 20}
@@ -222,25 +222,28 @@ export default function DocsRoute() {
             ) : (
               <div className="flex items-center gap-3">
                 <Link
-                  className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700"
+                  className="rounded-lg border border-border px-4 py-2 text-sm text-foreground"
                   to="/editor"
                 >
                   Start a graph
                 </Link>
-                <Link className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white" to="/login">
+                <Link
+                  className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground"
+                  to="/login"
+                >
                   Sign in
                 </Link>
               </div>
             )}
           </div>
 
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
           {isAuthenticated ? (
             loading ? (
-              <p className="text-sm text-slate-500">Loading...</p>
+              <p className="text-sm text-muted-foreground">Loading...</p>
             ) : graphs.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+              <div className="rounded-lg border border-dashed border-border bg-background p-8 text-center text-sm text-muted-foreground">
                 No graphs yet. Create one to get started.
               </div>
             ) : (
@@ -248,12 +251,12 @@ export default function DocsRoute() {
                 {graphs.map((graph) => (
                   <div
                     key={graph.id}
-                    className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                    className="group relative overflow-hidden rounded-xl border border-border bg-background shadow-sm transition hover:border-muted-foreground/30 hover:shadow-[0_0_40px_-10px_rgba(0,212,255,0.25)]"
                   >
                     {/* Preview area */}
                     <button
                       type="button"
-                      className="block h-24 w-full cursor-pointer border-b border-slate-100 bg-slate-50 p-2"
+                      className="block h-24 w-full cursor-pointer border-b border-border bg-secondary p-2"
                       onClick={() => navigate(`/docs/${graph.id}`)}
                     >
                       <GraphPreview graph={graph} />
@@ -261,7 +264,7 @@ export default function DocsRoute() {
 
                     {/* Delete button - top right corner */}
                     <button
-                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-white/80 text-slate-400 opacity-0 backdrop-blur-sm transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 backdrop-blur-sm transition hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
                       type="button"
                       onClick={() => setDeleteTarget(graph)}
                       aria-label="Delete graph"
@@ -276,12 +279,12 @@ export default function DocsRoute() {
                         className="block w-full cursor-pointer text-left"
                         onClick={() => navigate(`/docs/${graph.id}`)}
                       >
-                        <h3 className="truncate text-sm font-semibold text-slate-800">
+                        <h3 className="truncate text-sm font-semibold text-foreground">
                           {graph.title || "Untitled Graph"}
                         </h3>
                       </button>
 
-                      <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {formatRelativeDate(graph.updated_at)}
@@ -297,7 +300,7 @@ export default function DocsRoute() {
               </div>
             )
           ) : (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+            <div className="rounded-lg border border-dashed border-border bg-background p-8 text-center text-sm text-muted-foreground">
               You can sketch ideas immediately, then export when you are ready.
             </div>
           )}
@@ -328,14 +331,14 @@ export default function DocsRoute() {
             <DialogFooter className="mt-4">
               <button
                 type="button"
-                className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                className="rounded-lg border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
                 onClick={() => setCreateOpen(false)}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
                 disabled={creating}
               >
                 {creating ? "Creating..." : "Create"}

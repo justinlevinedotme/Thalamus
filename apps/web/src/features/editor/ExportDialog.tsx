@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Moon, Sun } from "lucide-react";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "reactflow";
 
 import { Button } from "../../components/ui/button";
 import { Checkbox } from "../../components/ui/checkbox";
-import { ColorPicker, ColorSwatch } from "../../components/ui/color-picker";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +27,7 @@ import {
   type ExportOptions,
   type ExportQuality,
 } from "../../lib/exportImage";
+import { useTheme } from "../../lib/theme";
 
 type ExportDialogProps = {
   open: boolean;
@@ -50,13 +50,12 @@ const qualityOptions: { value: ExportQuality; label: string; description: string
   { value: "ultra", label: "4x", description: "Ultra quality" },
 ];
 
-const backgroundPresets = [
-  { color: "#ffffff", label: "White" },
-  { color: "#f8fafc", label: "Slate 50" },
-  { color: "#f1f5f9", label: "Slate 100" },
-  { color: "#1e293b", label: "Slate 800" },
-  { color: "#0f172a", label: "Slate 900" },
-];
+type ExportTheme = "light" | "dark";
+
+const themeBackgrounds: Record<ExportTheme, string> = {
+  light: "#ffffff",
+  dark: "#000000",
+};
 
 export default function ExportDialog({
   open,
@@ -65,14 +64,20 @@ export default function ExportDialog({
   nodes,
   edges,
 }: ExportDialogProps) {
+  const { resolvedTheme } = useTheme();
   const [format, setFormat] = useState<ExportFormat>("png");
   const [margin, setMargin] = useState<ExportMargin>("small");
   const [quality, setQuality] = useState<ExportQuality>("high");
   const [transparentBackground, setTransparentBackground] = useState(false);
-  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+  const [exportTheme, setExportTheme] = useState<ExportTheme>(() =>
+    resolvedTheme === "dark" ? "dark" : "light"
+  );
   const [preview, setPreview] = useState<string | null>(null);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+
+  // Derive background color from export theme
+  const backgroundColor = themeBackgrounds[exportTheme];
 
   const options: ExportOptions = {
     margin,
@@ -93,7 +98,7 @@ export default function ExportDialog({
     } finally {
       setIsGeneratingPreview(false);
     }
-  }, [open, nodes, edges, margin, transparentBackground, backgroundColor]);
+  }, [open, nodes, edges, margin, transparentBackground, exportTheme]);
 
   // Generate preview when dialog opens or options change
   useEffect(() => {
@@ -130,7 +135,7 @@ export default function ExportDialog({
           <div className="space-y-4 flex-1 min-h-0 flex flex-col">
             {/* Preview - Large */}
             <div
-              className="relative flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200"
+              className="relative flex-1 min-h-0 overflow-hidden rounded-lg border border-border"
               style={{
                 backgroundColor: transparentBackground ? undefined : backgroundColor,
                 backgroundImage: transparentBackground
@@ -140,12 +145,12 @@ export default function ExportDialog({
             >
               {isGeneratingPreview ? (
                 <div className="flex h-full items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                 </div>
               ) : preview ? (
                 <img src={preview} alt="Export preview" className="h-full w-full object-contain" />
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                   No preview available
                 </div>
               )}
@@ -155,10 +160,10 @@ export default function ExportDialog({
             <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
               {/* Format */}
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-500">Format</label>
+                <label className="text-xs text-muted-foreground">Format</label>
                 <ToggleGroup
                   type="single"
-                  className="h-7 rounded-md border border-slate-200 bg-white"
+                  className="h-7 rounded-md border border-border bg-background"
                   value={format}
                   onValueChange={(v) => v && setFormat(v as ExportFormat)}
                 >
@@ -166,7 +171,7 @@ export default function ExportDialog({
                     <TooltipTrigger asChild>
                       <ToggleGroupItem
                         value="png"
-                        className="h-full w-12 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900"
+                        className="h-full w-12 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground"
                         variant="ghost"
                       >
                         PNG
@@ -178,7 +183,7 @@ export default function ExportDialog({
                     <TooltipTrigger asChild>
                       <ToggleGroupItem
                         value="pdf"
-                        className="h-full w-12 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900"
+                        className="h-full w-12 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground"
                         variant="ghost"
                       >
                         PDF
@@ -191,10 +196,10 @@ export default function ExportDialog({
 
               {/* Margin */}
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-500">Margin</label>
+                <label className="text-xs text-muted-foreground">Margin</label>
                 <ToggleGroup
                   type="single"
-                  className="h-7 rounded-md border border-slate-200 bg-white"
+                  className="h-7 rounded-md border border-border bg-background"
                   value={margin}
                   onValueChange={(v) => v && setMargin(v as ExportMargin)}
                 >
@@ -203,7 +208,7 @@ export default function ExportDialog({
                       <TooltipTrigger asChild>
                         <ToggleGroupItem
                           value={opt.value}
-                          className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900"
+                          className="h-full w-10 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground"
                           variant="ghost"
                         >
                           {opt.label}
@@ -221,10 +226,10 @@ export default function ExportDialog({
 
               {/* Quality */}
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-500">Quality</label>
+                <label className="text-xs text-muted-foreground">Quality</label>
                 <ToggleGroup
                   type="single"
-                  className="h-7 rounded-md border border-slate-200 bg-white"
+                  className="h-7 rounded-md border border-border bg-background"
                   value={quality}
                   onValueChange={(v) => v && setQuality(v as ExportQuality)}
                 >
@@ -233,7 +238,7 @@ export default function ExportDialog({
                       <TooltipTrigger asChild>
                         <ToggleGroupItem
                           value={opt.value}
-                          className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900"
+                          className="h-full w-10 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground"
                           variant="ghost"
                         >
                           {opt.label}
@@ -245,52 +250,45 @@ export default function ExportDialog({
                 </ToggleGroup>
               </div>
 
-              {/* Background */}
+              {/* Theme */}
               <div className="flex items-center gap-2">
-                <label className="text-xs text-slate-500">Background</label>
-                <div className="flex h-7 items-center gap-0.5 rounded-md border border-slate-200 bg-white px-1">
-                  {backgroundPresets.map((preset) => (
-                    <Tooltip key={preset.color}>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setBackgroundColor(preset.color);
-                            setTransparentBackground(false);
-                          }}
-                          className={`h-5 w-5 rounded transition ${
-                            !transparentBackground && backgroundColor === preset.color
-                              ? "ring-2 ring-slate-900 ring-offset-1"
-                              : "hover:ring-1 hover:ring-slate-400"
-                          }`}
-                          style={{ backgroundColor: preset.color }}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>{preset.label}</TooltipContent>
-                    </Tooltip>
-                  ))}
-                  <ColorPicker
-                    value={backgroundColor}
-                    onChange={(color) => {
-                      setBackgroundColor(color);
+                <label className="text-xs text-muted-foreground">Theme</label>
+                <ToggleGroup
+                  type="single"
+                  className="h-7 rounded-md border border-border bg-background"
+                  value={exportTheme}
+                  onValueChange={(v) => {
+                    if (v) {
+                      setExportTheme(v as ExportTheme);
                       setTransparentBackground(false);
-                    }}
-                    showAlpha={false}
-                  >
-                    <button
-                      type="button"
-                      className={`ml-0.5 h-5 w-5 rounded transition ${
-                        !transparentBackground &&
-                        !backgroundPresets.some((p) => p.color === backgroundColor)
-                          ? "ring-2 ring-slate-900 ring-offset-1"
-                          : "hover:ring-1 hover:ring-slate-400"
-                      }`}
-                      title="Custom color"
-                    >
-                      <ColorSwatch color={backgroundColor} className="h-full w-full rounded" />
-                    </button>
-                  </ColorPicker>
-                </div>
+                    }
+                  }}
+                >
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ToggleGroupItem
+                        value="light"
+                        className="h-full w-10 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground"
+                        variant="ghost"
+                      >
+                        <Sun className="h-3.5 w-3.5" />
+                      </ToggleGroupItem>
+                    </TooltipTrigger>
+                    <TooltipContent>Light background</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ToggleGroupItem
+                        value="dark"
+                        className="h-full w-10 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground"
+                        variant="ghost"
+                      >
+                        <Moon className="h-3.5 w-3.5" />
+                      </ToggleGroupItem>
+                    </TooltipTrigger>
+                    <TooltipContent>Dark background</TooltipContent>
+                  </Tooltip>
+                </ToggleGroup>
               </div>
 
               {/* Transparent (PNG only) */}
@@ -301,7 +299,10 @@ export default function ExportDialog({
                     checked={transparentBackground}
                     onCheckedChange={(checked) => setTransparentBackground(checked === true)}
                   />
-                  <label htmlFor="transparent-bg" className="cursor-pointer text-xs text-slate-500">
+                  <label
+                    htmlFor="transparent-bg"
+                    className="cursor-pointer text-xs text-muted-foreground"
+                  >
                     Transparent
                   </label>
                 </div>

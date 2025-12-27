@@ -242,17 +242,19 @@ export default function MapStyleInspector() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="space-y-4 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-        <h2 className="text-sm font-semibold text-slate-700">Map Style</h2>
+      <div className="space-y-4 rounded-lg border border-border bg-background p-3 shadow-sm">
+        <h2 className="text-sm font-semibold text-foreground">Map Style</h2>
 
         {/* Node Styles Section */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-medium text-slate-600">All Nodes ({nodeCount})</h3>
+            <h3 className="text-xs font-medium text-muted-foreground">All Nodes ({nodeCount})</h3>
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Background</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              Background
+            </label>
             <ColorPicker
               value="#E2E8F0"
               onChange={(color) => updateAllNodeStyles({ color })}
@@ -260,19 +262,19 @@ export default function MapStyleInspector() {
             >
               <button
                 type="button"
-                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-2"
               >
                 <ColorSwatch color="#E2E8F0" className="h-5 w-5" />
-                <span className="text-xs text-slate-600">Set color</span>
+                <span className="text-xs text-muted-foreground">Set color</span>
               </button>
             </ColorPicker>
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Shape</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">Shape</label>
             <ToggleGroup
               type="single"
-              className="h-8 rounded-md border border-slate-200 bg-white"
+              className="h-8 rounded-md border border-border bg-background"
               onValueChange={(value) => {
                 if (!value) {
                   return;
@@ -286,7 +288,7 @@ export default function MapStyleInspector() {
                   <TooltipTrigger asChild>
                     <ToggleGroupItem
                       value={shape.value}
-                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      className="h-full w-9 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                       variant="ghost"
                     >
                       {shape.icon}
@@ -299,10 +301,12 @@ export default function MapStyleInspector() {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Edge Padding</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              Edge Padding
+            </label>
             <ToggleGroup
               type="single"
-              className="h-8 rounded-md border border-slate-200 bg-white"
+              className="h-8 rounded-md border border-border bg-background"
               onValueChange={(value) => {
                 if (!value) {
                   return;
@@ -316,7 +320,7 @@ export default function MapStyleInspector() {
                   <TooltipTrigger asChild>
                     <ToggleGroupItem
                       value={padding.value}
-                      className="h-full w-11 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      className="h-full w-11 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                       variant="ghost"
                     >
                       {padding.value === "none" ? "0" : padding.value.toUpperCase()}
@@ -329,7 +333,9 @@ export default function MapStyleInspector() {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Title Text</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              Title Text
+            </label>
             <ColorPicker
               value="#1e293b"
               onChange={(color) => updateAllNodeStyles({ textColor: color })}
@@ -337,16 +343,18 @@ export default function MapStyleInspector() {
             >
               <button
                 type="button"
-                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-2"
               >
                 <ColorSwatch color="#1e293b" className="h-5 w-5" />
-                <span className="text-xs text-slate-600">Set color</span>
+                <span className="text-xs text-muted-foreground">Set color</span>
               </button>
             </ColorPicker>
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Body Text</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              Body Text
+            </label>
             <ColorPicker
               value="#475569"
               onChange={(color) => updateAllNodeStyles({ bodyTextColor: color })}
@@ -354,25 +362,25 @@ export default function MapStyleInspector() {
             >
               <button
                 type="button"
-                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-2"
               >
                 <ColorSwatch color="#475569" className="h-5 w-5" />
-                <span className="text-xs text-slate-600">Set color</span>
+                <span className="text-xs text-muted-foreground">Set color</span>
               </button>
             </ColorPicker>
           </div>
         </div>
 
-        <hr className="border-slate-100" />
+        <hr className="border-border" />
 
         {/* Edge Styles Section */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-medium text-slate-600">All Paths ({edgeCount})</h3>
+            <h3 className="text-xs font-medium text-muted-foreground">All Paths ({edgeCount})</h3>
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Color</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">Color</label>
             <ColorPicker
               value="#94A3B8"
               onChange={(color) => updateAllEdgeStyles({ color })}
@@ -380,19 +388,21 @@ export default function MapStyleInspector() {
             >
               <button
                 type="button"
-                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                className="flex h-8 w-36 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-2"
               >
                 <ColorSwatch color="#94A3B8" className="h-5 w-5" />
-                <span className="text-xs text-slate-600">Set color</span>
+                <span className="text-xs text-muted-foreground">Set color</span>
               </button>
             </ColorPicker>
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Thickness</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              Thickness
+            </label>
             <ToggleGroup
               type="single"
-              className="h-8 rounded-md border border-slate-200 bg-white"
+              className="h-8 rounded-md border border-border bg-background"
               onValueChange={(value) => {
                 if (!value) {
                   return;
@@ -406,7 +416,7 @@ export default function MapStyleInspector() {
                   <TooltipTrigger asChild>
                     <ToggleGroupItem
                       value={String(thickness.value)}
-                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      className="h-full w-9 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                       variant="ghost"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
@@ -427,10 +437,10 @@ export default function MapStyleInspector() {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Style</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">Style</label>
             <ToggleGroup
               type="single"
-              className="h-8 rounded-md border border-slate-200 bg-white"
+              className="h-8 rounded-md border border-border bg-background"
               onValueChange={(value) => {
                 if (!value) {
                   return;
@@ -444,7 +454,7 @@ export default function MapStyleInspector() {
                   <TooltipTrigger asChild>
                     <ToggleGroupItem
                       value={style.value}
-                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      className="h-full w-9 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                       variant="ghost"
                     >
                       {style.icon}
@@ -457,10 +467,12 @@ export default function MapStyleInspector() {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Curvature</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              Curvature
+            </label>
             <ToggleGroup
               type="single"
-              className="h-8 rounded-md border border-slate-200 bg-white"
+              className="h-8 rounded-md border border-border bg-background"
               onValueChange={(value) => {
                 if (!value) {
                   return;
@@ -474,7 +486,7 @@ export default function MapStyleInspector() {
                   <TooltipTrigger asChild>
                     <ToggleGroupItem
                       value={curvature.value}
-                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      className="h-full w-9 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                       variant="ghost"
                     >
                       {curvature.icon}
@@ -487,10 +499,12 @@ export default function MapStyleInspector() {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">End Type</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              End Type
+            </label>
             <ToggleGroup
               type="single"
-              className="h-8 rounded-md border border-slate-200 bg-white"
+              className="h-8 rounded-md border border-border bg-background"
               onValueChange={(value) => {
                 if (!value) {
                   return;
@@ -504,7 +518,7 @@ export default function MapStyleInspector() {
                   <TooltipTrigger asChild>
                     <ToggleGroupItem
                       value={marker.value}
-                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      className="h-full w-9 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                       variant="ghost"
                     >
                       {marker.icon}
@@ -517,10 +531,12 @@ export default function MapStyleInspector() {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Start Type</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              Start Type
+            </label>
             <ToggleGroup
               type="single"
-              className="h-8 rounded-md border border-slate-200 bg-white"
+              className="h-8 rounded-md border border-border bg-background"
               onValueChange={(value) => {
                 if (!value) {
                   return;
@@ -534,7 +550,7 @@ export default function MapStyleInspector() {
                   <TooltipTrigger asChild>
                     <ToggleGroupItem
                       value={marker.value}
-                      className="h-full w-9 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      className="h-full w-9 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                       variant="ghost"
                     >
                       {marker.icon}
@@ -547,10 +563,12 @@ export default function MapStyleInspector() {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">Arrow Size</label>
+            <label className="text-xs font-semibold uppercase text-muted-foreground">
+              Arrow Size
+            </label>
             <ToggleGroup
               type="single"
-              className="h-8 rounded-md border border-slate-200 bg-white"
+              className="h-8 rounded-md border border-border bg-background"
               onValueChange={(value) => {
                 if (!value) {
                   return;
@@ -564,7 +582,7 @@ export default function MapStyleInspector() {
                   <TooltipTrigger asChild>
                     <ToggleGroupItem
                       value={size.value}
-                      className="h-full w-11 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-100 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-100 data-[state=on]:hover:text-slate-900"
+                      className="h-full w-11 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                       variant="ghost"
                     >
                       {size.value.toUpperCase()}

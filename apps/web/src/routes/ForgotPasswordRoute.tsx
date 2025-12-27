@@ -45,14 +45,14 @@ export default function ForgotPasswordRoute() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-secondary via-background to-secondary px-4 py-12">
       {/* Subtle background pattern */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-slate-200/40 blur-3xl" />
-        <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-slate-300/30 blur-3xl" />
+        <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-muted/40 blur-3xl" />
+        <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-muted/30 blur-3xl" />
       </div>
 
-      <Card className="relative w-full max-w-md border-slate-200/80 shadow-xl shadow-slate-200/50">
+      <Card className="relative w-full max-w-md border-border shadow-xl">
         <CardHeader className="space-y-1 pb-4">
           <Link
             to="/login"
@@ -81,9 +81,9 @@ export default function ForgotPasswordRoute() {
                   We've sent a password reset link to <span className="font-medium">{email}</span>
                 </p>
               </div>
-              <div className="rounded-md bg-slate-50 p-3">
+              <div className="rounded-md bg-secondary p-3">
                 <div className="flex items-start gap-3">
-                  <Mail className="mt-0.5 h-5 w-5 text-slate-500" />
+                  <Mail className="mt-0.5 h-5 w-5 text-muted-foreground" />
                   <div className="text-sm text-muted-foreground">
                     <p>Didn't receive the email? Check your spam folder or</p>
                     <button
@@ -141,7 +141,7 @@ export default function ForgotPasswordRoute() {
           )}
         </CardContent>
 
-        <CardFooter className="flex justify-center border-t border-slate-100 pt-6">
+        <CardFooter className="flex justify-center border-t border-border pt-6">
           <p className="text-sm text-muted-foreground">
             Remember your password?{" "}
             <Link

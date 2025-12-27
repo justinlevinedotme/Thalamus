@@ -330,19 +330,19 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
           <TabsList className="w-full rounded-none border-b bg-transparent p-0">
             <TabsTrigger
               value="emoji"
-              className="flex-1 rounded-none border-b-2 border-transparent py-2 data-[state=active]:border-slate-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              className="flex-1 rounded-none border-b-2 border-transparent py-2 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               Emoji
             </TabsTrigger>
             <TabsTrigger
               value="lucide"
-              className="flex-1 rounded-none border-b-2 border-transparent py-2 data-[state=active]:border-slate-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              className="flex-1 rounded-none border-b-2 border-transparent py-2 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               Lucide
             </TabsTrigger>
             <TabsTrigger
               value="simple"
-              className="flex-1 rounded-none border-b-2 border-transparent py-2 data-[state=active]:border-slate-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              className="flex-1 rounded-none border-b-2 border-transparent py-2 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               Brands
             </TabsTrigger>
@@ -376,17 +376,17 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
                   <button
                     key={iconName}
                     type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-slate-100"
+                    className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-secondary"
                     onClick={() => handleLucideSelect(iconName)}
                     title={iconName}
                   >
-                    <IconComponent className="h-5 w-5 text-slate-700" />
+                    <IconComponent className="h-5 w-5 text-foreground" />
                   </button>
                 );
               })}
             </div>
             {filteredLucideIcons.length === 0 && (
-              <div className="py-8 text-center text-sm text-slate-500">No icons found</div>
+              <div className="py-8 text-center text-sm text-muted-foreground">No icons found</div>
             )}
           </TabsContent>
 
@@ -406,17 +406,17 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
                   <button
                     key={iconName}
                     type="button"
-                    className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-slate-100"
+                    className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-secondary"
                     onClick={() => handleSimpleSelect(iconName)}
                     title={iconName.replace("Si", "")}
                   >
-                    <IconComponent size={20} color="#334155" />
+                    <IconComponent size={20} color="currentColor" />
                   </button>
                 );
               })}
             </div>
             {filteredSimpleIcons.length === 0 && (
-              <div className="py-8 text-center text-sm text-slate-500">No brands found</div>
+              <div className="py-8 text-center text-sm text-muted-foreground">No brands found</div>
             )}
           </TabsContent>
         </Tabs>

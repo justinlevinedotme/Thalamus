@@ -159,13 +159,13 @@ export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyDat
   const borderWidth = data.style?.borderWidth ?? 1;
   const borderStyle = data.style?.borderStyle ?? "solid";
   const hasBorder = borderWidth > 0;
-  const borderColor = selected && hasBorder ? "#64748b" : (data.style?.borderColor ?? "#e2e8f0");
+  const borderColor = selected && hasBorder ? undefined : data.style?.borderColor;
 
   // Text colors from style
-  const titleColor = data.style?.textColor ?? "#334155";
-  const bodyTextColor = data.style?.bodyTextColor ?? "#64748b";
-  const separatorColor = data.style?.separatorColor ?? "#e2e8f0";
-  const iconColor = data.style?.iconColor ?? "#64748b";
+  const titleColor = data.style?.textColor;
+  const bodyTextColor = data.style?.bodyTextColor;
+  const separatorColor = data.style?.separatorColor;
+  const iconColor = data.style?.iconColor;
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color ?? "#FFFFFF",
@@ -180,12 +180,14 @@ export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyDat
         minWidth={MIN_WIDTH}
         minHeight={MIN_HEIGHT}
         isVisible={selected}
-        lineClassName="!border-slate-400"
-        handleClassName="!w-2.5 !h-2.5 !bg-white !border-slate-400"
+        lineClassName="!border-muted-foreground"
+        handleClassName="!w-2.5 !h-2.5 !bg-background !border-muted-foreground"
       />
       <div
         ref={containerRef}
-        className={`relative h-full w-full flex flex-col rounded-lg p-3 transition ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
+        className={`relative h-full w-full flex flex-col rounded-lg p-3 transition ${
+          selected && hasBorder ? "!border-muted-foreground" : ""
+        } ${selected && !hasBorder ? "ring-2 ring-muted-foreground ring-offset-0" : ""}`}
         style={nodeStyle}
         onMouseDown={handleMouseDown}
         tabIndex={0}
@@ -322,7 +324,7 @@ export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyDat
         {/* Tab hint popover when selected */}
         {selected && (
           <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none z-50">
-            <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1 shadow-md text-[11px] text-slate-500 whitespace-nowrap">
+            <div className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 shadow-md text-[11px] text-muted-foreground whitespace-nowrap">
               <Kbd>Tab</Kbd>
               <span>to add entry</span>
             </div>

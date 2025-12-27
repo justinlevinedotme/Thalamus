@@ -192,7 +192,7 @@ export default function RichTextEditor({
     selectionRect &&
     createPortal(
       <div
-        className="fixed flex gap-0.5 rounded-lg border border-slate-200 bg-white p-1 shadow-lg"
+        className="fixed flex gap-0.5 rounded-lg border border-border bg-background p-1 shadow-lg"
         style={{
           left: selectionRect.left + selectionRect.width / 2,
           top: selectionRect.top - 8,
@@ -210,8 +210,8 @@ export default function RichTextEditor({
           className={cn(
             "flex h-7 w-7 items-center justify-center rounded transition",
             editor.isActive("bold")
-              ? "bg-slate-200 text-slate-900"
-              : "text-slate-600 hover:bg-slate-100"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-secondary"
           )}
           aria-label="Bold"
           title="Bold (Cmd+B)"
@@ -227,8 +227,8 @@ export default function RichTextEditor({
           className={cn(
             "flex h-7 w-7 items-center justify-center rounded transition",
             editor.isActive("italic")
-              ? "bg-slate-200 text-slate-900"
-              : "text-slate-600 hover:bg-slate-100"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-secondary"
           )}
           aria-label="Italic"
           title="Italic (Cmd+I)"
@@ -244,8 +244,8 @@ export default function RichTextEditor({
           className={cn(
             "flex h-7 w-7 items-center justify-center rounded transition",
             editor.isActive("underline")
-              ? "bg-slate-200 text-slate-900"
-              : "text-slate-600 hover:bg-slate-100"
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-secondary"
           )}
           aria-label="Underline"
           title="Underline (Cmd+U)"
@@ -266,7 +266,7 @@ export default function RichTextEditor({
       {/* Placeholder */}
       {isEmpty && placeholder && (
         <div
-          className="pointer-events-none absolute left-0 top-0 text-slate-400"
+          className="pointer-events-none absolute left-0 top-0 text-muted-foreground"
           style={{ color: textColor ? `${textColor}80` : undefined }}
         >
           {placeholder}

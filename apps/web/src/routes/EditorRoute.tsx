@@ -386,7 +386,7 @@ export default function EditorRoute() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="relative h-screen w-screen overflow-hidden bg-slate-100">
+      <div className="relative h-screen w-screen overflow-hidden bg-secondary">
         {/* Full-page canvas */}
         <div className="absolute inset-0">
           <GraphCanvas />
@@ -407,12 +407,12 @@ export default function EditorRoute() {
         <div className="absolute left-4 top-28 z-10">
           {showLeftPanel ? (
             <div className="flex items-start gap-2">
-              <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
+              <div className="rounded-lg border border-border bg-background p-2 shadow-sm">
                 <SpeedDial actions={speedDialActions} />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="mt-1 flex h-10 w-10 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100"
+                      className="mt-1 flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition hover:bg-secondary"
                       type="button"
                       onClick={() => setSearchOpen(true)}
                       aria-label="Search nodes"
@@ -427,7 +427,7 @@ export default function EditorRoute() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="mt-1 flex h-10 w-10 items-center justify-center rounded-md text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
+                      className="mt-1 flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition hover:bg-secondary disabled:opacity-50"
                       type="button"
                       onClick={() => selectedNodeId && setFocusNode(selectedNodeId)}
                       disabled={!selectedNodeId || isFocusMode}
@@ -443,8 +443,8 @@ export default function EditorRoute() {
                     <button
                       className={`mt-1 flex h-10 w-10 items-center justify-center rounded-md transition ${
                         mapStyleOpen
-                          ? "bg-slate-100 text-slate-900"
-                          : "text-slate-600 hover:bg-slate-100"
+                          ? "bg-secondary text-foreground"
+                          : "text-muted-foreground hover:bg-secondary"
                       }`}
                       type="button"
                       onClick={() => setMapStyleOpen(!mapStyleOpen)}
@@ -460,8 +460,8 @@ export default function EditorRoute() {
                     <button
                       className={`mt-1 flex h-10 w-10 items-center justify-center rounded-md transition ${
                         layoutOpen
-                          ? "bg-slate-100 text-slate-900"
-                          : "text-slate-600 hover:bg-slate-100"
+                          ? "bg-secondary text-foreground"
+                          : "text-muted-foreground hover:bg-secondary"
                       }`}
                       type="button"
                       onClick={() => setLayoutOpen(!layoutOpen)}
@@ -477,8 +477,8 @@ export default function EditorRoute() {
                     <button
                       className={`mt-1 flex h-10 w-10 items-center justify-center rounded-md transition ${
                         settingsOpen
-                          ? "bg-slate-100 text-slate-900"
-                          : "text-slate-600 hover:bg-slate-100"
+                          ? "bg-secondary text-foreground"
+                          : "text-muted-foreground hover:bg-secondary"
                       }`}
                       type="button"
                       onClick={() => setSettingsOpen(!settingsOpen)}
@@ -491,7 +491,7 @@ export default function EditorRoute() {
                 </Tooltip>
               </div>
               <button
-                className="mt-2 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
+                className="mt-2 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground"
                 type="button"
                 onClick={() => setShowLeftPanel(false)}
                 aria-label="Hide toolbar"
@@ -501,7 +501,7 @@ export default function EditorRoute() {
             </div>
           ) : (
             <button
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground"
               type="button"
               onClick={() => setShowLeftPanel(true)}
               aria-label="Show toolbar"
@@ -537,7 +537,7 @@ export default function EditorRoute() {
           <div className="absolute right-4 top-28 z-10 w-72">
             <div className="flex items-start gap-2">
               <button
-                className="mt-2 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
+                className="mt-2 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground"
                 type="button"
                 onClick={() => setShowRightPanel(false)}
                 aria-label="Hide panel"
@@ -553,7 +553,7 @@ export default function EditorRoute() {
         ) : !showRightPanel ? (
           <div className="absolute right-4 top-28 z-10">
             <button
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 shadow-sm transition hover:bg-slate-50 hover:text-slate-600"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition hover:bg-secondary hover:text-foreground"
               type="button"
               onClick={() => setShowRightPanel(true)}
               aria-label="Show panel"
@@ -575,7 +575,7 @@ export default function EditorRoute() {
 
         {/* Keyboard shortcuts help - bottom center */}
         <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2">
-          <Card className="flex items-center gap-4 px-4 py-2 text-xs text-slate-500">
+          <Card className="flex items-center gap-4 px-4 py-2 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <Kbd>⌥</Kbd>
               <Kbd>N</Kbd> Add node
@@ -599,7 +599,7 @@ export default function EditorRoute() {
         {isFocusMode ? (
           <div className="absolute bottom-4 right-4 z-10">
             <button
-              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm transition hover:bg-slate-50"
+              className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm transition hover:bg-secondary"
               type="button"
               onClick={clearFocus}
               aria-label="Exit focus mode"
@@ -613,20 +613,20 @@ export default function EditorRoute() {
         {/* Status messages - bottom left */}
         <div className="absolute bottom-4 left-4 z-10 max-w-sm space-y-2">
           {!canSave ? (
-            <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-600 shadow-sm">
+            <div className="rounded-lg border border-border bg-background p-3 text-sm text-muted-foreground shadow-sm">
               <p>Cloud saves are available for account holders.</p>
-              <Link className="mt-1 inline-block text-slate-900 underline" to="/login">
+              <Link className="mt-1 inline-block text-foreground underline" to="/login">
                 Sign in to save and share
               </Link>
             </div>
           ) : null}
           {status === "authenticated" && loadError ? (
-            <div className="rounded-lg border border-red-200 bg-white p-3 text-sm text-red-600 shadow-sm">
+            <div className="rounded-lg border border-red-200 bg-background p-3 text-sm text-red-600 shadow-sm">
               {loadError}
             </div>
           ) : null}
           {shareMessage ? (
-            <div className="rounded-lg border border-amber-200 bg-white p-3 text-sm text-amber-700 shadow-sm">
+            <div className="rounded-lg border border-amber-200 bg-background p-3 text-sm text-amber-700 shadow-sm">
               {shareMessage}
             </div>
           ) : null}

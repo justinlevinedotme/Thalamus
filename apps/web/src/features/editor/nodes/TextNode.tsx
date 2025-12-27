@@ -96,13 +96,13 @@ export default function TextNode({
 
   // Text nodes have no background by default, transparent
   const nodeStyle: React.CSSProperties = {
-    color: data.style?.textColor ?? "#1e293b",
+    color: data.style?.textColor,
   };
 
   return (
     <div
       className={`relative px-2 py-1 font-semibold transition ${textSizeClass} ${
-        selected ? "ring-2 ring-slate-400 ring-offset-2 rounded" : ""
+        selected ? "ring-2 ring-muted-foreground ring-offset-2 rounded" : ""
       }`}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
@@ -115,7 +115,7 @@ export default function TextNode({
         {data.style?.icon && (
           <span
             className="flex-shrink-0 flex items-center"
-            style={{ color: data.style?.iconColor ?? data.style?.textColor ?? "#1e293b" }}
+            style={{ color: data.style?.iconColor ?? data.style?.textColor }}
           >
             <NodeIconDisplay icon={data.style.icon} className="h-[1em] w-[1em]" />
           </span>
@@ -130,7 +130,7 @@ export default function TextNode({
               onEscape={handleEscape}
               placeholder="Heading"
               className="w-full bg-transparent"
-              textColor={data.style?.textColor ?? "#1e293b"}
+              textColor={data.style?.textColor}
               singleLine
               autoFocus
             />

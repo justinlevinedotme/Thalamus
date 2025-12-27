@@ -918,12 +918,12 @@ export default function GraphCanvas() {
         })()}
       {/* Custom attribution */}
       <div className="absolute bottom-2 right-2 z-10 flex flex-col items-end gap-0.5">
-        <span className="text-xs font-medium text-slate-500">Thalamus</span>
+        <span className="text-xs font-medium text-muted-foreground">Thalamus</span>
         <a
           href="https://reactflow.dev"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-slate-400 transition hover:text-slate-600"
+          className="text-xs text-muted-foreground/70 transition hover:text-foreground"
         >
           Powered by React Flow
         </a>

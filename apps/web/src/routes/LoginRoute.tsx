@@ -199,14 +199,13 @@ export default function LoginRoute() {
   }, [location.pathname, location.search, navigate, setError]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-12">
-      {/* Subtle background pattern */}
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      {/* Subtle background glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-slate-200/40 blur-3xl" />
-        <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-slate-300/30 blur-3xl" />
+        <div className="absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-brand/10 blur-[100px]" />
       </div>
 
-      <Card className="relative w-full max-w-md border-slate-200/80 shadow-xl shadow-slate-200/50">
+      <Card className="relative w-full max-w-md border-border shadow-xl">
         <CardHeader className="space-y-1 pb-4">
           <CardTitle className="text-2xl font-semibold tracking-tight">Welcome back</CardTitle>
           <CardDescription>Sign in to access your graphs and share links</CardDescription>
@@ -235,7 +234,7 @@ export default function LoginRoute() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-slate-200" />
+                  <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-card px-2 text-muted-foreground">or continue with email</span>
@@ -326,7 +325,7 @@ export default function LoginRoute() {
           </form>
         </CardContent>
 
-        <CardFooter className="flex justify-center border-t border-slate-100 pt-6">
+        <CardFooter className="flex justify-center border-t border-border pt-6">
           <p className="text-sm text-muted-foreground">
             Don't have an account?{" "}
             <Link

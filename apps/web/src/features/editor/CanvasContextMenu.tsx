@@ -308,18 +308,18 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
   const modKeyLabel = isMac ? "⌘" : "Ctrl";
 
   const menuItemClass =
-    "flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 transition cursor-pointer";
+    "flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary transition cursor-pointer";
   const menuItemWithSubmenuClass =
-    "flex w-full items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 transition cursor-pointer";
+    "flex w-full items-center justify-between px-3 py-2 text-sm text-foreground hover:bg-secondary transition cursor-pointer";
   const disabledItemClass =
-    "flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-400 cursor-not-allowed";
+    "flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground cursor-not-allowed";
   const dangerItemClass =
     "flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition cursor-pointer";
   const subMenuClass =
-    "absolute left-full top-0 ml-1 min-w-[160px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg";
+    "absolute left-full top-0 ml-1 min-w-[160px] rounded-lg border border-border bg-background py-1 shadow-lg";
 
   const renderKbd = (keys: string) => (
-    <span className="ml-auto flex items-center gap-0.5 text-xs text-slate-400">
+    <span className="ml-auto flex items-center gap-0.5 text-xs text-muted-foreground">
       {keys.split("+").map((key, i) => (
         <Kbd key={i} className="text-[10px] px-1 py-0.5">
           {key}
@@ -331,7 +331,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
   return (
     <div
       ref={menuRef}
-      className="fixed z-50 min-w-[200px] rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+      className="fixed z-50 min-w-[200px] rounded-lg border border-border bg-background py-1 shadow-lg"
       style={{
         left: menu.position.x,
         top: menu.position.y,
@@ -356,7 +356,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
             {renderKbd(`${modKeyLabel}+X`)}
           </button>
 
-          <div className="my-1 h-px bg-slate-200" />
+          <div className="my-1 h-px bg-border" />
 
           {/* Group submenu */}
           {selectedCount >= 2 && (
@@ -427,7 +427,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
                     <AlignEndHorizontal className="h-4 w-4" />
                     Right
                   </button>
-                  <div className="my-1 h-px bg-slate-200" />
+                  <div className="my-1 h-px bg-border" />
                   <button className={menuItemClass} type="button" onClick={handleAlignTop}>
                     <AlignStartVertical className="h-4 w-4" />
                     Top
@@ -482,7 +482,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
             </div>
           )}
 
-          <div className="my-1 h-px bg-slate-200" />
+          <div className="my-1 h-px bg-border" />
           <button className={dangerItemClass} type="button" onClick={handleDeleteSelection}>
             <Trash2 className="h-4 w-4" />
             Delete ({selectedCount} nodes)
@@ -507,7 +507,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
             {renderKbd(`${modKeyLabel}+X`)}
           </button>
 
-          <div className="my-1 h-px bg-slate-200" />
+          <div className="my-1 h-px bg-border" />
 
           {/* Edit option - only for non-shape nodes */}
           {clickedNodeKind !== "shape" && (
@@ -530,7 +530,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
           {/* Send to front/back - for text and shape nodes */}
           {isTextOrShapeNode && (
             <>
-              <div className="my-1 h-px bg-slate-200" />
+              <div className="my-1 h-px bg-border" />
               <button className={menuItemClass} type="button" onClick={handleSendToFront}>
                 <ArrowUpToLine className="h-4 w-4" />
                 Send to Front
@@ -543,14 +543,14 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
           )}
           {clickedNodeGroupId && (
             <>
-              <div className="my-1 h-px bg-slate-200" />
+              <div className="my-1 h-px bg-border" />
               <button className={menuItemClass} type="button" onClick={handleUngroupSingle}>
                 <Ungroup className="h-4 w-4" />
                 Ungroup
               </button>
             </>
           )}
-          <div className="my-1 h-px bg-slate-200" />
+          <div className="my-1 h-px bg-border" />
           <button className={dangerItemClass} type="button" onClick={handleDelete}>
             <Trash2 className="h-4 w-4" />
             Delete
@@ -568,7 +568,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
             Paste
             {renderKbd(`${modKeyLabel}+V`)}
           </button>
-          <div className="my-1 h-px bg-slate-200" />
+          <div className="my-1 h-px bg-border" />
           <button className={menuItemClass} type="button" onClick={handleAddNode}>
             <Plus className="h-4 w-4" />
             Add Node
@@ -581,7 +581,7 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
             <Square className="h-4 w-4" />
             Add Shape
           </button>
-          <div className="my-1 h-px bg-slate-200" />
+          <div className="my-1 h-px bg-border" />
           <button className={menuItemClass} type="button" onClick={handleAddPathKey}>
             <Route className="h-4 w-4" />
             Add Path Key

@@ -89,13 +89,13 @@ export default function ResetPasswordRoute() {
   // Invalid or expired token state
   if (status === "invalid") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-12">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-secondary via-background to-secondary px-4 py-12">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-slate-200/40 blur-3xl" />
-          <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-slate-300/30 blur-3xl" />
+          <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-muted/40 blur-3xl" />
+          <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-muted/30 blur-3xl" />
         </div>
 
-        <Card className="relative w-full max-w-md border-slate-200/80 shadow-xl shadow-slate-200/50">
+        <Card className="relative w-full max-w-md border-border shadow-xl">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-2xl font-semibold tracking-tight">Invalid link</CardTitle>
             <CardDescription>This password reset link is invalid or has expired.</CardDescription>
@@ -113,7 +113,7 @@ export default function ResetPasswordRoute() {
             </p>
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-3 border-t border-slate-100 pt-6">
+          <CardFooter className="flex flex-col gap-3 border-t border-border pt-6">
             <Button asChild className="w-full">
               <Link to="/forgot-password">Request new link</Link>
             </Button>
@@ -133,13 +133,13 @@ export default function ResetPasswordRoute() {
   // Success state
   if (status === "success") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-12">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-secondary via-background to-secondary px-4 py-12">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-slate-200/40 blur-3xl" />
-          <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-slate-300/30 blur-3xl" />
+          <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-muted/40 blur-3xl" />
+          <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-muted/30 blur-3xl" />
         </div>
 
-        <Card className="relative w-full max-w-md border-slate-200/80 shadow-xl shadow-slate-200/50">
+        <Card className="relative w-full max-w-md border-border shadow-xl">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-2xl font-semibold tracking-tight">Password reset</CardTitle>
             <CardDescription>Your password has been successfully updated.</CardDescription>
@@ -156,7 +156,7 @@ export default function ResetPasswordRoute() {
             </p>
           </CardContent>
 
-          <CardFooter className="border-t border-slate-100 pt-6">
+          <CardFooter className="border-t border-border pt-6">
             <Button onClick={() => navigate("/login")} className="w-full">
               Sign in
             </Button>
@@ -167,14 +167,14 @@ export default function ResetPasswordRoute() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-12">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-secondary via-background to-secondary px-4 py-12">
       {/* Subtle background pattern */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-slate-200/40 blur-3xl" />
-        <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-slate-300/30 blur-3xl" />
+        <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-muted/40 blur-3xl" />
+        <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-muted/30 blur-3xl" />
       </div>
 
-      <Card className="relative w-full max-w-md border-slate-200/80 shadow-xl shadow-slate-200/50">
+      <Card className="relative w-full max-w-md border-border shadow-xl">
         <CardHeader className="space-y-1 pb-4">
           <Link
             to="/login"
@@ -218,7 +218,7 @@ export default function ResetPasswordRoute() {
 
             {/* Password requirements */}
             {password.length > 0 && (
-              <div className="space-y-1.5 rounded-md bg-slate-50 p-3">
+              <div className="space-y-1.5 rounded-md bg-secondary p-3">
                 <p className="text-xs font-medium text-muted-foreground">Password requirements:</p>
                 <div className="grid gap-1">
                   {PASSWORD_REQUIREMENTS.map((req) => {
@@ -297,7 +297,7 @@ export default function ResetPasswordRoute() {
           </form>
         </CardContent>
 
-        <CardFooter className="flex justify-center border-t border-slate-100 pt-6">
+        <CardFooter className="flex justify-center border-t border-border pt-6">
           <p className="text-sm text-muted-foreground">
             Remember your password?{" "}
             <Link
