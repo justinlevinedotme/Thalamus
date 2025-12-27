@@ -2,8 +2,9 @@ import { drizzle as drizzleD1, DrizzleD1Database } from "drizzle-orm/d1";
 import { drizzle as drizzleSqlite, BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 
-// Database type union - works for both D1 (production) and better-sqlite3 (local)
-export type Database = DrizzleD1Database<typeof schema> | BetterSQLite3Database<typeof schema>;
+// Use D1 database type for consistent API across both drivers
+// Both D1 and better-sqlite3 are SQLite-based and share the same query interface
+export type Database = DrizzleD1Database<typeof schema>;
 
 // Check if we're in local development mode
 // Local mode: when running outside Cloudflare Workers (no D1 binding available)
@@ -120,7 +121,8 @@ export function createDb(): Database {
     return drizzleD1(getD1(), { schema });
   } else {
     // Local dev: use better-sqlite3
-    return initLocalDb();
+    // Cast to Database type - both share compatible SQLite query interface
+    return initLocalDb() as unknown as Database;
   }
 }
 
