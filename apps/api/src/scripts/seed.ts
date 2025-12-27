@@ -10,6 +10,7 @@
 
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
+import { eq } from "drizzle-orm";
 import path from "path";
 import { fileURLToPath } from "url";
 import * as schema from "../lib/schema";
@@ -133,7 +134,7 @@ async function seed() {
     const existingUser = db
       .select()
       .from(schema.baUser)
-      .where(require("drizzle-orm").eq(schema.baUser.email, "admin@admin.com"))
+      .where(eq(schema.baUser.email, "admin@admin.com"))
       .get();
 
     if (existingUser) {
@@ -187,7 +188,7 @@ async function seed() {
     const existingGraphs = db
       .select()
       .from(schema.graphs)
-      .where(require("drizzle-orm").eq(schema.graphs.ownerId, adminUserId))
+      .where(eq(schema.graphs.ownerId, adminUserId))
       .all();
 
     if (existingGraphs.length > 0) {
