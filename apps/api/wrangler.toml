@@ -17,10 +17,16 @@ migrations_dir = "migrations"
 FRONTEND_URL = "http://localhost:5173"
 
 # Development settings
-# Note: Local dev uses better-sqlite3, not D1. See CLAUDE.md for details.
+# Local dev uses Miniflare's D1 simulation (SQLite under the hood)
 [env.dev]
 name = "thalamus-api-dev"
 vars = { FRONTEND_URL = "http://localhost:5173" }
+
+[[env.dev.d1_databases]]
+binding = "DB"
+database_name = "thalamus-auth"
+database_id = "39238f0a-6bd1-493f-8cf1-4b55b67dbeca"
+migrations_dir = "migrations"
 
 # Production
 [env.production]
