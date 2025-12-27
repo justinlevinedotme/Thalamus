@@ -1,7 +1,0 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Thalamus App Icon - For app stores, PWA -->
-  <rect width="512" height="512" rx="108" fill="#00D4FF"/>
-  <rect x="96" y="96" width="320" height="320" rx="72" fill="#ffffff" fill-opacity="0.15" transform="rotate(12 256 256)"/>
-  <rect x="112" y="112" width="288" height="288" rx="64" fill="#ffffff" fill-opacity="0.25" transform="rotate(-6 256 256)"/>
-  <circle cx="256" cy="256" r="64" fill="#ffffff"/>
-</svg>

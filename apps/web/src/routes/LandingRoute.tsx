@@ -52,7 +52,7 @@ export default function LandingRoute() {
             </p>
 
             <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="rounded-xl border border-border bg-background p-6 transition hover:shadow-[0_0_40px_-10px_rgba(0,212,255,0.25)]">
+              <div className="rounded-xl border border-border bg-background p-6 transition hover:shadow-[0_0_40px_-10px_rgba(255,79,0,0.25)]">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary">
                   <Sparkles className="h-6 w-6 text-foreground" />
                 </div>
@@ -63,7 +63,7 @@ export default function LandingRoute() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border bg-background p-6 transition hover:shadow-[0_0_40px_-10px_rgba(0,212,255,0.25)]">
+              <div className="rounded-xl border border-border bg-background p-6 transition hover:shadow-[0_0_40px_-10px_rgba(255,79,0,0.25)]">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary">
                   <Layout className="h-6 w-6 text-foreground" />
                 </div>
@@ -74,7 +74,7 @@ export default function LandingRoute() {
                 </p>
               </div>
 
-              <div className="rounded-xl border border-border bg-background p-6 transition hover:shadow-[0_0_40px_-10px_rgba(0,212,255,0.25)]">
+              <div className="rounded-xl border border-border bg-background p-6 transition hover:shadow-[0_0_40px_-10px_rgba(255,79,0,0.25)]">
                 <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-secondary">
                   <Share2 className="h-6 w-6 text-foreground" />
                 </div>
@@ -97,7 +97,7 @@ export default function LandingRoute() {
             </p>
             <Link
               to="/editor"
-              className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 hover:shadow-[0_0_30px_rgba(0,212,255,0.4)]"
+              className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 hover:shadow-[0_0_30px_rgba(255,79,0,0.4)]"
             >
               Open Editor
               <ArrowRight className="h-4 w-4" />
