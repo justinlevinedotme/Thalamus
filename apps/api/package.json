@@ -12,6 +12,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply thalamus-auth --env production",
     "db:migrate:local": "tsx src/scripts/migrate-local.ts",
+    "db:seed": "tsx src/scripts/seed.ts",
     "db:studio": "drizzle-kit studio",
     "email:dev": "email dev --dir src/emails --port 3002"
   },
