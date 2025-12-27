@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FolderOpen, LogOut, Settings, Share2, User } from "lucide-react";
 
+import { ThalamusLogo } from "./ThalamusLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,8 +24,8 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
     <header className="border-b border-border bg-background px-4 py-4">
       <nav className={`flex items-center justify-between ${fullWidth ? "" : "mx-auto max-w-6xl"}`}>
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-xl font-semibold text-foreground">
-            Thalamus
+          <Link to="/" className="flex items-center">
+            <ThalamusLogo size="md" />
           </Link>
           {children}
         </div>

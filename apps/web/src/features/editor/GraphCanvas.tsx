@@ -31,6 +31,7 @@ import { nodeTypes } from "./nodeTypes";
 import { getFocusSubgraph } from "../search/focus";
 import CanvasContextMenu, { type ContextMenuState } from "./CanvasContextMenu";
 import { useHelperLines, HelperLinesRenderer } from "./helperLines";
+import { ThalamusLogoIcon } from "../../components/ThalamusLogo";
 
 // Spatial hash for O(1) proximity lookup - divides space into grid cells
 const CELL_SIZE = 100; // pixels per cell

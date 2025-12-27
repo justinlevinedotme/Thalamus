@@ -1,0 +1,78 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Thalamus Logo Animation -->
+  <style>
+    .layer-1 {
+      animation: rotate1 1.2s ease-out forwards, fadeIn1 0.6s ease-out forwards;
+      transform-origin: 100px 100px;
+      opacity: 0;
+    }
+    .layer-2 {
+      animation: rotate2 1.2s ease-out 0.15s forwards, fadeIn2 0.6s ease-out 0.15s forwards;
+      transform-origin: 100px 100px;
+      opacity: 0;
+    }
+    .layer-3 {
+      animation: rotate3 1.2s ease-out 0.3s forwards, fadeIn3 0.6s ease-out 0.3s forwards;
+      transform-origin: 100px 100px;
+      opacity: 0;
+    }
+    .hub-outer {
+      animation: scaleIn 0.4s ease-out 0.6s forwards;
+      transform-origin: 100px 100px;
+      opacity: 0;
+    }
+    .hub-inner {
+      animation: pulseIn 0.5s ease-out 0.8s forwards;
+      transform-origin: 100px 100px;
+      opacity: 0;
+    }
+
+    @keyframes rotate1 {
+      0% { transform: rotate(90deg) scale(0.5); }
+      100% { transform: rotate(20deg) scale(1); }
+    }
+    @keyframes rotate2 {
+      0% { transform: rotate(-60deg) scale(0.5); }
+      100% { transform: rotate(5deg) scale(1); }
+    }
+    @keyframes rotate3 {
+      0% { transform: rotate(45deg) scale(0.5); }
+      100% { transform: rotate(-10deg) scale(1); }
+    }
+    @keyframes fadeIn1 {
+      0% { opacity: 0; }
+      100% { opacity: 0.15; }
+    }
+    @keyframes fadeIn2 {
+      0% { opacity: 0; }
+      100% { opacity: 0.3; }
+    }
+    @keyframes fadeIn3 {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    @keyframes scaleIn {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pulseIn {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.5); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+
+  <!-- Background layer -->
+  <rect class="layer-1" x="28" y="28" width="144" height="144" rx="36" fill="#00D4FF"/>
+
+  <!-- Middle layer -->
+  <rect class="layer-2" x="36" y="36" width="128" height="128" rx="32" fill="#00D4FF"/>
+
+  <!-- Primary layer -->
+  <rect class="layer-3" x="44" y="44" width="112" height="112" rx="28" fill="#00D4FF"/>
+
+  <!-- Center hub -->
+  <circle class="hub-outer" cx="100" cy="100" r="20" fill="#0a0a0a"/>
+  <circle class="hub-inner" cx="100" cy="100" r="8" fill="#00D4FF"/>
+</svg>
