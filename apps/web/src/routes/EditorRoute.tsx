@@ -63,6 +63,7 @@ export default function EditorRoute() {
     pasteNodes,
     undo,
     redo,
+    dataVersion,
   } = useGraphStore();
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -76,7 +77,8 @@ export default function EditorRoute() {
   const [layoutOpen, setLayoutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastPayloadRef = useRef<string>("");
+  // Track last saved version instead of stringifying entire payload
+  const lastSavedVersionRef = useRef<number>(0);
 
   const canSave = Boolean(user);
   const payload = useMemo(() => ({ nodes, edges, groups }), [edges, groups, nodes]);
@@ -131,13 +133,14 @@ export default function EditorRoute() {
       }
       setSaveStatus("saved");
       setLastSavedAt(new Date());
-      lastPayloadRef.current = JSON.stringify(payload);
+      // Track version instead of stringifying - O(1) vs O(n)
+      lastSavedVersionRef.current = dataVersion;
       setTimeout(() => setSaveStatus("idle"), 1500);
     } catch (error) {
       console.error(error);
       setSaveStatus("error");
     }
-  }, [user, graphId, graphTitle, payload, navigate]);
+  }, [user, graphId, graphTitle, payload, navigate, dataVersion]);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback(
@@ -336,14 +339,14 @@ export default function EditorRoute() {
   }, [graphId, setEdges, setGraphTitle, setGroups, setNodes, user]);
 
   // Auto-save: debounce changes and save after 3 seconds of inactivity
+  // Uses version-based dirty check instead of JSON.stringify for O(1) comparison
   useEffect(() => {
     if (!user || !graphId) {
       return;
     }
 
-    const currentPayload = JSON.stringify(payload);
-    // Skip if payload hasn't changed since last save
-    if (currentPayload === lastPayloadRef.current) {
+    // Skip if version hasn't changed since last save - O(1) comparison
+    if (dataVersion === lastSavedVersionRef.current) {
       return;
     }
 
@@ -362,7 +365,7 @@ export default function EditorRoute() {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [user, graphId, payload, handleSave]);
+  }, [user, graphId, dataVersion, handleSave]);
 
   const handleShare = () => {
     if (!user) {

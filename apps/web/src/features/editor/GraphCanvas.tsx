@@ -28,30 +28,90 @@ import { getFocusSubgraph } from "../search/focus";
 import CanvasContextMenu, { type ContextMenuState } from "./CanvasContextMenu";
 import { useHelperLines, HelperLinesRenderer } from "./helperLines";
 
+// Spatial hash for O(1) proximity lookup - divides space into grid cells
+const CELL_SIZE = 100; // pixels per cell
+
+type SpatialIndex = {
+  cells: Map<string, Set<string>>; // cell key -> node IDs
+  nodePositions: Map<string, { x: number; y: number; width: number; height: number }>;
+};
+
+function buildSpatialIndex(nodes: Node[]): SpatialIndex {
+  const cells = new Map<string, Set<string>>();
+  const nodePositions = new Map<string, { x: number; y: number; width: number; height: number }>();
+
+  for (const node of nodes) {
+    const width = node.width ?? 150;
+    const height = node.height ?? 50;
+    nodePositions.set(node.id, { x: node.position.x, y: node.position.y, width, height });
+
+    // Add node to all cells it overlaps
+    const minCellX = Math.floor(node.position.x / CELL_SIZE);
+    const maxCellX = Math.floor((node.position.x + width) / CELL_SIZE);
+    const minCellY = Math.floor(node.position.y / CELL_SIZE);
+    const maxCellY = Math.floor((node.position.y + height) / CELL_SIZE);
+
+    for (let cx = minCellX; cx <= maxCellX; cx++) {
+      for (let cy = minCellY; cy <= maxCellY; cy++) {
+        const key = `${cx},${cy}`;
+        if (!cells.has(key)) {
+          cells.set(key, new Set());
+        }
+        cells.get(key)!.add(node.id);
+      }
+    }
+  }
+
+  return { cells, nodePositions };
+}
+
+function queryNearbyNodes(index: SpatialIndex, x: number, y: number, radius: number): string[] {
+  const results = new Set<string>();
+  const minCellX = Math.floor((x - radius) / CELL_SIZE);
+  const maxCellX = Math.floor((x + radius) / CELL_SIZE);
+  const minCellY = Math.floor((y - radius) / CELL_SIZE);
+  const maxCellY = Math.floor((y + radius) / CELL_SIZE);
+
+  for (let cx = minCellX; cx <= maxCellX; cx++) {
+    for (let cy = minCellY; cy <= maxCellY; cy++) {
+      const key = `${cx},${cy}`;
+      const cellNodes = index.cells.get(key);
+      if (cellNodes) {
+        for (const nodeId of cellNodes) {
+          results.add(nodeId);
+        }
+      }
+    }
+  }
+
+  return Array.from(results);
+}
+
 // Custom marker definitions for circle and diamond
 function CustomMarkerDefs({ edges }: { edges: Array<{ data?: RelationshipData }> }) {
-  // Collect unique marker configurations needed
+  // Collect unique marker configurations needed - optimized to avoid JSON parse/stringify
   const markerConfigs = useMemo(() => {
-    const configs = new Set<string>();
+    const configMap = new Map<
+      string,
+      { type: EdgeMarkerType; color: string; size: EdgeMarkerSize }
+    >();
 
     for (const edge of edges) {
       const style = edge.data?.style;
       const color = style?.color ?? "#94A3B8";
       const size = style?.markerSize ?? "md";
 
-      const customMarkerTypes: EdgeMarkerType[] = ["circle", "diamond"];
-      const markers = [style?.markerStart, style?.markerEnd].filter(Boolean) as EdgeMarkerType[];
-
-      for (const marker of markers) {
-        if (customMarkerTypes.includes(marker)) {
-          configs.add(JSON.stringify({ type: marker, color, size }));
+      for (const markerType of [style?.markerStart, style?.markerEnd]) {
+        if (markerType === "circle" || markerType === "diamond") {
+          const key = `${markerType}-${color}-${size}`;
+          if (!configMap.has(key)) {
+            configMap.set(key, { type: markerType, color, size });
+          }
         }
       }
     }
 
-    return Array.from(configs).map(
-      (c) => JSON.parse(c) as { type: EdgeMarkerType; color: string; size: EdgeMarkerSize }
-    );
+    return Array.from(configMap.values());
   }, [edges]);
 
   const sizeToValue = (size: EdgeMarkerSize): number => {
@@ -263,6 +323,19 @@ export default function GraphCanvas() {
     targetHandlePosition: { x: number; y: number };
   } | null>(null);
   const PROXIMITY_THRESHOLD = 80;
+
+  // Spatial index for O(1) proximity lookups - rebuild when nodes change
+  const spatialIndex = useMemo(() => buildSpatialIndex(nodes), [nodes]);
+
+  // Edge lookup set for O(1) edge existence checks
+  const edgeLookup = useMemo(() => {
+    const lookup = new Set<string>();
+    for (const edge of edges) {
+      lookup.add(`${edge.source}-${edge.target}`);
+      lookup.add(`${edge.target}-${edge.source}`);
+    }
+    return lookup;
+  }, [edges]);
 
   const handleInit = useCallback(
     (instance: ReactFlowInstance) => {
@@ -598,35 +671,44 @@ export default function GraphCanvas() {
       }));
 
       let closestMatch: {
-        sourceNode: Node;
+        sourceNodeId: string;
         sourceHandlePos: { x: number; y: number };
         targetHandlePos: { x: number; y: number };
         distance: number;
       } | null = null;
 
-      for (const node of nodes) {
-        if (node.id === draggedNode.id) {
+      // Use spatial index to only check nearby nodes - O(1) instead of O(n)
+      const nearbyNodeIds = queryNearbyNodes(
+        spatialIndex,
+        draggedNode.position.x,
+        draggedNode.position.y,
+        PROXIMITY_THRESHOLD + 200 // Add buffer for node width
+      );
+
+      for (const nodeId of nearbyNodeIds) {
+        if (nodeId === draggedNode.id) {
           continue;
         }
 
-        // Check if edge already exists between these nodes
-        const edgeExists = edges.some(
-          (e) =>
-            (e.source === node.id && e.target === draggedNode.id) ||
-            (e.source === draggedNode.id && e.target === node.id)
-        );
-        if (edgeExists) {
+        // O(1) edge existence check using lookup set
+        if (edgeLookup.has(`${nodeId}-${draggedNode.id}`)) {
           continue;
         }
 
-        const nodeWidth = node.width ?? 150;
-        const nodeHeight = node.height ?? 50;
+        const nodePos = spatialIndex.nodePositions.get(nodeId);
+        if (!nodePos) continue;
+
+        const node = nodes.find((n) => n.id === nodeId);
+        if (!node) continue;
+
+        const nodeWidth = nodePos.width;
+        const nodeHeight = nodePos.height;
 
         // Calculate this node's source handle positions (right side)
         const sourceHandles = node.data?.sourceHandles ?? [{ id: "source" }];
         const sourcePositions = sourceHandles.map((_, index) => ({
-          x: node.position.x + nodeWidth,
-          y: node.position.y + ((index + 1) / (sourceHandles.length + 1)) * nodeHeight,
+          x: nodePos.x + nodeWidth,
+          y: nodePos.y + ((index + 1) / (sourceHandles.length + 1)) * nodeHeight,
         }));
 
         // Find the closest source handle to any of the dragged node's target handles
@@ -640,7 +722,7 @@ export default function GraphCanvas() {
               (!closestMatch || distance < closestMatch.distance)
             ) {
               closestMatch = {
-                sourceNode: node,
+                sourceNodeId: nodeId,
                 sourceHandlePos: sourcePos,
                 targetHandlePos: targetPos,
                 distance,
@@ -652,7 +734,7 @@ export default function GraphCanvas() {
 
       if (closestMatch) {
         setProximityTarget({
-          sourceNodeId: closestMatch.sourceNode.id,
+          sourceNodeId: closestMatch.sourceNodeId,
           targetNodeId: draggedNode.id,
           sourceHandlePosition: closestMatch.sourceHandlePos,
           targetHandlePosition: closestMatch.targetHandlePos,
@@ -661,7 +743,14 @@ export default function GraphCanvas() {
         setProximityTarget(null);
       }
     },
-    [connectionSuggestionsEnabled, nodes, edges, PROXIMITY_THRESHOLD]
+    [
+      connectionSuggestionsEnabled,
+      nodes,
+      spatialIndex,
+      edgeLookup,
+      PROXIMITY_THRESHOLD,
+      onNodesChange,
+    ]
   );
 
   const handleNodeDragStop: NodeDragHandler = useCallback(

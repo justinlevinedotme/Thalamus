@@ -130,6 +130,8 @@ type GraphState = {
   historyFuture: GraphSnapshot[];
   canUndo: boolean;
   canRedo: boolean;
+  // Version counter for efficient dirty detection - increments on every data change
+  dataVersion: number;
   setNodes: (nodes: Node<GraphNodeData>[]) => void;
   setEdges: (edges: Edge<RelationshipData>[]) => void;
   onNodesChange: (changes: NodeChange[]) => void;
@@ -236,11 +238,30 @@ const defaultEdgeData: RelationshipData = {
   style: defaultEdgeStyle,
 };
 
+const MAX_HISTORY_SIZE = 50;
+
+// Shallow clone for performance - avoid structuredClone overhead
 const cloneGraph = (
   nodes: Node<GraphNodeData>[],
   edges: Edge<RelationshipData>[],
   groups: NodeGroup[]
-): GraphSnapshot => structuredClone({ nodes, edges, groups });
+): GraphSnapshot => ({
+  nodes: nodes.map((n) => ({
+    ...n,
+    data: { ...n.data, style: n.data.style ? { ...n.data.style } : undefined },
+    position: { ...n.position },
+  })),
+  edges: edges.map((e) => ({
+    ...e,
+    data: e.data
+      ? {
+          ...e.data,
+          style: e.data.style ? { ...e.data.style } : undefined,
+        }
+      : undefined,
+  })),
+  groups: groups.map((g) => ({ ...g })),
+});
 
 const getNodeType = (kind: NodeKind): string => {
   switch (kind) {
@@ -295,11 +316,15 @@ const normalizeEdges = (edges: Edge<RelationshipData>[]) =>
     };
   });
 
+// Track version for dirty detection - incremented when setHistoryWithVersion is used
+let currentDataVersion = 0;
+
 const setHistory = (past: GraphSnapshot[], future: GraphSnapshot[]) => ({
-  historyPast: past,
-  historyFuture: future,
+  historyPast: past.length > MAX_HISTORY_SIZE ? past.slice(-MAX_HISTORY_SIZE) : past,
+  historyFuture: future.length > MAX_HISTORY_SIZE ? future.slice(0, MAX_HISTORY_SIZE) : future,
   canUndo: past.length > 0,
   canRedo: future.length > 0,
+  dataVersion: ++currentDataVersion,
 });
 
 const shouldCommitNodeChanges = (changes: NodeChange[]) =>
@@ -423,6 +448,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   historyFuture: [],
   canUndo: false,
   canRedo: false,
+  dataVersion: 0,
   setNodes: (nodes) =>
     set({
       nodes: normalizeNodes(nodes),
