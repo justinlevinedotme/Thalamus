@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { setD1, resetDb } from "./lib/db";
+import { setD1, resetDb, initLocalDb } from "./lib/db";
 import { setAuthD1 } from "./lib/auth";
 
 // Define env bindings type
@@ -38,21 +38,30 @@ app.use("*", async (c, next) => {
   // Reset DB cache for each request
   resetDb();
 
-  // Set D1 binding for database access
-  setD1(c.env.DB);
-  setAuthD1(c.env.DB);
+  // Check if D1 binding is available (production/wrangler)
+  if (c.env?.DB) {
+    // Production or wrangler dev: use D1 binding
+    setD1(c.env.DB);
+    setAuthD1(c.env.DB);
 
-  // Polyfill process.env for libraries that expect it
-  (globalThis as { process?: { env: Record<string, string> } }).process = {
-    env: c.env as unknown as Record<string, string>,
-  };
+    // Polyfill process.env for libraries that expect it
+    (globalThis as { process?: { env: Record<string, string> } }).process = {
+      env: c.env as unknown as Record<string, string>,
+    };
+  } else {
+    // Local dev without wrangler: use better-sqlite3
+    // Database will be initialized on first getDb() call
+    console.log("Running in local dev mode (no D1 binding)");
+    initLocalDb();
+  }
+
   await next();
 });
 
 app.use("*", logger());
 app.use("*", async (c, next) => {
   const corsMiddleware = cors({
-    origin: c.env.FRONTEND_URL || "http://localhost:5173",
+    origin: c.env?.FRONTEND_URL || process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   });
   return corsMiddleware(c, next);

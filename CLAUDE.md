@@ -17,8 +17,13 @@
 # Install dependencies (from root)
 npm install
 
-# Run development (both apps)
+# Run development (both apps) - just works!
 npm run dev
+
+# First time? Set up local database with test data:
+cd apps/api
+npm run db:migrate:local    # Apply migrations
+npm run db:seed             # Create test user + sample graphs
 
 # Run individual apps
 cd apps/web && npm run dev    # Frontend at localhost:5173
@@ -26,10 +31,12 @@ cd apps/api && npm run dev    # API at localhost:8787
 
 # Build
 npm run build
-
-# Database migrations (local)
-cd apps/api && npx wrangler d1 migrations apply thalamus-auth --local
 ```
+
+**Test Credentials** (after seeding):
+
+- Email: `admin@admin.com`
+- Password: `root123`
 
 ---
 
@@ -83,7 +90,7 @@ Thalamus/
 │   │   │   ├── index.worker.ts # Entry point, middleware pipeline
 │   │   │   ├── lib/
 │   │   │   │   ├── auth.ts     # BetterAuth configuration
-│   │   │   │   ├── db.ts       # D1 database factory
+│   │   │   │   ├── db.ts       # Database factory (D1 prod, SQLite local)
 │   │   │   │   ├── email.ts    # Resend email service
 │   │   │   │   └── schema.ts   # Drizzle schema
 │   │   │   ├── routes/         # API route handlers
@@ -101,7 +108,7 @@ Thalamus/
 │           └── routes/         # Route pages
 │
 ├── packages/                   # Shared packages (currently empty)
-├── .github/workflows/          # CI/CD (staging + production)
+├── .github/workflows/          # CI/CD (production only)
 └── turbo.json                  # Turborepo config
 ```
 
@@ -199,16 +206,28 @@ Use these context keywords to activate specialized behavior.
 
 ### Running Migrations
 
+**Local Development** (SQLite):
+
 ```bash
 cd apps/api
 
-# Local development
-npx wrangler d1 migrations apply thalamus-auth --local
+# Generate migration from schema changes
+npm run db:generate
 
-# Staging
-npx wrangler d1 migrations apply thalamus-auth --env staging
+# Apply migrations to local.db
+npm run db:migrate:local
 
-# Production
+# Seed test data (test user + sample graphs)
+npm run db:seed
+
+# Browse local database
+npm run db:studio
+```
+
+**Production** (Cloudflare D1):
+
+```bash
+cd apps/api
 npx wrangler d1 migrations apply thalamus-auth --env production
 ```
 
@@ -277,15 +296,13 @@ Common errors:
 
 ### GitHub Actions
 
-- `deploy-staging.yml` - Deploys on push to dev/develop/staging branches and PRs to main
 - `deploy-production.yml` - Deploys on push to main
 
 ### Manual Deployment
 
 ```bash
 cd apps/api
-npm run deploy:staging     # Staging
-npm run deploy:production  # Production
+npm run deploy    # Production
 ```
 
 ### Environment Variables

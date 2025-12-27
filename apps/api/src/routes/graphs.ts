@@ -14,24 +14,44 @@ const graphs = new Hono();
 // All graph routes require authentication
 graphs.use("/*", sessionMiddleware);
 
-// List user's graphs
+// List user's graphs with pagination
 graphs.get("/", async (c) => {
   const user = c.get("user");
   const db = getDb();
 
-  const result = await db
-    .select({
-      id: schema.graphs.id,
-      title: schema.graphs.title,
-      data: schema.graphs.data,
-      updatedAt: schema.graphs.updatedAt,
-      expiresAt: schema.graphs.expiresAt,
-    })
-    .from(schema.graphs)
-    .where(eq(schema.graphs.ownerId, user.id))
-    .orderBy(sql`${schema.graphs.updatedAt} DESC`);
+  // Parse pagination params with sensible defaults
+  const limit = Math.min(Math.max(Number(c.req.query("limit")) || 20, 1), 100);
+  const offset = Math.max(Number(c.req.query("offset")) || 0, 0);
 
-  return c.json(result);
+  // Run data query and count in parallel for better performance
+  const [result, countResult] = await Promise.all([
+    db
+      .select({
+        id: schema.graphs.id,
+        title: schema.graphs.title,
+        data: schema.graphs.data,
+        updatedAt: schema.graphs.updatedAt,
+        expiresAt: schema.graphs.expiresAt,
+      })
+      .from(schema.graphs)
+      .where(eq(schema.graphs.ownerId, user.id))
+      .orderBy(sql`${schema.graphs.updatedAt} DESC`)
+      .limit(limit)
+      .offset(offset),
+    db.select({ total: count() }).from(schema.graphs).where(eq(schema.graphs.ownerId, user.id)),
+  ]);
+
+  const total = countResult[0]?.total ?? 0;
+
+  return c.json({
+    items: result,
+    pagination: {
+      total,
+      limit,
+      offset,
+      hasMore: offset + result.length < total,
+    },
+  });
 });
 
 // Get single graph
@@ -64,18 +84,16 @@ graphs.post("/", async (c) => {
   const body = await c.req.json<{ title: string; data: GraphPayload }>();
   const db = getDb();
 
-  // Check quota
-  const countResult = await db
-    .select({ count: count() })
-    .from(schema.graphs)
-    .where(eq(schema.graphs.ownerId, user.id));
-  const currentCount = countResult[0]?.count ?? 0;
+  // Check quota - run both queries in parallel for better performance
+  const [countResult, profileResult] = await Promise.all([
+    db.select({ count: count() }).from(schema.graphs).where(eq(schema.graphs.ownerId, user.id)),
+    db
+      .select({ maxGraphs: schema.profiles.maxGraphs })
+      .from(schema.profiles)
+      .where(eq(schema.profiles.id, user.id)),
+  ]);
 
-  // Get max graphs from profile (default 20)
-  const profileResult = await db
-    .select({ maxGraphs: schema.profiles.maxGraphs })
-    .from(schema.profiles)
-    .where(eq(schema.profiles.id, user.id));
+  const currentCount = countResult[0]?.count ?? 0;
   const maxGraphs = profileResult.length > 0 ? (profileResult[0].maxGraphs ?? 20) : 20;
 
   if (currentCount >= maxGraphs) {

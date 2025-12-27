@@ -23,8 +23,19 @@ export const emptyGraphPayload = (): GraphPayload => ({
   groups: [],
 });
 
+type PaginatedResponse<T> = {
+  items: T[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+};
+
 export async function listGraphs(): Promise<GraphRecord[]> {
-  return apiFetch<GraphRecord[]>("/graphs");
+  const response = await apiFetch<PaginatedResponse<GraphRecord>>("/graphs");
+  return response.items;
 }
 
 export async function getGraph(graphId: string): Promise<GraphRecord> {

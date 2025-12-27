@@ -1,0 +1,12 @@
+# Local development database
+local.db
+local.db-journal
+local.db-wal
+
+# Environment files (local secrets)
+.env
+.env.local
+.dev.vars
+
+# Wrangler
+.wrangler/

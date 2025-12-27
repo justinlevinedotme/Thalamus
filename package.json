@@ -30,6 +30,9 @@
     ]
   },
   "packageManager": "npm@11.6.2",
+  "optionalDependencies": {
+    "better-sqlite3": "^11.7.0"
+  },
   "devDependencies": {
     "@commitlint/cli": "^20.2.0",
     "@commitlint/config-conventional": "^20.2.0",

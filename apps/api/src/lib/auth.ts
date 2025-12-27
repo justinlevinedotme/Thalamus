@@ -1,7 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { genericOAuth, twoFactor, haveIBeenPwned, captcha } from "better-auth/plugins";
-import { drizzle } from "drizzle-orm/d1";
+import { drizzle as drizzleD1 } from "drizzle-orm/d1";
+import { drizzle as drizzleSqlite } from "drizzle-orm/better-sqlite3";
 import { emails } from "../emails";
 import { sendEmail } from "./email";
 import * as schema from "./schema";
@@ -37,12 +38,38 @@ const sendWelcomeEmail = async (user: { email: string; name?: string | null }) =
   }
 };
 
-// Store D1 binding for the current request
+// Store D1 binding for the current request (production only)
 let _d1: D1Database | null = null;
+
+// Store local SQLite instance (local dev only)
+let _localSqlite: ReturnType<typeof drizzleSqlite<typeof schema>> | null = null;
+
+// Check if we're in local development mode
+function isLocalDev(): boolean {
+  return typeof globalThis.process !== "undefined" && !_d1;
+}
 
 export function setAuthD1(d1: D1Database) {
   _d1 = d1;
   _auth = null; // Reset auth instance when D1 changes
+}
+
+// Initialize local SQLite for auth (called in local dev)
+export function initAuthLocalDb(): ReturnType<typeof drizzleSqlite<typeof schema>> {
+  if (_localSqlite) return _localSqlite;
+
+  // Dynamic import to avoid bundling better-sqlite3 in production
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const Database = require("better-sqlite3");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const path = require("path");
+
+  const dbPath = path.resolve(process.cwd(), "local.db");
+  const sqlite = new Database(dbPath);
+  sqlite.pragma("journal_mode = WAL");
+
+  _localSqlite = drizzleSqlite(sqlite, { schema });
+  return _localSqlite;
 }
 
 // Lazily create auth instance - required for Cloudflare Workers where
@@ -50,11 +77,20 @@ export function setAuthD1(d1: D1Database) {
 let _auth: ReturnType<typeof betterAuth> | null = null;
 
 function createAuth(): ReturnType<typeof betterAuth> {
-  if (!_d1) {
-    throw new Error("D1 database not set. Call setAuthD1() first.");
-  }
+  // Get the appropriate database based on environment
+  let db:
+    | ReturnType<typeof drizzleD1<typeof schema>>
+    | ReturnType<typeof drizzleSqlite<typeof schema>>;
 
-  const db = drizzle(_d1, { schema });
+  if (_d1) {
+    // Production: use D1
+    db = drizzleD1(_d1, { schema });
+  } else if (isLocalDev()) {
+    // Local dev: use better-sqlite3
+    db = initAuthLocalDb();
+  } else {
+    throw new Error("No database available. In production, call setAuthD1() first.");
+  }
 
   return betterAuth({
     database: drizzleAdapter(db, {
