@@ -8,7 +8,6 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "deploy": "wrangler deploy --env production",
-    "deploy:staging": "wrangler deploy --env staging",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "wrangler d1 migrations apply thalamus-auth --env production",
     "db:migrate:local": "tsx src/scripts/migrate-local.ts",
