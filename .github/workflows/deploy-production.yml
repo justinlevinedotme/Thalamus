@@ -19,6 +19,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Apply database migrations
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: apps/api
+          command: d1 migrations apply thalamus-auth --env production
+
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
