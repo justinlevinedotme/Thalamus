@@ -38,6 +38,9 @@ type NodeKeyData = {
 
 type NodeKeyNodeType = Node<NodeKeyData, "nodeKey">;
 
+// Default text color for nodes without explicit textColor (ensures readability on light backgrounds)
+const DEFAULT_TEXT_COLOR = "#1f2937"; // gray-800
+
 export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyNodeType>) {
   const { selectGroupNodes, updateNodeLabel, updateNodeBody } = useGraphStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -191,11 +194,11 @@ export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyNod
   const hasBorder = borderWidth > 0;
   const borderColor = selected && hasBorder ? undefined : data.style?.borderColor;
 
-  // Text colors from style
-  const titleColor = data.style?.textColor;
-  const bodyTextColor = data.style?.bodyTextColor;
+  // Text colors from style with fallback for existing nodes
+  const titleColor = data.style?.textColor ?? DEFAULT_TEXT_COLOR;
+  const bodyTextColor = data.style?.bodyTextColor ?? DEFAULT_TEXT_COLOR;
   const separatorColor = data.style?.separatorColor;
-  const iconColor = data.style?.iconColor;
+  const iconColor = data.style?.iconColor ?? DEFAULT_TEXT_COLOR;
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color ?? "#FFFFFF",

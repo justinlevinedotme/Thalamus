@@ -24,6 +24,9 @@ type EditableNodeData = {
 
 type EditableNodeType = Node<EditableNodeData, "editable">;
 
+// Default text color for nodes without explicit textColor (ensures readability on light backgrounds)
+const DEFAULT_TEXT_COLOR = "#1f2937"; // gray-800
+
 const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
   switch (padding) {
     case "sm":
@@ -210,7 +213,7 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
         {data.style?.icon && (
           <span
             className="flex-shrink-0 flex items-center"
-            style={{ color: data.style?.iconColor ?? data.style?.textColor }}
+            style={{ color: data.style?.iconColor ?? data.style?.textColor ?? DEFAULT_TEXT_COLOR }}
           >
             <NodeIconDisplay icon={data.style.icon} className="h-4 w-4" />
           </span>
@@ -232,14 +235,14 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
               onFocus={() => setEditingField("title")}
               placeholder="Node title"
               className="w-full bg-transparent font-medium"
-              textColor={data.style?.textColor}
+              textColor={data.style?.textColor ?? DEFAULT_TEXT_COLOR}
               singleLine
               autoFocus={editingField === "title"}
             />
           ) : (
             <div
               className="node-rich-text font-medium w-full"
-              style={{ color: data.style?.textColor }}
+              style={{ color: data.style?.textColor ?? DEFAULT_TEXT_COLOR }}
               dangerouslySetInnerHTML={{ __html: data.label }}
             />
           )}
@@ -262,13 +265,15 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
             onFocus={() => setEditingField("body")}
             placeholder="Add notes..."
             className="mt-1 w-full bg-transparent text-xs"
-            textColor={data.style?.bodyTextColor ?? data.style?.textColor}
+            textColor={data.style?.bodyTextColor ?? data.style?.textColor ?? DEFAULT_TEXT_COLOR}
             autoFocus={editingField === "body"}
           />
         ) : (
           <div
             className="nodrag node-rich-text mt-1 w-full text-xs cursor-text"
-            style={{ color: data.style?.bodyTextColor ?? data.style?.textColor }}
+            style={{
+              color: data.style?.bodyTextColor ?? data.style?.textColor ?? DEFAULT_TEXT_COLOR,
+            }}
             dangerouslySetInnerHTML={{ __html: draftBody || data.body || "" }}
             onClick={(e) => {
               e.stopPropagation();
