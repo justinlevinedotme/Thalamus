@@ -45,9 +45,6 @@ async function hashPassword(password: string): Promise<string> {
 // Generate timestamps
 const now = new Date();
 
-// User ID
-const adminUserId = randomUUID();
-
 // Graph data samples
 const sampleEventFlowData = {
   nodes: [
@@ -137,13 +134,19 @@ async function seed() {
       .where(eq(schema.baUser.email, "admin@admin.com"))
       .get();
 
+    // Use existing user's ID or create new one
+    let userId: string;
+
     if (existingUser) {
+      userId = existingUser.id;
       console.log("  ⏭️  User admin@admin.com already exists, skipping...");
     } else {
+      userId = randomUUID();
+
       // Create user
       db.insert(schema.baUser)
         .values({
-          id: adminUserId,
+          id: userId,
           email: "admin@admin.com",
           name: "Admin User",
           emailVerified: true,
@@ -158,9 +161,9 @@ async function seed() {
       db.insert(schema.baAccount)
         .values({
           id: randomUUID(),
-          accountId: adminUserId,
+          accountId: userId,
           providerId: "credential",
-          userId: adminUserId,
+          userId: userId,
           password: hashedPassword,
           createdAt: now,
           updatedAt: now,
@@ -170,7 +173,7 @@ async function seed() {
       // Create profile
       db.insert(schema.profiles)
         .values({
-          id: adminUserId,
+          id: userId,
           plan: "free",
           maxGraphs: 20,
           retentionDays: 365,
@@ -184,11 +187,11 @@ async function seed() {
 
     console.log("\nCreating sample graphs...");
 
-    // Check if graphs already exist
+    // Check if graphs already exist for this user
     const existingGraphs = db
       .select()
       .from(schema.graphs)
-      .where(eq(schema.graphs.ownerId, adminUserId))
+      .where(eq(schema.graphs.ownerId, userId))
       .all();
 
     if (existingGraphs.length > 0) {
@@ -198,7 +201,7 @@ async function seed() {
       db.insert(schema.graphs)
         .values({
           id: randomUUID(),
-          ownerId: adminUserId,
+          ownerId: userId,
           title: "Sample Event Flow",
           data: sampleEventFlowData,
           createdAt: now,
@@ -211,7 +214,7 @@ async function seed() {
       db.insert(schema.graphs)
         .values({
           id: randomUUID(),
-          ownerId: adminUserId,
+          ownerId: userId,
           title: "Getting Started",
           data: gettingStartedData,
           createdAt: now,
