@@ -49,15 +49,21 @@ function CustomMarkerDefs({ edges }: { edges: Array<{ data?: RelationshipData }>
       }
     }
 
-    return Array.from(configs).map((c) => JSON.parse(c) as { type: EdgeMarkerType; color: string; size: EdgeMarkerSize });
+    return Array.from(configs).map(
+      (c) => JSON.parse(c) as { type: EdgeMarkerType; color: string; size: EdgeMarkerSize }
+    );
   }, [edges]);
 
   const sizeToValue = (size: EdgeMarkerSize): number => {
     switch (size) {
-      case "xs": return 8;
-      case "sm": return 15;
-      case "lg": return 35;
-      default: return 25;
+      case "xs":
+        return 8;
+      case "sm":
+        return 15;
+      case "lg":
+        return 35;
+      default:
+        return 25;
     }
   };
 
@@ -238,8 +244,7 @@ export default function GraphCanvas() {
     reconnectEdge,
     deleteSelectedNodes,
   } = useGraphStore();
-  const [reactFlowInstance, setReactFlowInstance] =
-    useState<ReactFlowInstance | null>(null);
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const lastCenteredNodeId = useRef<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
   const { helperLines, applyHelperLines, resetHelperLines } = useHelperLines();
@@ -315,17 +320,14 @@ export default function GraphCanvas() {
     [nodes]
   );
 
-  const handleEdgeContextMenu = useCallback(
-    (event: React.MouseEvent, edge: Edge) => {
-      event.preventDefault();
-      setContextMenu({
-        type: "edge",
-        edgeId: edge.id,
-        position: { x: event.clientX, y: event.clientY },
-      });
-    },
-    []
-  );
+  const handleEdgeContextMenu = useCallback((event: React.MouseEvent, edge: Edge) => {
+    event.preventDefault();
+    setContextMenu({
+      type: "edge",
+      edgeId: edge.id,
+      position: { x: event.clientX, y: event.clientY },
+    });
+  }, []);
 
   const handlePaneContextMenu = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
@@ -348,8 +350,7 @@ export default function GraphCanvas() {
   }, []);
 
   const focusedSubgraph = useMemo(
-    () =>
-      isFocusMode ? getFocusSubgraph(nodes, edges, focusNodeId) : { nodes, edges },
+    () => (isFocusMode ? getFocusSubgraph(nodes, edges, focusNodeId) : { nodes, edges }),
     [edges, focusNodeId, isFocusMode, nodes]
   );
 
@@ -454,11 +455,7 @@ export default function GraphCanvas() {
       }
       if (target) {
         const tag = target.tagName;
-        if (
-          tag === "INPUT" ||
-          tag === "TEXTAREA" ||
-          target.isContentEditable
-        ) {
+        if (tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable) {
           return;
         }
       }
@@ -595,7 +592,9 @@ export default function GraphCanvas() {
       const draggedTargetHandles = draggedNode.data?.targetHandles ?? [{ id: "target" }];
       const draggedTargetPositions = draggedTargetHandles.map((_: unknown, index: number) => ({
         x: draggedNode.position.x,
-        y: draggedNode.position.y + ((index + 1) / (draggedTargetHandles.length + 1)) * draggedHeight,
+        y:
+          draggedNode.position.y +
+          ((index + 1) / (draggedTargetHandles.length + 1)) * draggedHeight,
       }));
 
       let closestMatch: {
@@ -634,10 +633,12 @@ export default function GraphCanvas() {
         for (const sourcePos of sourcePositions) {
           for (const targetPos of draggedTargetPositions) {
             const distance = Math.sqrt(
-              Math.pow(sourcePos.x - targetPos.x, 2) +
-                Math.pow(sourcePos.y - targetPos.y, 2)
+              Math.pow(sourcePos.x - targetPos.x, 2) + Math.pow(sourcePos.y - targetPos.y, 2)
             );
-            if (distance < PROXIMITY_THRESHOLD && (!closestMatch || distance < closestMatch.distance)) {
+            if (
+              distance < PROXIMITY_THRESHOLD &&
+              (!closestMatch || distance < closestMatch.distance)
+            ) {
               closestMatch = {
                 sourceNode: node,
                 sourceHandlePos: sourcePos,
@@ -685,8 +686,7 @@ export default function GraphCanvas() {
       // Check for selection changes that involve grouped nodes
       // When a grouped node is selected (without shift), select all nodes in the group
       const selectionChanges = changes.filter(
-        (c): c is NodeChange & { type: "select"; selected: boolean } =>
-          c.type === "select"
+        (c): c is NodeChange & { type: "select"; selected: boolean } => c.type === "select"
       );
 
       if (selectionChanges.length > 0) {
@@ -701,9 +701,7 @@ export default function GraphCanvas() {
 
           if (groupId) {
             // Get all nodes in this group
-            const groupNodeIds = nodes
-              .filter((n) => n.data?.groupId === groupId)
-              .map((n) => n.id);
+            const groupNodeIds = nodes.filter((n) => n.data?.groupId === groupId).map((n) => n.id);
 
             // Check if we're deselecting other nodes (single click behavior)
             const nodesBeingDeselected = selectionChanges.filter((c) => !c.selected);
@@ -794,35 +792,41 @@ export default function GraphCanvas() {
         {helperLinesEnabled && <HelperLinesRenderer helperLines={helperLines} />}
       </ReactFlow>
       {/* Proximity Connect Indicator */}
-      {proximityTarget && reactFlowInstance && (() => {
-        const sourceScreen = reactFlowInstance.flowToScreenPosition(proximityTarget.sourceHandlePosition);
-        const targetScreen = reactFlowInstance.flowToScreenPosition(proximityTarget.targetHandlePosition);
-        const canvasBounds = document.getElementById("graph-canvas")?.getBoundingClientRect();
-        if (!canvasBounds) return null;
-        const x1 = sourceScreen.x - canvasBounds.left;
-        const y1 = sourceScreen.y - canvasBounds.top;
-        const x2 = targetScreen.x - canvasBounds.left;
-        const y2 = targetScreen.y - canvasBounds.top;
-        return (
-          <svg className="pointer-events-none absolute inset-0 z-20 h-full w-full overflow-visible">
-            <line
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="#3B82F6"
-              strokeWidth={2}
-              strokeDasharray="6 4"
-            />
-            {/* Highlight at source handle */}
-            <circle cx={x1} cy={y1} r={8} fill="#3B82F6" opacity={0.2} />
-            <circle cx={x1} cy={y1} r={4} fill="#3B82F6" opacity={0.6} />
-            {/* Highlight at target handle */}
-            <circle cx={x2} cy={y2} r={8} fill="#3B82F6" opacity={0.2} />
-            <circle cx={x2} cy={y2} r={4} fill="#3B82F6" opacity={0.6} />
-          </svg>
-        );
-      })()}
+      {proximityTarget &&
+        reactFlowInstance &&
+        (() => {
+          const sourceScreen = reactFlowInstance.flowToScreenPosition(
+            proximityTarget.sourceHandlePosition
+          );
+          const targetScreen = reactFlowInstance.flowToScreenPosition(
+            proximityTarget.targetHandlePosition
+          );
+          const canvasBounds = document.getElementById("graph-canvas")?.getBoundingClientRect();
+          if (!canvasBounds) return null;
+          const x1 = sourceScreen.x - canvasBounds.left;
+          const y1 = sourceScreen.y - canvasBounds.top;
+          const x2 = targetScreen.x - canvasBounds.left;
+          const y2 = targetScreen.y - canvasBounds.top;
+          return (
+            <svg className="pointer-events-none absolute inset-0 z-20 h-full w-full overflow-visible">
+              <line
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                stroke="#3B82F6"
+                strokeWidth={2}
+                strokeDasharray="6 4"
+              />
+              {/* Highlight at source handle */}
+              <circle cx={x1} cy={y1} r={8} fill="#3B82F6" opacity={0.2} />
+              <circle cx={x1} cy={y1} r={4} fill="#3B82F6" opacity={0.6} />
+              {/* Highlight at target handle */}
+              <circle cx={x2} cy={y2} r={8} fill="#3B82F6" opacity={0.2} />
+              <circle cx={x2} cy={y2} r={4} fill="#3B82F6" opacity={0.6} />
+            </svg>
+          );
+        })()}
       {/* Custom attribution */}
       <div className="absolute bottom-2 right-2 z-10 flex flex-col items-end gap-0.5">
         <span className="text-xs font-medium text-slate-500">Thalamus</span>

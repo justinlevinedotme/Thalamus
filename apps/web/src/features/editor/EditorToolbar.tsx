@@ -18,11 +18,7 @@ import {
   MenubarShortcut,
   MenubarTrigger,
 } from "../../components/ui/menubar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../../components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import { exportGraphJson } from "../../lib/exportJson";
 import { useGraphStore } from "../../store/graphStore";
 import ExportDialog from "./ExportDialog";
@@ -59,21 +55,11 @@ export default function EditorToolbar({
   saveStatus = "idle",
   lastSavedAt,
 }: EditorToolbarProps) {
-  const {
-    graphTitle,
-    setGraphTitle,
-    nodes,
-    edges,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
-  } = useGraphStore();
+  const { graphTitle, setGraphTitle, nodes, edges, undo, redo, canUndo, canRedo } = useGraphStore();
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   const isMac =
-    typeof navigator !== "undefined" &&
-    navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+    typeof navigator !== "undefined" && navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 
   const handleExportJson = () => {
     exportGraphJson(graphTitle, nodes, edges);
@@ -97,21 +83,14 @@ export default function EditorToolbar({
       <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-1">
         <Menubar className="h-auto border-0 bg-transparent p-0">
           <MenubarMenu>
-            <MenubarTrigger className="px-2 py-1 text-sm font-normal">
-              File
-            </MenubarTrigger>
+            <MenubarTrigger className="px-2 py-1 text-sm font-normal">File</MenubarTrigger>
             <MenubarContent>
-              <MenubarItem
-                onClick={onSave}
-                disabled={!canSave || saveStatus === "saving"}
-              >
+              <MenubarItem onClick={onSave} disabled={!canSave || saveStatus === "saving"}>
                 {saveStatus === "saving" ? "Saving..." : "Save"}
                 <MenubarShortcut>{isMac ? "⌘S" : "Ctrl+S"}</MenubarShortcut>
               </MenubarItem>
               <MenubarSeparator />
-              <MenubarItem onClick={handleExportJson}>
-                Export as JSON
-              </MenubarItem>
+              <MenubarItem onClick={handleExportJson}>Export as JSON</MenubarItem>
               <MenubarItem onClick={() => setExportDialogOpen(true)}>
                 Export as Image...
               </MenubarItem>
@@ -123,9 +102,7 @@ export default function EditorToolbar({
           </MenubarMenu>
 
           <MenubarMenu>
-            <MenubarTrigger className="px-2 py-1 text-sm font-normal">
-              Edit
-            </MenubarTrigger>
+            <MenubarTrigger className="px-2 py-1 text-sm font-normal">Edit</MenubarTrigger>
             <MenubarContent>
               <MenubarItem onClick={undo} disabled={!canUndo}>
                 Undo
@@ -139,9 +116,7 @@ export default function EditorToolbar({
           </MenubarMenu>
 
           <MenubarMenu>
-            <MenubarTrigger className="px-2 py-1 text-sm font-normal">
-              View
-            </MenubarTrigger>
+            <MenubarTrigger className="px-2 py-1 text-sm font-normal">View</MenubarTrigger>
             <MenubarContent>
               <MenubarItem disabled>Zoom In</MenubarItem>
               <MenubarItem disabled>Zoom Out</MenubarItem>
@@ -150,9 +125,7 @@ export default function EditorToolbar({
           </MenubarMenu>
 
           <MenubarMenu>
-            <MenubarTrigger className="px-2 py-1 text-sm font-normal">
-              Help
-            </MenubarTrigger>
+            <MenubarTrigger className="px-2 py-1 text-sm font-normal">Help</MenubarTrigger>
             <MenubarContent>
               <MenubarItem disabled>Keyboard Shortcuts</MenubarItem>
               <MenubarItem disabled>Documentation</MenubarItem>

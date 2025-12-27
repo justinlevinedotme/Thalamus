@@ -1,11 +1,7 @@
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./popover";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 type EmojiPickerProps = {
   value?: string;
@@ -23,11 +19,7 @@ export function EmojiPicker({ value, onChange, children }: EmojiPickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent
-        className="w-auto border-none p-0 shadow-xl"
-        side="right"
-        align="start"
-      >
+      <PopoverContent className="w-auto border-none p-0 shadow-xl" side="right" align="start">
         <Picker
           data={data}
           onEmojiSelect={(emoji: EmojiData) => onChange(emoji.native)}

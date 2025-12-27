@@ -1,11 +1,7 @@
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import { Plus, X } from "lucide-react";
 import { cn } from "../../lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
 export interface SpeedDialAction {
   icon: ReactNode;
@@ -80,9 +76,7 @@ export function SpeedDial({ actions, className }: SpeedDialProps) {
                 type="button"
                 className={cn(
                   "flex h-10 w-10 items-center justify-center rounded-md bg-white border border-slate-200 text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-300",
-                  isOpen
-                    ? "scale-100 opacity-100"
-                    : "scale-75 opacity-0"
+                  isOpen ? "scale-100 opacity-100" : "scale-75 opacity-0"
                 )}
                 style={{
                   transitionDelay: isOpen ? `${index * 50}ms` : "0ms",

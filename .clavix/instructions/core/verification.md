@@ -11,6 +11,7 @@ Verification ensures that critical workflow steps actually completed successfull
 ### What Are Checkpoints?
 
 Checkpoints are standardized markers that agents output to confirm workflow step completion. They enable:
+
 - Progress tracking
 - Failure detection
 - Workflow validation
@@ -39,6 +40,7 @@ Checkpoints are standardized markers that agents output to confirm workflow step
 ### 1. Mode Transitions
 
 **When entering a specific mode:**
+
 ```markdown
 **CHECKPOINT:** Entered conversational mode for requirements gathering
 **CHECKPOINT:** Started PRD generation workflow
@@ -48,6 +50,7 @@ Checkpoints are standardized markers that agents output to confirm workflow step
 ### 2. After File Operations
 
 **After creating files:**
+
 ```markdown
 **CHECKPOINT:** Files created successfully - verified existence
 **CHECKPOINT:** Saved prompt to .clavix/outputs/prompts/fast/fast-20251124-1430.md
@@ -56,6 +59,7 @@ Checkpoints are standardized markers that agents output to confirm workflow step
 ### 3. After Complex Operations
 
 **After multi-step processes:**
+
 ```markdown
 **CHECKPOINT:** Completed pattern-based optimization - 5 improvements applied
 **CHECKPOINT:** Analyzed conversation - extracted 12 requirements, 3 constraints
@@ -64,6 +68,7 @@ Checkpoints are standardized markers that agents output to confirm workflow step
 ### 4. At Decision Points
 
 **When making workflow decisions:**
+
 ```markdown
 **CHECKPOINT:** Conversation complexity threshold reached (15+ exchanges) - suggesting summarization
 **CHECKPOINT:** Missing critical requirements - requesting more information before proceeding
@@ -82,10 +87,12 @@ Checkpoints are standardized markers that agents output to confirm workflow step
 
 List the created files to confirm they exist:
 ```
+
 Created files:
 ✓ .clavix/outputs/[project]/mini-prd.md
 ✓ .clavix/outputs/[project]/original-prompt.md
 ✓ .clavix/outputs/[project]/optimized-prompt.md
+
 ```
 
 **CHECKPOINT:** All files created successfully.
@@ -105,6 +112,7 @@ If any file is missing:
 **Step 6: Validate Content**
 
 Verify each file contains:
+
 - ✓ mini-prd.md: Objective, Requirements, Constraints, Success Criteria sections
 - ✓ original-prompt.md: At least 2 paragraphs of extracted requirements
 - ✓ optimized-prompt.md: Improvements labeled with [ADDED], [CLARIFIED], etc.
@@ -122,6 +130,7 @@ Verify each file contains:
 **Step 7: Mode Compliance Check**
 
 Confirm you stayed in CLAVIX MODE:
+
 - ✓ Did NOT implement application code
 - ✓ Did NOT generate feature implementations
 - ✓ Only created planning documents and prompts
@@ -139,11 +148,13 @@ Confirm you stayed in CLAVIX MODE:
 **Pre-Extraction Validation**
 
 Before proceeding with summarization, verify conversation includes:
+
 - ✓ Clear project objective (what are we building?)
 - ✓ At least 3 core requirements
 - ✓ Technical constraints or framework preferences (if applicable)
 
 If ANY are missing:
+
 - DO NOT proceed with summarization
 - Ask clarifying questions to gather missing information
 - Reference: `.clavix/instructions/troubleshooting/incomplete-requirements.md`
@@ -161,11 +172,13 @@ If ANY are missing:
 **Self-Check: Am I Implementing?**
 
 If you catch yourself:
+
 - Writing application code (functions, components, classes)
 - Implementing features being discussed
 - Generating code examples for the actual feature
 
 **IMMEDIATE ACTION:**
+
 1. STOP writing implementation code
 2. Delete the implementation attempt
 3. Output: "I apologize - I was jumping to implementation. Let me return to requirements gathering."
@@ -183,6 +196,7 @@ If you catch yourself:
 **Self-Check: Did I Skip File Creation?**
 
 Before completing the summarization workflow, verify:
+
 - ✓ Created .clavix/outputs/[project]/ directory
 - ✓ Wrote mini-prd.md
 - ✓ Wrote original-prompt.md
@@ -190,6 +204,7 @@ Before completing the summarization workflow, verify:
 - ✓ Verified all files exist
 
 If any step was skipped:
+
 1. Go back and complete missing steps
 2. Reference: `.clavix/instructions/core/file-operations.md`
 3. Verify files exist before marking workflow complete
@@ -329,6 +344,7 @@ Use consistent format to enable future automated validation:
 **CHECKPOINT:** <status> - <description>
 
 Where:
+
 - <status>: SUCCESS, WARNING, ERROR, INFO
 - <description>: What was completed or detected
 
@@ -352,23 +368,27 @@ Examples:
 ## Summary
 
 **Always include:**
+
 1. **Checkpoints** after major workflow steps
 2. **Verification steps** for file operations
 3. **Self-correction checks** at decision points
 4. **Troubleshooting detection** for common failures
 
 **Format:**
+
 ```markdown
 **CHECKPOINT:** [Clear description of what completed]
 ```
 
 **Use verification to:**
+
 - Confirm files created
 - Validate content structure
 - Ensure mode boundaries respected
 - Detect and correct failures
 
 **Reference troubleshooting guides when:**
+
 - Files not created
 - Implementation occurred prematurely
 - Mode confusion detected

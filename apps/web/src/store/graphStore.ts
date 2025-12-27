@@ -16,7 +16,15 @@ import { getLayoutedElements, type LayoutOptions } from "../lib/autoLayout";
 
 export type RelationshipDirection = "forward" | "backward" | "both" | "none";
 export type RelationshipType = "causes" | "supports" | "contradicts" | "related";
-export type NodeKind = "idea" | "question" | "evidence" | "goal" | "text" | "shape" | "pathKey" | "nodeKey";
+export type NodeKind =
+  | "idea"
+  | "question"
+  | "evidence"
+  | "goal"
+  | "text"
+  | "shape"
+  | "pathKey"
+  | "nodeKey";
 
 export type NodeShape = "rounded" | "pill" | "circle" | "square";
 export type NodeSize = "sm" | "md" | "lg";
@@ -138,11 +146,7 @@ type GraphState = {
   updateNodeLabel: (nodeId: string, label: string) => void;
   updateNodeBody: (nodeId: string, body: string) => void;
   updateNodeStyle: (nodeId: string, style: Partial<NodeStyle>) => void;
-  updateNodeHandles: (
-    nodeId: string,
-    sourceCount: number,
-    targetCount: number
-  ) => void;
+  updateNodeHandles: (nodeId: string, sourceCount: number, targetCount: number) => void;
   setNodeKind: (nodeId: string, kind: NodeKind) => void;
   updateEdgeLabel: (edgeId: string, label: string) => void;
   updateEdgeData: (edgeId: string, data: Partial<RelationshipData>) => void;
@@ -156,10 +160,7 @@ type GraphState = {
   duplicateNode: (nodeId: string) => void;
   deleteNode: (nodeId: string) => void;
   deleteEdge: (edgeId: string) => void;
-  reconnectEdge: (
-    oldEdge: Edge<RelationshipData>,
-    newConnection: Connection
-  ) => void;
+  reconnectEdge: (oldEdge: Edge<RelationshipData>, newConnection: Connection) => void;
   connectNodes: (sourceId: string, targetId: string) => void;
   updateAllNodeStyles: (style: Partial<NodeStyle>) => void;
   updateAllEdgeStyles: (style: Partial<EdgeStyle>) => void;
@@ -196,9 +197,30 @@ const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
   evidence: { color: "#BBF7D0", shape: "rounded", size: "sm" },
   goal: { color: "#BFDBFE", shape: "pill", size: "lg" },
   text: { color: "transparent", shape: "rounded", size: "md" },
-  shape: { color: "#DBEAFE", shape: "rounded", size: "lg", borderColor: "#3B82F6", borderWidth: 2, borderStyle: "solid" },
-  pathKey: { color: "#FFFFFF", shape: "rounded", size: "md", borderColor: "#e2e8f0", borderWidth: 1, borderStyle: "solid" },
-  nodeKey: { color: "#FFFFFF", shape: "rounded", size: "md", borderColor: "#e2e8f0", borderWidth: 1, borderStyle: "solid" },
+  shape: {
+    color: "#DBEAFE",
+    shape: "rounded",
+    size: "lg",
+    borderColor: "#3B82F6",
+    borderWidth: 2,
+    borderStyle: "solid",
+  },
+  pathKey: {
+    color: "#FFFFFF",
+    shape: "rounded",
+    size: "md",
+    borderColor: "#e2e8f0",
+    borderWidth: 1,
+    borderStyle: "solid",
+  },
+  nodeKey: {
+    color: "#FFFFFF",
+    shape: "rounded",
+    size: "md",
+    borderColor: "#e2e8f0",
+    borderWidth: 1,
+    borderStyle: "solid",
+  },
 };
 
 const defaultEdgeStyle: EdgeStyle = {
@@ -294,7 +316,10 @@ const shouldCommitNodeChanges = (changes: NodeChange[]) =>
 const shouldCommitEdgeChanges = (changes: EdgeChange[]) =>
   changes.some((change) => change.type !== "select");
 
-type MarkerConfig = { type: MarkerType; color?: string; width?: number; height?: number } | string | undefined;
+type MarkerConfig =
+  | { type: MarkerType; color?: string; width?: number; height?: number }
+  | string
+  | undefined;
 
 const markerSizeToScale = (size: EdgeMarkerSize): number => {
   switch (size) {
@@ -310,7 +335,11 @@ const markerSizeToScale = (size: EdgeMarkerSize): number => {
 };
 
 // Generate a unique marker ID based on type, color and size
-export const getMarkerId = (markerType: EdgeMarkerType, color: string, size: EdgeMarkerSize): string => {
+export const getMarkerId = (
+  markerType: EdgeMarkerType,
+  color: string,
+  size: EdgeMarkerSize
+): string => {
   // Encode color to be URL-safe (remove #)
   const colorId = color.replace("#", "");
   return `marker-${markerType}-${colorId}-${size}`;
@@ -447,10 +476,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         },
         state.edges
       ),
-      ...setHistory(
-        [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
-        []
-      ),
+      ...setHistory([...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)], []),
     })),
   setGraphTitle: (graphTitle) => set({ graphTitle }),
   selectEdge: (edgeId) => set({ selectedEdgeId: edgeId }),
@@ -481,9 +507,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       }
       return {
         nodes: state.nodes.map((node) =>
-          node.id === nodeId
-            ? { ...node, data: { ...node.data, label } }
-            : node
+          node.id === nodeId ? { ...node, data: { ...node.data, label } } : node
         ),
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
@@ -503,9 +527,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       }
       return {
         nodes: state.nodes.map((node) =>
-          node.id === nodeId
-            ? { ...node, data: { ...node.data, body: normalizedBody } }
-            : node
+          node.id === nodeId ? { ...node, data: { ...node.data, body: normalizedBody } } : node
         ),
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
@@ -526,9 +548,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       };
       return {
         nodes: state.nodes.map((node) =>
-          node.id === nodeId
-            ? { ...node, data: { ...node.data, style: nextStyle } }
-            : node
+          node.id === nodeId ? { ...node, data: { ...node.data, style: nextStyle } } : node
         ),
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
@@ -673,11 +693,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
             ? {
                 ...edge,
                 data: nextData,
-                ...markerForDirection(
-                  nextData.direction ?? "forward",
-                  nextStyle.color,
-                  nextStyle
-                ),
+                ...markerForDirection(nextData.direction ?? "forward", nextStyle.color, nextStyle),
               }
             : edge
         ),
@@ -694,20 +710,29 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     const nodeType = getNodeType(kind);
     const getDefaultLabel = () => {
       switch (kind) {
-        case "text": return "Heading";
-        case "shape": return "";
-        case "pathKey": return "Path Key";
-        case "nodeKey": return "Node Key";
-        default: return "New node";
+        case "text":
+          return "Heading";
+        case "shape":
+          return "";
+        case "pathKey":
+          return "Path Key";
+        case "nodeKey":
+          return "Node Key";
+        default:
+          return "New node";
       }
     };
     // Get initial dimensions for resizable nodes
     const getInitialStyle = () => {
       switch (kind) {
-        case "shape": return { width: 200, height: 120 };
-        case "pathKey": return { width: 200, height: 150 };
-        case "nodeKey": return { width: 200, height: 150 };
-        default: return undefined;
+        case "shape":
+          return { width: 200, height: 120 };
+        case "pathKey":
+          return { width: 200, height: 150 };
+        case "nodeKey":
+          return { width: 200, height: 150 };
+        default:
+          return undefined;
       }
     };
     const nextNode: Node<GraphNodeData> = {
@@ -723,10 +748,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     };
     set((state) => ({
       nodes: [...state.nodes, nextNode],
-      ...setHistory(
-        [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
-        []
-      ),
+      ...setHistory([...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)], []),
     }));
   },
   addNodeAtCenter: (kind) => {
@@ -763,10 +785,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     set({
       nodes: [...state.nodes, newNode],
       selectedNodeId: newId,
-      ...setHistory(
-        [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
-        []
-      ),
+      ...setHistory([...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)], []),
     });
   },
   deleteNode: (nodeId) =>
@@ -777,11 +796,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       }
       return {
         nodes: state.nodes.filter((n) => n.id !== nodeId),
-        edges: state.edges.filter(
-          (e) => e.source !== nodeId && e.target !== nodeId
-        ),
-        selectedNodeId:
-          state.selectedNodeId === nodeId ? undefined : state.selectedNodeId,
+        edges: state.edges.filter((e) => e.source !== nodeId && e.target !== nodeId),
+        selectedNodeId: state.selectedNodeId === nodeId ? undefined : state.selectedNodeId,
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
@@ -796,8 +812,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       }
       return {
         edges: state.edges.filter((e) => e.id !== edgeId),
-        selectedEdgeId:
-          state.selectedEdgeId === edgeId ? undefined : state.selectedEdgeId,
+        selectedEdgeId: state.selectedEdgeId === edgeId ? undefined : state.selectedEdgeId,
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
           []
@@ -915,11 +930,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           return {
             ...edge,
             data: nextData,
-            ...markerForDirection(
-              nextData.direction ?? "forward",
-              nextStyle.color,
-              nextStyle
-            ),
+            ...markerForDirection(nextData.direction ?? "forward", nextStyle.color, nextStyle),
           };
         }),
         ...setHistory(
@@ -958,9 +969,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     }),
   deleteSelectedNodes: () =>
     set((state) => {
-      const selectedNodeIds = new Set(
-        state.nodes.filter((n) => n.selected).map((n) => n.id)
-      );
+      const selectedNodeIds = new Set(state.nodes.filter((n) => n.selected).map((n) => n.id));
       if (selectedNodeIds.size === 0) {
         return {};
       }
@@ -1028,17 +1037,10 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     if (state.nodes.length === 0) {
       return;
     }
-    const { nodes: layoutedNodes } = await getLayoutedElements(
-      state.nodes,
-      state.edges,
-      options
-    );
+    const { nodes: layoutedNodes } = await getLayoutedElements(state.nodes, state.edges, options);
     set({
       nodes: layoutedNodes,
-      ...setHistory(
-        [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
-        []
-      ),
+      ...setHistory([...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)], []),
     });
   },
   groupSelectedNodes: () =>
@@ -1048,9 +1050,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         return {};
       }
       // Check if any selected nodes are already in a group
-      const existingGroupIds = new Set(
-        selectedNodes.map((n) => n.data.groupId).filter(Boolean)
-      );
+      const existingGroupIds = new Set(selectedNodes.map((n) => n.data.groupId).filter(Boolean));
       if (existingGroupIds.size > 0) {
         // Don't allow grouping nodes that are already grouped
         return {};
@@ -1072,9 +1072,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       };
       return {
         nodes: state.nodes.map((node) =>
-          node.selected
-            ? { ...node, data: { ...node.data, groupId } }
-            : node
+          node.selected ? { ...node, data: { ...node.data, groupId } } : node
         ),
         groups: [...state.groups, newGroup],
         ...setHistory(
@@ -1201,9 +1199,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
       return {
         nodes: state.nodes.map((node) =>
-          node.selected
-            ? { ...node, position: { ...node.position, x: minX } }
-            : node
+          node.selected ? { ...node, position: { ...node.position, x: minX } } : node
         ),
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
@@ -1217,9 +1213,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       if (selectedNodes.length < 2) return {};
 
       // Find the rightmost edge (x + width)
-      const maxRight = Math.max(
-        ...selectedNodes.map((n) => n.position.x + (n.width ?? 150))
-      );
+      const maxRight = Math.max(...selectedNodes.map((n) => n.position.x + (n.width ?? 150)));
 
       return {
         nodes: state.nodes.map((node) =>
@@ -1264,9 +1258,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
       return {
         nodes: state.nodes.map((node) =>
-          node.selected
-            ? { ...node, position: { ...node.position, y: minY } }
-            : node
+          node.selected ? { ...node, position: { ...node.position, y: minY } } : node
         ),
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
@@ -1280,9 +1272,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       if (selectedNodes.length < 2) return {};
 
       // Find the bottommost edge (y + height)
-      const maxBottom = Math.max(
-        ...selectedNodes.map((n) => n.position.y + (n.height ?? 50))
-      );
+      const maxBottom = Math.max(...selectedNodes.map((n) => n.position.y + (n.height ?? 50)));
 
       return {
         nodes: state.nodes.map((node) =>
@@ -1398,10 +1388,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       }
       const next = state.historyFuture[0];
       const nextFuture = state.historyFuture.slice(1);
-      const nextPast = [
-        ...state.historyPast,
-        cloneGraph(state.nodes, state.edges, state.groups),
-      ];
+      const nextPast = [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)];
       return {
         nodes: next.nodes,
         edges: next.edges,
@@ -1485,10 +1472,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
       set((state) => ({
         // Deselect existing nodes and add new ones
-        nodes: [
-          ...state.nodes.map((n) => ({ ...n, selected: false })),
-          ...newNodes,
-        ],
+        nodes: [...state.nodes.map((n) => ({ ...n, selected: false })), ...newNodes],
         edges: [...state.edges, ...newEdges],
         ...setHistory(
           [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
@@ -1506,9 +1490,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
       return undefined;
     }
     // Get unique group IDs from selected nodes
-    const groupIds = new Set(
-      selectedNodes.map((n) => n.data.groupId).filter(Boolean)
-    );
+    const groupIds = new Set(selectedNodes.map((n) => n.data.groupId).filter(Boolean));
     // Return the group ID if all selected nodes are in the same group
     if (groupIds.size === 1) {
       return Array.from(groupIds)[0];

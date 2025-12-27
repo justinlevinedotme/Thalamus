@@ -16,15 +16,10 @@ export default function EditorSettingsInspector() {
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-0.5">
-            <label
-              htmlFor="helper-lines"
-              className="text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="helper-lines" className="text-sm font-medium text-slate-700">
               Helper Lines
             </label>
-            <p className="text-xs text-slate-500">
-              Alignment guides when dragging
-            </p>
+            <p className="text-xs text-slate-500">Alignment guides when dragging</p>
           </div>
           <Switch
             id="helper-lines"
@@ -35,15 +30,10 @@ export default function EditorSettingsInspector() {
 
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-0.5">
-            <label
-              htmlFor="connection-suggestions"
-              className="text-sm font-medium text-slate-700"
-            >
+            <label htmlFor="connection-suggestions" className="text-sm font-medium text-slate-700">
               Connection Suggestions
             </label>
-            <p className="text-xs text-slate-500">
-              Suggest links when nodes are near
-            </p>
+            <p className="text-xs text-slate-500">Suggest links when nodes are near</p>
           </div>
           <Switch
             id="connection-suggestions"

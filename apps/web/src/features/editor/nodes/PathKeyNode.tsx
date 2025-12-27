@@ -9,11 +9,7 @@ import RichTextEditor from "../../../components/RichTextEditor";
 import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
 import { Kbd } from "../../../components/ui/kbd";
-import {
-  type NodeKind,
-  type NodeStyle,
-  useGraphStore,
-} from "../../../store/graphStore";
+import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
 // Strip HTML tags for plain text comparison
 const stripHtml = (html: string): string => {
@@ -41,11 +37,7 @@ type PathKeyData = {
   entries?: PathKeyEntry[];
 };
 
-export default function PathKeyNode({
-  id,
-  data,
-  selected,
-}: NodeProps<PathKeyData>) {
+export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyData>) {
   const { selectGroupNodes, updateNodeLabel, updateNodeBody } = useGraphStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(data.label);
@@ -100,9 +92,7 @@ export default function PathKeyNode({
   };
 
   const handleEntryLabelChange = (entryId: string, newLabel: string) => {
-    const newEntries = entries.map((e) =>
-      e.id === entryId ? { ...e, label: newLabel } : e
-    );
+    const newEntries = entries.map((e) => (e.id === entryId ? { ...e, label: newLabel } : e));
     saveEntries(newEntries);
   };
 
@@ -119,16 +109,12 @@ export default function PathKeyNode({
   };
 
   const handleEntryColorChange = (entryId: string, newColor: string) => {
-    const newEntries = entries.map((e) =>
-      e.id === entryId ? { ...e, color: newColor } : e
-    );
+    const newEntries = entries.map((e) => (e.id === entryId ? { ...e, color: newColor } : e));
     saveEntries(newEntries);
   };
 
   const handleEntryStyleChange = (entryId: string, newStyle: "solid" | "dashed") => {
-    const newEntries = entries.map((e) =>
-      e.id === entryId ? { ...e, style: newStyle } : e
-    );
+    const newEntries = entries.map((e) => (e.id === entryId ? { ...e, style: newStyle } : e));
     saveEntries(newEntries);
   };
 
@@ -155,7 +141,8 @@ export default function PathKeyNode({
       if (event.key === "Tab" && !event.shiftKey) {
         // Check if we're not in an input field
         const activeElement = document.activeElement;
-        const isInInput = activeElement?.tagName === "INPUT" || activeElement?.tagName === "TEXTAREA";
+        const isInInput =
+          activeElement?.tagName === "INPUT" || activeElement?.tagName === "TEXTAREA";
 
         // Only add entry if Tab is pressed while the node container is focused or we're in an entry input
         if (containerRef.current?.contains(activeElement as Node) || !isInInput) {
@@ -172,9 +159,7 @@ export default function PathKeyNode({
   const borderWidth = data.style?.borderWidth ?? 1;
   const borderStyle = data.style?.borderStyle ?? "solid";
   const hasBorder = borderWidth > 0;
-  const borderColor = selected && hasBorder
-    ? "#64748b"
-    : (data.style?.borderColor ?? "#e2e8f0");
+  const borderColor = selected && hasBorder ? "#64748b" : (data.style?.borderColor ?? "#e2e8f0");
 
   // Text colors from style
   const titleColor = data.style?.textColor ?? "#334155";
@@ -206,16 +191,10 @@ export default function PathKeyNode({
         tabIndex={0}
       >
         {/* Title with optional icon */}
-        <div
-          className="mb-2 border-b pb-2 flex-shrink-0"
-          style={{ borderColor: separatorColor }}
-        >
+        <div className="mb-2 border-b pb-2 flex-shrink-0" style={{ borderColor: separatorColor }}>
           <div className="flex items-center gap-1.5">
             {data.style?.icon && (
-              <span
-                className="flex-shrink-0 flex items-center"
-                style={{ color: iconColor }}
-              >
+              <span className="flex-shrink-0 flex items-center" style={{ color: iconColor }}>
                 <NodeIconDisplay icon={data.style.icon} className="h-3.5 w-3.5" />
               </span>
             )}
@@ -284,7 +263,9 @@ export default function PathKeyNode({
               {selected && (
                 <button
                   type="button"
-                  onClick={() => handleEntryStyleChange(entry.id, entry.style === "solid" ? "dashed" : "solid")}
+                  onClick={() =>
+                    handleEntryStyleChange(entry.id, entry.style === "solid" ? "dashed" : "solid")
+                  }
                   className="nodrag text-[9px] w-6 hover:opacity-70"
                   style={{ color: bodyTextColor }}
                   title="Toggle line style"

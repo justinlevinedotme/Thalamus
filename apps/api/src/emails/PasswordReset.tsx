@@ -23,13 +23,11 @@ export const PasswordReset = ({ userName, resetUrl }: PasswordResetProps) => {
     <Layout preview="Reset your Thalamus password">
       <Text style={heading}>Reset Your Password</Text>
 
-      <Text style={paragraph}>
-        Hi{userName ? ` ${userName}` : ""},
-      </Text>
+      <Text style={paragraph}>Hi{userName ? ` ${userName}` : ""},</Text>
 
       <Text style={paragraph}>
-        We received a request to reset the password for your Thalamus account.
-        Click the button below to create a new password.
+        We received a request to reset the password for your Thalamus account. Click the button
+        below to create a new password.
       </Text>
 
       <Section style={buttonContainer}>
@@ -37,14 +35,13 @@ export const PasswordReset = ({ userName, resetUrl }: PasswordResetProps) => {
       </Section>
 
       <Text style={mutedText}>
-        This link will expire in 1 hour. If you didn't request a password reset,
-        you can safely ignore this email.
+        This link will expire in 1 hour. If you didn't request a password reset, you can safely
+        ignore this email.
       </Text>
 
       <Section style={warningBox}>
         <Text style={warningText}>
-          If the button doesn't work, copy and paste this link into your
-          browser:
+          If the button doesn't work, copy and paste this link into your browser:
         </Text>
       </Section>
 
@@ -53,8 +50,8 @@ export const PasswordReset = ({ userName, resetUrl }: PasswordResetProps) => {
       <Hr style={{ borderTop: "1px solid #e2e8f0", margin: "24px 0" }} />
 
       <Text style={mutedText}>
-        If you didn't request this password reset, please ignore this email or
-        contact support if you have concerns about your account security.
+        If you didn't request this password reset, please ignore this email or contact support if
+        you have concerns about your account security.
       </Text>
     </Layout>
   );

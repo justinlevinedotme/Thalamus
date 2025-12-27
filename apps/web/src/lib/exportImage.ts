@@ -2,11 +2,7 @@
 // exporting with edge labels doesn't work for some reason, we need to hide them during export
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
-import {
-  getNodesBounds,
-  type Node as ReactFlowNode,
-  type Edge as ReactFlowEdge,
-} from "reactflow";
+import { getNodesBounds, type Node as ReactFlowNode, type Edge as ReactFlowEdge } from "reactflow";
 
 const slugify = (value: string) =>
   value
@@ -112,9 +108,7 @@ async function captureGraphImage(
     throw new Error("React Flow container not found");
   }
 
-  const viewport = reactFlow.querySelector(
-    ".react-flow__viewport"
-  ) as HTMLElement;
+  const viewport = reactFlow.querySelector(".react-flow__viewport") as HTMLElement;
   if (!viewport) {
     throw new Error("React Flow viewport not found");
   }
@@ -229,11 +223,7 @@ export async function exportGraphPdf(
   edges: ReactFlowEdge[],
   options: ExportOptions = {}
 ) {
-  const { dataUrl, width, height } = await captureGraphImage(
-    nodes,
-    edges,
-    options
-  );
+  const { dataUrl, width, height } = await captureGraphImage(nodes, edges, options);
 
   const pdf = new jsPDF({
     orientation: width >= height ? "landscape" : "portrait",

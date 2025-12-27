@@ -44,10 +44,7 @@ type CanvasContextMenuProps = {
 
 type SubMenuType = "group" | "align" | "distribute" | null;
 
-export default function CanvasContextMenu({
-  menu,
-  onClose,
-}: CanvasContextMenuProps) {
+export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuProps) {
   const {
     nodes,
     duplicateNode,
@@ -78,10 +75,7 @@ export default function CanvasContextMenu({
   const [openSubMenu, setOpenSubMenu] = useState<SubMenuType>(null);
 
   // Get info about selected nodes for group/ungroup logic
-  const selectedNodes = useMemo(
-    () => nodes.filter((n) => n.selected),
-    [nodes]
-  );
+  const selectedNodes = useMemo(() => nodes.filter((n) => n.selected), [nodes]);
   const selectedCount = selectedNodes.length;
 
   // Check if right-clicked node is part of a group
@@ -310,8 +304,7 @@ export default function CanvasContextMenu({
   }
 
   const isMac =
-    typeof navigator !== "undefined" &&
-    navigator.platform.toUpperCase().indexOf("MAC") >= 0;
+    typeof navigator !== "undefined" && navigator.platform.toUpperCase().indexOf("MAC") >= 0;
   const modKeyLabel = isMac ? "⌘" : "Ctrl";
 
   const menuItemClass =
@@ -468,11 +461,19 @@ export default function CanvasContextMenu({
               </button>
               {openSubMenu === "distribute" && (
                 <div className={subMenuClass}>
-                  <button className={menuItemClass} type="button" onClick={handleDistributeHorizontally}>
+                  <button
+                    className={menuItemClass}
+                    type="button"
+                    onClick={handleDistributeHorizontally}
+                  >
                     <AlignHorizontalSpaceAround className="h-4 w-4" />
                     Horizontally
                   </button>
-                  <button className={menuItemClass} type="button" onClick={handleDistributeVertically}>
+                  <button
+                    className={menuItemClass}
+                    type="button"
+                    onClick={handleDistributeVertically}
+                  >
                     <AlignVerticalSpaceAround className="h-4 w-4" />
                     Vertically
                   </button>
@@ -482,11 +483,7 @@ export default function CanvasContextMenu({
           )}
 
           <div className="my-1 h-px bg-slate-200" />
-          <button
-            className={dangerItemClass}
-            type="button"
-            onClick={handleDeleteSelection}
-          >
+          <button className={dangerItemClass} type="button" onClick={handleDeleteSelection}>
             <Trash2 className="h-4 w-4" />
             Delete ({selectedCount} nodes)
           </button>
@@ -519,11 +516,7 @@ export default function CanvasContextMenu({
               Edit
             </button>
           )}
-          <button
-            className={menuItemClass}
-            type="button"
-            onClick={handleDuplicate}
-          >
+          <button className={menuItemClass} type="button" onClick={handleDuplicate}>
             <Copy className="h-4 w-4" />
             Duplicate
           </button>
@@ -558,74 +551,42 @@ export default function CanvasContextMenu({
             </>
           )}
           <div className="my-1 h-px bg-slate-200" />
-          <button
-            className={dangerItemClass}
-            type="button"
-            onClick={handleDelete}
-          >
+          <button className={dangerItemClass} type="button" onClick={handleDelete}>
             <Trash2 className="h-4 w-4" />
             Delete
           </button>
         </>
       ) : menu.type === "edge" ? (
-        <button
-          className={dangerItemClass}
-          type="button"
-          onClick={handleDelete}
-        >
+        <button className={dangerItemClass} type="button" onClick={handleDelete}>
           <Trash2 className="h-4 w-4" />
           Delete
         </button>
       ) : (
         <>
-          <button
-            className={menuItemClass}
-            type="button"
-            onClick={handlePaste}
-          >
+          <button className={menuItemClass} type="button" onClick={handlePaste}>
             <Clipboard className="h-4 w-4" />
             Paste
             {renderKbd(`${modKeyLabel}+V`)}
           </button>
           <div className="my-1 h-px bg-slate-200" />
-          <button
-            className={menuItemClass}
-            type="button"
-            onClick={handleAddNode}
-          >
+          <button className={menuItemClass} type="button" onClick={handleAddNode}>
             <Plus className="h-4 w-4" />
             Add Node
           </button>
-          <button
-            className={menuItemClass}
-            type="button"
-            onClick={handleAddTextNode}
-          >
+          <button className={menuItemClass} type="button" onClick={handleAddTextNode}>
             <Type className="h-4 w-4" />
             Add Text
           </button>
-          <button
-            className={menuItemClass}
-            type="button"
-            onClick={handleAddShapeNode}
-          >
+          <button className={menuItemClass} type="button" onClick={handleAddShapeNode}>
             <Square className="h-4 w-4" />
             Add Shape
           </button>
           <div className="my-1 h-px bg-slate-200" />
-          <button
-            className={menuItemClass}
-            type="button"
-            onClick={handleAddPathKey}
-          >
+          <button className={menuItemClass} type="button" onClick={handleAddPathKey}>
             <Route className="h-4 w-4" />
             Add Path Key
           </button>
-          <button
-            className={menuItemClass}
-            type="button"
-            onClick={handleAddNodeKey}
-          >
+          <button className={menuItemClass} type="button" onClick={handleAddNodeKey}>
             <Palette className="h-4 w-4" />
             Add Node Key
           </button>

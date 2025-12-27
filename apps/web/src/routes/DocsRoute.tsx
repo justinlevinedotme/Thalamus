@@ -103,15 +103,7 @@ function GraphPreview({ graph }: { graph: GraphRecord }) {
         const y2 = target.position.y * scale + offsetY + 4;
 
         return (
-          <line
-            key={edge.id}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            stroke="#CBD5E1"
-            strokeWidth={1}
-          />
+          <line key={edge.id} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#CBD5E1" strokeWidth={1} />
         );
       })}
       {/* Nodes */}
@@ -207,111 +199,108 @@ export default function DocsRoute() {
       <Header />
       <div className="flex-1 px-6 py-8">
         <div className="mx-auto max-w-4xl space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-slate-900">
-              {isAuthenticated ? "Your graphs" : "Thalamus workspace"}
-            </h1>
-            <p className="text-sm text-slate-500">
-              {isAuthenticated
-                ? `${graphs.length}/20 saved. Each graph keeps a one-year retention window.`
-                : "Start a graph in the browser. Saving and sharing require an account."}
-            </p>
-          </div>
-          {isAuthenticated ? (
-            <button
-              className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-50"
-              type="button"
-              onClick={handleOpenCreate}
-              disabled={graphs.length >= 20}
-            >
-              New graph
-            </button>
-          ) : (
-            <div className="flex items-center gap-3">
-              <Link
-                className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700"
-                to="/editor"
-              >
-                Start a graph
-              </Link>
-              <Link
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white"
-                to="/login"
-              >
-                Sign in
-              </Link>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-slate-900">
+                {isAuthenticated ? "Your graphs" : "Thalamus workspace"}
+              </h1>
+              <p className="text-sm text-slate-500">
+                {isAuthenticated
+                  ? `${graphs.length}/20 saved. Each graph keeps a one-year retention window.`
+                  : "Start a graph in the browser. Saving and sharing require an account."}
+              </p>
             </div>
-          )}
-        </div>
-
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-        {isAuthenticated ? (
-          loading ? (
-            <p className="text-sm text-slate-500">Loading...</p>
-          ) : graphs.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-              No graphs yet. Create one to get started.
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {graphs.map((graph) => (
-                <div
-                  key={graph.id}
-                  className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:shadow-md"
+            {isAuthenticated ? (
+              <button
+                className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white disabled:opacity-50"
+                type="button"
+                onClick={handleOpenCreate}
+                disabled={graphs.length >= 20}
+              >
+                New graph
+              </button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link
+                  className="rounded-md border border-slate-200 px-4 py-2 text-sm text-slate-700"
+                  to="/editor"
                 >
-                  {/* Preview area */}
-                  <button
-                    type="button"
-                    className="block h-24 w-full cursor-pointer border-b border-slate-100 bg-slate-50 p-2"
-                    onClick={() => navigate(`/docs/${graph.id}`)}
-                  >
-                    <GraphPreview graph={graph} />
-                  </button>
+                  Start a graph
+                </Link>
+                <Link className="rounded-md bg-slate-900 px-4 py-2 text-sm text-white" to="/login">
+                  Sign in
+                </Link>
+              </div>
+            )}
+          </div>
 
-                  {/* Delete button - top right corner */}
-                  <button
-                    className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-white/80 text-slate-400 opacity-0 backdrop-blur-sm transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-                    type="button"
-                    onClick={() => setDeleteTarget(graph)}
-                    aria-label="Delete graph"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+          {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-                  {/* Card content */}
-                  <div className="p-3">
+          {isAuthenticated ? (
+            loading ? (
+              <p className="text-sm text-slate-500">Loading...</p>
+            ) : graphs.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+                No graphs yet. Create one to get started.
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {graphs.map((graph) => (
+                  <div
+                    key={graph.id}
+                    className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                  >
+                    {/* Preview area */}
                     <button
                       type="button"
-                      className="block w-full cursor-pointer text-left"
+                      className="block h-24 w-full cursor-pointer border-b border-slate-100 bg-slate-50 p-2"
                       onClick={() => navigate(`/docs/${graph.id}`)}
                     >
-                      <h3 className="truncate text-sm font-semibold text-slate-800">
-                        {graph.title || "Untitled Graph"}
-                      </h3>
+                      <GraphPreview graph={graph} />
                     </button>
 
-                    <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {formatRelativeDate(graph.updated_at)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {formatExpiryDate(graph.expires_at)}
-                      </span>
+                    {/* Delete button - top right corner */}
+                    <button
+                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-white/80 text-slate-400 opacity-0 backdrop-blur-sm transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                      type="button"
+                      onClick={() => setDeleteTarget(graph)}
+                      aria-label="Delete graph"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+
+                    {/* Card content */}
+                    <div className="p-3">
+                      <button
+                        type="button"
+                        className="block w-full cursor-pointer text-left"
+                        onClick={() => navigate(`/docs/${graph.id}`)}
+                      >
+                        <h3 className="truncate text-sm font-semibold text-slate-800">
+                          {graph.title || "Untitled Graph"}
+                        </h3>
+                      </button>
+
+                      <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {formatRelativeDate(graph.updated_at)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatExpiryDate(graph.expires_at)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            )
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+              You can sketch ideas immediately, then export when you are ready.
             </div>
-          )
-        ) : (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-            You can sketch ideas immediately, then export when you are ready.
-          </div>
-        )}
+          )}
         </div>
       </div>
       <Footer />
@@ -321,9 +310,7 @@ export default function DocsRoute() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Create new graph</DialogTitle>
-            <DialogDescription>
-              Give your graph a name to get started.
-            </DialogDescription>
+            <DialogDescription>Give your graph a name to get started.</DialogDescription>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -364,7 +351,8 @@ export default function DocsRoute() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete graph?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.title || "Untitled Graph"}"? This action cannot be undone.
+              Are you sure you want to delete "{deleteTarget?.title || "Untitled Graph"}"? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -3,11 +3,7 @@ import "@reactflow/node-resizer/dist/style.css";
 import { flushSync } from "react-dom";
 import { type NodeProps } from "reactflow";
 
-import {
-  type NodeKind,
-  type NodeStyle,
-  useGraphStore,
-} from "../../../store/graphStore";
+import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
 const MIN_WIDTH = 100;
 const MIN_HEIGHT = 60;
@@ -54,9 +50,11 @@ export default function ShapeNode({
   const borderWidth = data.style?.borderWidth ?? 2;
   const borderStyle = data.style?.borderStyle ?? "solid";
   const hasBorder = borderWidth > 0;
-  const borderColor = selected && hasBorder
-    ? "#64748b"
-    : (data.style?.borderColor ?? (data.style?.color === "transparent" ? "#e2e8f0" : data.style?.color ?? "#3B82F6"));
+  const borderColor =
+    selected && hasBorder
+      ? "#64748b"
+      : (data.style?.borderColor ??
+        (data.style?.color === "transparent" ? "#e2e8f0" : (data.style?.color ?? "#3B82F6")));
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color ?? "#DBEAFE",

@@ -132,9 +132,7 @@ export default function ExportDialog({
             <div
               className="relative flex-1 min-h-0 overflow-hidden rounded-lg border border-slate-200"
               style={{
-                backgroundColor: transparentBackground
-                  ? undefined
-                  : backgroundColor,
+                backgroundColor: transparentBackground ? undefined : backgroundColor,
                 backgroundImage: transparentBackground
                   ? "repeating-conic-gradient(#d1d5db 0% 25%, #f1f5f9 0% 50%) 50% / 16px 16px"
                   : undefined,
@@ -145,11 +143,7 @@ export default function ExportDialog({
                   <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
                 </div>
               ) : preview ? (
-                <img
-                  src={preview}
-                  alt="Export preview"
-                  className="h-full w-full object-contain"
-                />
+                <img src={preview} alt="Export preview" className="h-full w-full object-contain" />
               ) : (
                 <div className="flex h-full items-center justify-center text-sm text-slate-400">
                   No preview available
@@ -216,7 +210,9 @@ export default function ExportDialog({
                         </ToggleGroupItem>
                       </TooltipTrigger>
                       <TooltipContent>
-                        {opt.value === "none" ? "No margin" : `${opt.value.charAt(0).toUpperCase() + opt.value.slice(1)} margin`}
+                        {opt.value === "none"
+                          ? "No margin"
+                          : `${opt.value.charAt(0).toUpperCase() + opt.value.slice(1)} margin`}
                       </TooltipContent>
                     </Tooltip>
                   ))}
@@ -305,10 +301,7 @@ export default function ExportDialog({
                     checked={transparentBackground}
                     onCheckedChange={(checked) => setTransparentBackground(checked === true)}
                   />
-                  <label
-                    htmlFor="transparent-bg"
-                    className="cursor-pointer text-xs text-slate-500"
-                  >
+                  <label htmlFor="transparent-bg" className="cursor-pointer text-xs text-slate-500">
                     Transparent
                   </label>
                 </div>

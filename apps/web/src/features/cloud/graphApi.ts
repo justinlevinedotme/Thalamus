@@ -31,10 +31,7 @@ export async function getGraph(graphId: string): Promise<GraphRecord> {
   return apiFetch<GraphRecord>(`/graphs/${graphId}`);
 }
 
-export async function createGraph(
-  title: string,
-  payload: GraphPayload
-): Promise<GraphRecord> {
+export async function createGraph(title: string, payload: GraphPayload): Promise<GraphRecord> {
   return apiFetch<GraphRecord>("/graphs", {
     method: "POST",
     body: JSON.stringify({ title, data: payload }),

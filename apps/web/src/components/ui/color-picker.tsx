@@ -11,7 +11,7 @@ interface EyeDropperResult {
 }
 
 interface EyeDropperConstructor {
-  new(): {
+  new (): {
     open(): Promise<EyeDropperResult>;
   };
 }
@@ -63,23 +63,104 @@ function addRecentColor(color: string): void {
 // Common color presets
 const commonColors = [
   // Grays
-  "#000000", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0", "#f1f5f9", "#ffffff",
+  "#000000",
+  "#1e293b",
+  "#334155",
+  "#475569",
+  "#64748b",
+  "#94a3b8",
+  "#cbd5e1",
+  "#e2e8f0",
+  "#f1f5f9",
+  "#ffffff",
   // Reds
-  "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fca5a5", "#fecaca", "#fee2e2", "#fef2f2",
+  "#7f1d1d",
+  "#991b1b",
+  "#b91c1c",
+  "#dc2626",
+  "#ef4444",
+  "#f87171",
+  "#fca5a5",
+  "#fecaca",
+  "#fee2e2",
+  "#fef2f2",
   // Oranges
-  "#7c2d12", "#9a3412", "#c2410c", "#ea580c", "#f97316", "#fb923c", "#fdba74", "#fed7aa", "#ffedd5", "#fff7ed",
+  "#7c2d12",
+  "#9a3412",
+  "#c2410c",
+  "#ea580c",
+  "#f97316",
+  "#fb923c",
+  "#fdba74",
+  "#fed7aa",
+  "#ffedd5",
+  "#fff7ed",
   // Yellows
-  "#713f12", "#854d0e", "#a16207", "#ca8a04", "#eab308", "#facc15", "#fde047", "#fef08a", "#fef9c3", "#fefce8",
+  "#713f12",
+  "#854d0e",
+  "#a16207",
+  "#ca8a04",
+  "#eab308",
+  "#facc15",
+  "#fde047",
+  "#fef08a",
+  "#fef9c3",
+  "#fefce8",
   // Greens
-  "#14532d", "#166534", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#86efac", "#bbf7d0", "#dcfce7", "#f0fdf4",
+  "#14532d",
+  "#166534",
+  "#15803d",
+  "#16a34a",
+  "#22c55e",
+  "#4ade80",
+  "#86efac",
+  "#bbf7d0",
+  "#dcfce7",
+  "#f0fdf4",
   // Teals
-  "#134e4a", "#115e59", "#0f766e", "#0d9488", "#14b8a6", "#2dd4bf", "#5eead4", "#99f6e4", "#ccfbf1", "#f0fdfa",
+  "#134e4a",
+  "#115e59",
+  "#0f766e",
+  "#0d9488",
+  "#14b8a6",
+  "#2dd4bf",
+  "#5eead4",
+  "#99f6e4",
+  "#ccfbf1",
+  "#f0fdfa",
   // Blues
-  "#1e3a8a", "#1e40af", "#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe", "#dbeafe", "#eff6ff",
+  "#1e3a8a",
+  "#1e40af",
+  "#1d4ed8",
+  "#2563eb",
+  "#3b82f6",
+  "#60a5fa",
+  "#93c5fd",
+  "#bfdbfe",
+  "#dbeafe",
+  "#eff6ff",
   // Purples
-  "#4c1d95", "#5b21b6", "#6d28d9", "#7c3aed", "#8b5cf6", "#a78bfa", "#c4b5fd", "#ddd6fe", "#ede9fe", "#f5f3ff",
+  "#4c1d95",
+  "#5b21b6",
+  "#6d28d9",
+  "#7c3aed",
+  "#8b5cf6",
+  "#a78bfa",
+  "#c4b5fd",
+  "#ddd6fe",
+  "#ede9fe",
+  "#f5f3ff",
   // Pinks
-  "#831843", "#9d174d", "#be185d", "#db2777", "#ec4899", "#f472b6", "#f9a8d4", "#fbcfe8", "#fce7f3", "#fdf2f8",
+  "#831843",
+  "#9d174d",
+  "#be185d",
+  "#db2777",
+  "#ec4899",
+  "#f472b6",
+  "#f9a8d4",
+  "#fbcfe8",
+  "#fce7f3",
+  "#fdf2f8",
 ];
 
 // Convert hex to RGBA
@@ -115,13 +196,34 @@ function hsvToRgb(h: number, s: number, v: number): { r: number; g: number; b: n
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = v - c;
 
-  let r = 0, g = 0, b = 0;
-  if (h < 60) { r = c; g = x; b = 0; }
-  else if (h < 120) { r = x; g = c; b = 0; }
-  else if (h < 180) { r = 0; g = c; b = x; }
-  else if (h < 240) { r = 0; g = x; b = c; }
-  else if (h < 300) { r = x; g = 0; b = c; }
-  else { r = c; g = 0; b = x; }
+  let r = 0,
+    g = 0,
+    b = 0;
+  if (h < 60) {
+    r = c;
+    g = x;
+    b = 0;
+  } else if (h < 120) {
+    r = x;
+    g = c;
+    b = 0;
+  } else if (h < 180) {
+    r = 0;
+    g = c;
+    b = x;
+  } else if (h < 240) {
+    r = 0;
+    g = x;
+    b = c;
+  } else if (h < 300) {
+    r = x;
+    g = 0;
+    b = c;
+  } else {
+    r = c;
+    g = 0;
+    b = x;
+  }
 
   return {
     r: Math.round((r + m) * 255),
@@ -146,9 +248,15 @@ function rgbToHsv(r: number, g: number, b: number): { h: number; s: number; v: n
 
   if (max !== min) {
     switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) * 60; break;
-      case g: h = ((b - r) / d + 2) * 60; break;
-      case b: h = ((r - g) / d + 4) * 60; break;
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+        break;
+      case g:
+        h = ((b - r) / d + 2) * 60;
+        break;
+      case b:
+        h = ((r - g) / d + 4) * 60;
+        break;
     }
   }
 
@@ -183,12 +291,15 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
     setHexInput(value);
   }, [value]);
 
-  const updateColor = useCallback((h: number, s: number, v: number, a: number) => {
-    const rgb = hsvToRgb(h, s, v);
-    const hex = rgbaToHex(rgb.r, rgb.g, rgb.b, a);
-    setHexInput(hex);
-    onChange(hex);
-  }, [onChange]);
+  const updateColor = useCallback(
+    (h: number, s: number, v: number, a: number) => {
+      const rgb = hsvToRgb(h, s, v);
+      const hex = rgbaToHex(rgb.r, rgb.g, rgb.b, a);
+      setHexInput(hex);
+      onChange(hex);
+    },
+    [onChange]
+  );
 
   const handleSaturationBrightnessChange = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -317,7 +428,8 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
             <div
               className="relative h-3 w-full cursor-pointer rounded-full"
               style={{
-                background: "linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)",
+                background:
+                  "linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)",
               }}
               onMouseDown={handleHueChange}
               onMouseMove={(e) => e.buttons === 1 && handleHueChange(e)}
@@ -353,9 +465,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
 
             {/* Color preview, hex input, and eyedropper */}
             <div className="flex items-center gap-2">
-              <div
-                className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-md border border-slate-200 shadow-sm"
-              >
+              <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-md border border-slate-200 shadow-sm">
                 {/* Checkerboard background for transparency */}
                 <div
                   className="absolute inset-0"
@@ -364,10 +474,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
                   }}
                 />
                 {/* Color overlay */}
-                <div
-                  className="absolute inset-0"
-                  style={{ backgroundColor: value }}
-                />
+                <div className="absolute inset-0" style={{ backgroundColor: value }} />
               </div>
               <Input
                 type="text"
@@ -482,13 +589,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
 }
 
 // Simple color swatch trigger component with transparency support
-export function ColorSwatch({
-  color,
-  className = "",
-}: {
-  color: string;
-  className?: string;
-}) {
+export function ColorSwatch({ color, className = "" }: { color: string; className?: string }) {
   // Check if color has alpha (8-digit hex or rgba)
   const hasAlpha = /^#[0-9a-fA-F]{8}$/.test(color) || color.includes("rgba");
 
@@ -506,10 +607,7 @@ export function ColorSwatch({
         />
       )}
       {/* Color overlay */}
-      <span
-        className="absolute inset-0"
-        style={{ backgroundColor: color }}
-      />
+      <span className="absolute inset-0" style={{ backgroundColor: color }} />
     </span>
   );
 }

@@ -3,8 +3,7 @@ import { Search } from "lucide-react";
 
 import { useGraphStore } from "../../store/graphStore";
 
-const getNodeLabel = (node: { data?: { label?: string } }) =>
-  node.data?.label ?? "Untitled";
+const getNodeLabel = (node: { data?: { label?: string } }) => node.data?.label ?? "Untitled";
 
 export default function NodeSearch() {
   const [query, setQuery] = useState("");
@@ -15,9 +14,7 @@ export default function NodeSearch() {
     if (!term) {
       return [];
     }
-    return nodes
-      .filter((node) => getNodeLabel(node).toLowerCase().includes(term))
-      .slice(0, 6);
+    return nodes.filter((node) => getNodeLabel(node).toLowerCase().includes(term)).slice(0, 6);
   }, [nodes, query]);
 
   const handleSelect = (nodeId: string) => {
@@ -40,9 +37,7 @@ export default function NodeSearch() {
 
       {/* Results */}
       {query.trim().length === 0 ? (
-        <div className="px-4 py-3 text-sm text-slate-500">
-          Type to search nodes...
-        </div>
+        <div className="px-4 py-3 text-sm text-slate-500">Type to search nodes...</div>
       ) : filteredNodes.length === 0 ? (
         <div className="px-4 py-3 text-sm text-slate-500">No matches found</div>
       ) : (

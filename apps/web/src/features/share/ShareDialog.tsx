@@ -10,9 +10,7 @@ type ShareDialogProps = {
 };
 
 export default function ShareDialog({ open, graphId, onClose }: ShareDialogProps) {
-  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">(
-    "idle"
-  );
+  const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [shareToken, setShareToken] = useState<string | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -83,9 +81,7 @@ export default function ShareDialog({ open, graphId, onClose }: ShareDialogProps
         <div className="mt-4 space-y-3">
           {shareToken ? (
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-slate-500">
-                Share URL
-              </label>
+              <label className="text-xs font-semibold uppercase text-slate-500">Share URL</label>
               <Input readOnly value={shareUrl} />
               <div className="flex items-center gap-2">
                 <button

@@ -49,7 +49,7 @@ export function setAuthD1(d1: D1Database) {
 // env vars are set per-request via middleware
 let _auth: ReturnType<typeof betterAuth> | null = null;
 
-function createAuth() {
+function createAuth(): ReturnType<typeof betterAuth> {
   if (!_d1) {
     throw new Error("D1 database not set. Call setAuthD1() first.");
   }

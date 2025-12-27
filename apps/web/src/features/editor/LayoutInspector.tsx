@@ -1,13 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  LayoutGrid,
-  Loader2,
-} from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, LayoutGrid, Loader2 } from "lucide-react";
 
 import { Input } from "../../components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
@@ -48,18 +41,10 @@ const algorithms: Array<{
 
 export default function LayoutInspector() {
   const { nodes, autoLayout } = useGraphStore();
-  const [direction, setDirection] = useState<LayoutDirection>(
-    defaultLayoutOptions.direction
-  );
-  const [algorithm, setAlgorithm] = useState<LayoutAlgorithm>(
-    defaultLayoutOptions.algorithm
-  );
-  const [nodeSpacing, setNodeSpacing] = useState(
-    defaultLayoutOptions.nodeSpacing
-  );
-  const [layerSpacing, setLayerSpacing] = useState(
-    defaultLayoutOptions.layerSpacing
-  );
+  const [direction, setDirection] = useState<LayoutDirection>(defaultLayoutOptions.direction);
+  const [algorithm, setAlgorithm] = useState<LayoutAlgorithm>(defaultLayoutOptions.algorithm);
+  const [nodeSpacing, setNodeSpacing] = useState(defaultLayoutOptions.nodeSpacing);
+  const [layerSpacing, setLayerSpacing] = useState(defaultLayoutOptions.layerSpacing);
   const [isLayouting, setIsLayouting] = useState(false);
 
   const handleApplyLayout = async () => {
@@ -89,9 +74,7 @@ export default function LayoutInspector() {
         {/* Direction */}
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">
-              Direction
-            </label>
+            <label className="text-xs font-semibold uppercase text-slate-500">Direction</label>
             <ToggleGroup
               type="single"
               className="h-8 rounded-md border border-slate-200 bg-white"
@@ -125,9 +108,7 @@ export default function LayoutInspector() {
         {/* Algorithm */}
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">
-              Algorithm
-            </label>
+            <label className="text-xs font-semibold uppercase text-slate-500">Algorithm</label>
             <ToggleGroup
               type="single"
               className="h-8 rounded-md border border-slate-200 bg-white"
@@ -163,32 +144,24 @@ export default function LayoutInspector() {
         {/* Spacing Controls */}
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">
-              Node Gap
-            </label>
+            <label className="text-xs font-semibold uppercase text-slate-500">Node Gap</label>
             <Input
               type="number"
               className="h-8 w-20 text-center"
               value={nodeSpacing}
-              onChange={(event) =>
-                setNodeSpacing(Math.max(10, Number(event.target.value)))
-              }
+              onChange={(event) => setNodeSpacing(Math.max(10, Number(event.target.value)))}
               min={10}
               max={500}
             />
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <label className="text-xs font-semibold uppercase text-slate-500">
-              Layer Gap
-            </label>
+            <label className="text-xs font-semibold uppercase text-slate-500">Layer Gap</label>
             <Input
               type="number"
               className="h-8 w-20 text-center"
               value={layerSpacing}
-              onChange={(event) =>
-                setLayerSpacing(Math.max(10, Number(event.target.value)))
-              }
+              onChange={(event) => setLayerSpacing(Math.max(10, Number(event.target.value)))}
               min={10}
               max={500}
             />
@@ -213,9 +186,7 @@ export default function LayoutInspector() {
         </button>
 
         {nodeCount === 0 ? (
-          <p className="text-center text-xs text-slate-400">
-            Add nodes to use auto layout
-          </p>
+          <p className="text-center text-xs text-slate-400">Add nodes to use auto layout</p>
         ) : null}
       </div>
     </TooltipProvider>

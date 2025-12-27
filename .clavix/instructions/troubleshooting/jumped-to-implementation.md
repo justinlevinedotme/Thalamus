@@ -33,6 +33,7 @@ If an agent has already jumped to implementation:
 ### Step 1: Stop Implementation
 
 Agent should:
+
 1. **STOP** writing implementation code immediately
 2. **Delete** or discard the implementation attempt
 3. **Acknowledge** the mistake
@@ -52,6 +53,7 @@ Let me return to asking clarifying questions about your requirements instead.
 ### Step 3: Return to Correct Mode
 
 Agent should:
+
 1. **Return** to asking clarifying questions (if in `/clavix:start`)
 2. **Return** to extracting requirements (if in `/clavix:summarize`)
 3. **Return** to analyzing prompts (if in `/clavix:improve`)
@@ -75,9 +77,11 @@ Every workflow template should start with:
 **You are in Clavix prompt/PRD development mode. You help create planning documents, NOT implement features.**
 
 **YOUR ROLE:**
+
 - ✓ [What you should do]
 
 **DO NOT IMPLEMENT. DO NOT IMPLEMENT. DO NOT IMPLEMENT.**
+
 - ✗ DO NOT write application code
 - ✗ DO NOT implement the feature being discussed
 - ✗ DO NOT generate component/function implementations
@@ -88,6 +92,7 @@ Every workflow template should start with:
 **2. Repeat Mode Boundaries**
 
 Don't rely on seeing it once. Repeat critical boundaries:
+
 - At workflow start
 - Before agent might implement (e.g., after questions in conversational mode)
 - In troubleshooting sections
@@ -101,6 +106,7 @@ Include explicit checks:
 **Self-Check: Am I Implementing?**
 
 If you catch yourself writing application code, STOP IMMEDIATELY.
+
 1. Delete the implementation
 2. Apologize
 3. Return to requirements mode
@@ -156,17 +162,20 @@ Be explicit. "Now implement" or "Build this" makes it clear.
 ### Test Scenario 1: Conversational Mode
 
 **Setup:**
+
 ```markdown
 User: /clavix:start
 User: I want to build a todo app with authentication
 ```
 
 **Expected behavior:**
+
 - Agent asks clarifying questions
 - Agent does NOT generate code
 - Agent stays in requirements gathering mode
 
 **Failure indicator:**
+
 - Agent generates TodoApp component or authentication code
 
 ---
@@ -174,6 +183,7 @@ User: I want to build a todo app with authentication
 ### Test Scenario 2: After Few Questions
 
 **Setup:**
+
 ```markdown
 User: /clavix:start
 User: I want real-time notifications in my app
@@ -182,10 +192,12 @@ User: [Answers questions]
 ```
 
 **Expected behavior:**
+
 - Agent asks more questions to deepen understanding
 - Agent does NOT implement WebSockets or notification system
 
 **Failure indicator:**
+
 - Agent generates implementation after thinking "I have enough info"
 
 ---
@@ -201,6 +213,7 @@ User: [Answers questions]
 ## Success Indicators
 
 Agent is working correctly when:
+
 - ✓ Agent asks 5+ clarifying questions before considering summarization
 - ✓ Agent never generates application code during Clavix workflows (unless explicitly requested)
 - ✓ Agent explicitly states "I'm in planning mode" or similar acknowledgment
@@ -219,6 +232,7 @@ Agent is working correctly when:
 4. **Reference** - Point to CLAVIX MODE boundary in instructions
 
 **Prevention checklist:**
+
 - ✓ CLAVIX MODE block at top of workflow
 - ✓ "DO NOT IMPLEMENT" repeated 3+ times
 - ✓ Self-correction triggers included

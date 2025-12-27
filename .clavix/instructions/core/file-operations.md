@@ -10,13 +10,15 @@ This guide provides proven patterns for file creation in Clavix workflows. These
 
 ### Complete File Creation Workflow
 
-```markdown
+````markdown
 **Step 1: Create Directory Structure**
 
 Use mkdir to create the output directory:
+
 ```bash
 mkdir -p .clavix/outputs/[project-name]
 ```
+````
 
 **Step 2: Write First File**
 
@@ -33,6 +35,7 @@ Use the Write tool to create `.clavix/outputs/[project-name]/another-file.md` wi
 **Step 4: Verify File Creation**
 
 List the created files to confirm they exist:
+
 ```
 Created files:
 ✓ .clavix/outputs/[project-name]/file-name.md
@@ -40,7 +43,8 @@ Created files:
 ```
 
 **CHECKPOINT:** Files created successfully.
-```
+
+````
 
 ---
 
@@ -75,7 +79,7 @@ Created files:
 **Step 1: Create directory**
 ```bash
 mkdir -p .clavix/outputs/[project-name]
-```
+````
 
 **Step 2: Write file**
 Use the Write tool to create `.clavix/outputs/[project-name]/output.md`:
@@ -90,7 +94,8 @@ Use the Write tool to create `.clavix/outputs/[project-name]/output.md`:
 Confirm file created: `.clavix/outputs/[project-name]/output.md` ✓
 
 **CHECKPOINT:** File created successfully.
-```
+
+````
 
 ---
 
@@ -104,26 +109,31 @@ You MUST create three files. This is not optional.
 **Step 1: Create directory structure**
 ```bash
 mkdir -p .clavix/outputs/[project-name]
-```
+````
 
 **Step 2: Write mini-prd.md**
 Use the Write tool to create `.clavix/outputs/[project-name]/mini-prd.md`
 
 Content template:
+
 ```markdown
 # Requirements: [Project Name]
 
 ## Objective
+
 [Clear goal]
 
 ## Core Requirements
+
 - [HIGH] Requirement 1
 - [MEDIUM] Requirement 2
 
 ## Technical Constraints
+
 [Constraints]
 
 ## Success Criteria
+
 [Criteria]
 ```
 
@@ -139,6 +149,7 @@ Content: [Enhanced version with labeled improvements]
 
 **Step 5: Verify all files exist**
 List created files:
+
 ```
 ✓ .clavix/outputs/[project-name]/mini-prd.md
 ✓ .clavix/outputs/[project-name]/original-prompt.md
@@ -146,7 +157,8 @@ List created files:
 ```
 
 **CHECKPOINT:** All files created successfully.
-```
+
+````
 
 ---
 
@@ -172,7 +184,7 @@ executed: false
 
 **Step 3: Verify**
 Confirm: `.clavix/outputs/prompts/std-[timestamp]-[random].md` ✓
-```
+````
 
 ---
 
@@ -181,11 +193,13 @@ Confirm: `.clavix/outputs/prompts/std-[timestamp]-[random].md` ✓
 ### Problem: Files Not Created
 
 **Symptoms:**
+
 - Agent says "files created" but they don't exist
 - Agent provides content in chat instead of creating files
 - Agent skips file creation step entirely
 
 **Solution:**
+
 1. Check instructions use **imperative language**: "You MUST create" not "Suggest saving"
 2. Verify **step-by-step pattern** is present
 3. Ensure **Write tool** is explicitly named
@@ -199,11 +213,13 @@ Confirm: `.clavix/outputs/prompts/std-[timestamp]-[random].md` ✓
 ### Problem: Wrong File Paths
 
 **Symptoms:**
+
 - Files created in wrong location
 - Missing directory structure
 - Path format inconsistent
 
 **Solution:**
+
 1. Always use `mkdir -p` to create parent directories
 2. Show complete path: `.clavix/outputs/[project]/file.md`
 3. Don't use relative paths without context
@@ -214,11 +230,13 @@ Confirm: `.clavix/outputs/prompts/std-[timestamp]-[random].md` ✓
 ### Problem: Missing Content
 
 **Symptoms:**
+
 - Files created but empty
 - Incomplete content
 - Wrong content structure
 
 **Solution:**
+
 1. Provide **complete content template** in instructions
 2. Use markdown code blocks to show exact format
 3. Include all required sections
@@ -245,21 +263,24 @@ Add fallback pattern:
 
 **Fallback if Write tool unavailable:**
 If file creation fails, display content and instruct user:
-
 ```
+
 ⚠️ File creation unavailable. Please save this content manually:
 
 **File path:** `.clavix/outputs/[project]/file.md`
 
 **Content:**
+
 ```markdown
 [Content here]
 ```
+
 ```
 
 Copy the content above and save to the specified path.
 ```
-```
+
+````
 
 ---
 
@@ -275,23 +296,28 @@ After displaying the optimized prompt, you MUST save it to the Clavix system for
 #### Step 1: Create Directory Structure
 ```bash
 mkdir -p .clavix/outputs/prompts/fast
-```
+````
 
 #### Step 2: Generate Unique Prompt ID
+
 Create a unique identifier: `fast-YYYYMMDD-HHMM`
 
 #### Step 3: Save Prompt File
+
 Use the Write tool to create the prompt file at:
 `.clavix/outputs/prompts/fast/[prompt-id].md`
 
 [Content template]
 
 #### Step 5: Verify Saving Succeeded
+
 Confirm the file path and display to user:
+
 ```
 ✓ Prompt saved: .clavix/outputs/prompts/fast/[prompt-id].md
 ```
-```
+
+````
 
 **Why it works:**
 - Header says "REQUIRED"
@@ -306,9 +332,10 @@ Confirm the file path and display to user:
 
 ```markdown
 5. Suggest saving to `.clavix/outputs/[session-name]/`
-```
+````
 
 **Why it failed:**
+
 - "Suggest" is passive
 - No Write tool instruction
 - No step-by-step breakdown
@@ -320,12 +347,14 @@ Confirm the file path and display to user:
 ## Summary
 
 **Always use this pattern for file creation:**
+
 1. Step 1: mkdir
 2. Step 2-N: Write tool for each file
 3. Step N+1: Verify files exist
 4. Add CHECKPOINT marker
 
 **Never use:**
+
 - "Suggest saving"
 - "If available"
 - Vague "create" or "save" without tool name

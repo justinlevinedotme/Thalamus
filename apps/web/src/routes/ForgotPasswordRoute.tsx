@@ -144,7 +144,10 @@ export default function ForgotPasswordRoute() {
         <CardFooter className="flex justify-center border-t border-slate-100 pt-6">
           <p className="text-sm text-muted-foreground">
             Remember your password?{" "}
-            <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+            <Link
+              to="/login"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
               Sign in
             </Link>
           </p>

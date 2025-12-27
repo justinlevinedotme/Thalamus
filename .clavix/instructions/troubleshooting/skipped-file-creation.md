@@ -49,13 +49,15 @@ If directory or files missing, proceed with fix.
 
 Tell the agent:
 
-```markdown
+````markdown
 The files weren't created. Please create them now using these exact steps:
 
 **Step 1: Create directory**
+
 ```bash
 mkdir -p .clavix/outputs/[project-name]
 ```
+````
 
 **Step 2: Write mini-prd.md**
 Use the Write tool to create `.clavix/outputs/[project-name]/mini-prd.md` with the content you showed me earlier.
@@ -68,7 +70,8 @@ Use the Write tool to create `.clavix/outputs/[project-name]/optimized-prompt.md
 
 **Step 5: Confirm files exist**
 List the created files so I can verify.
-```
+
+````
 
 ---
 
@@ -79,7 +82,7 @@ After agent claims files are created, verify:
 ```bash
 ls -la .clavix/outputs/[project-name]/
 cat .clavix/outputs/[project-name]/mini-prd.md
-```
+````
 
 Files should exist and contain the expected content.
 
@@ -93,15 +96,17 @@ Files should exist and contain the expected content.
 
 Copy the explicit pattern from `fast.md` or `.clavix/instructions/core/file-operations.md`:
 
-```markdown
+````markdown
 **CREATE OUTPUT FILES (REQUIRED)**
 
 You MUST create [N] files. This is not optional.
 
 **Step 1: Create directory structure**
+
 ```bash
 mkdir -p .clavix/outputs/[project-name]
 ```
+````
 
 **Step 2: Write [filename]**
 Use the Write tool to create `.clavix/outputs/[project-name]/[filename]`
@@ -114,13 +119,15 @@ Use the Write tool to create `.clavix/outputs/[project-name]/[another-filename]`
 
 **Step N: Verify files exist**
 List created files:
+
 ```
 ✓ .clavix/outputs/[project-name]/file1.md
 ✓ .clavix/outputs/[project-name]/file2.md
 ```
 
 **CHECKPOINT:** All files created successfully
-```
+
+````
 
 **2. Use Imperative Language**
 
@@ -155,10 +162,12 @@ Always include a step to verify files exist:
 **Step N: Verify File Creation**
 
 List the created files to confirm they exist:
-```
+````
+
 ✓ file1.md
 ✓ file2.md
 ✓ file3.md
+
 ```
 
 If any file is missing, something went wrong. Review and retry file creation steps.
@@ -171,6 +180,7 @@ If any file is missing, something went wrong. Review and retry file creation ste
 File creation should be step 3 or 4, NOT step 5 or 6.
 
 **Good order:**
+
 1. Validate requirements
 2. Extract/analyze
 3. **CREATE FILES** ← Early in process
@@ -179,6 +189,7 @@ File creation should be step 3 or 4, NOT step 5 or 6.
 6. Present summary
 
 **Bad order:**
+
 1. Validate requirements
 2. Extract/analyze
 3. Apply optimizations
@@ -221,7 +232,9 @@ If file creation fails, display content and instruct user:
 
 **Content:**
 ```
+
 [Content here]
+
 ```
 
 Copy the content above and save to the specified path.
@@ -234,6 +247,7 @@ Copy the content above and save to the specified path.
 ### Test Scenario 1: Summarization Workflow
 
 **Setup:**
+
 ```markdown
 User: /clavix:start
 [Conversation happens]
@@ -241,6 +255,7 @@ User: /clavix:summarize
 ```
 
 **Expected behavior:**
+
 - Agent creates .clavix/outputs/[project]/ directory
 - Agent writes mini-prd.md
 - Agent writes original-prompt.md
@@ -249,6 +264,7 @@ User: /clavix:summarize
 - **CHECKPOINT:** All files created successfully
 
 **Test:**
+
 ```bash
 ls -la .clavix/outputs/[project]/
 ```
@@ -256,6 +272,7 @@ ls -la .clavix/outputs/[project]/
 Should show all three files.
 
 **Failure indicator:**
+
 - Directory doesn't exist
 - Files missing
 - Agent showed content in chat but didn't write files
@@ -265,11 +282,13 @@ Should show all three files.
 ### Test Scenario 2: Prompt Improvement
 
 **Setup:**
+
 ```markdown
 User: /clavix:improve [prompt]
 ```
 
 **Expected behavior:**
+
 - Agent analyzes prompt with triage
 - Agent generates optimized version
 - Agent creates .clavix/outputs/prompts/ directory
@@ -277,6 +296,7 @@ User: /clavix:improve [prompt]
 - Agent verifies file created
 
 **Test:**
+
 ```bash
 ls -la .clavix/outputs/prompts/
 ```
@@ -334,18 +354,21 @@ Should show saved prompt file.
 
 ### ✅ Pattern: Explicit Numbered Steps
 
-```markdown
+````markdown
 **CREATE FILES (REQUIRED)**
 
 **Step 1:** Create directory
+
 ```bash
 mkdir -p .clavix/outputs/project
 ```
+````
 
 **Step 2:** Use Write tool to create file1.md
 **Step 3:** Use Write tool to create file2.md
 **Step 4:** Verify all files exist
 **CHECKPOINT:** Files created successfully
+
 ```
 
 **Why it works:** Imperative, explicit tool, verification, checkpoint.
@@ -383,3 +406,4 @@ File creation is working when:
 - `.clavix/instructions/core/file-operations.md` - Complete file creation patterns
 - `.clavix/instructions/workflows/summarize.md` - Corrected summarization with file creation
 - `.clavix/instructions/core/verification.md` - Verification patterns
+```

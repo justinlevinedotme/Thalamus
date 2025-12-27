@@ -97,10 +97,7 @@ export async function sendEmail({
 /**
  * Unsubscribe a user from a specific email category
  */
-export async function unsubscribeUser(
-  email: string,
-  category: EmailCategory
-): Promise<boolean> {
+export async function unsubscribeUser(email: string, category: EmailCategory): Promise<boolean> {
   try {
     const db = getDb();
 
@@ -166,10 +163,7 @@ export async function unsubscribeUser(
 /**
  * Resubscribe a user to a specific email category
  */
-export async function resubscribeUser(
-  email: string,
-  category: EmailCategory
-): Promise<boolean> {
+export async function resubscribeUser(email: string, category: EmailCategory): Promise<boolean> {
   try {
     const db = getDb();
 

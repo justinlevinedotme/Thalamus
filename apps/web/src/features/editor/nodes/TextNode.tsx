@@ -4,11 +4,7 @@ import { type NodeProps } from "reactflow";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
-import {
-  type NodeKind,
-  type NodeStyle,
-  useGraphStore,
-} from "../../../store/graphStore";
+import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
 // Strip HTML tags for plain text display
 const stripHtml = (html: string): string => {
@@ -38,13 +34,8 @@ export default function TextNode({
   style?: NodeStyle;
   groupId?: string;
 }>) {
-  const {
-    editingNodeId,
-    startEditingNode,
-    stopEditingNode,
-    updateNodeLabel,
-    selectGroupNodes,
-  } = useGraphStore();
+  const { editingNodeId, startEditingNode, stopEditingNode, updateNodeLabel, selectGroupNodes } =
+    useGraphStore();
   const isEditing = editingNodeId === id;
   const [draftLabel, setDraftLabel] = useState(data.label);
 
@@ -122,7 +113,10 @@ export default function TextNode({
     >
       <div className="flex items-center gap-1.5">
         {data.style?.icon && (
-          <span className="flex-shrink-0 flex items-center" style={{ color: data.style?.iconColor ?? data.style?.textColor ?? "#1e293b" }}>
+          <span
+            className="flex-shrink-0 flex items-center"
+            style={{ color: data.style?.iconColor ?? data.style?.textColor ?? "#1e293b" }}
+          >
             <NodeIconDisplay icon={data.style.icon} className="h-[1em] w-[1em]" />
           </span>
         )}

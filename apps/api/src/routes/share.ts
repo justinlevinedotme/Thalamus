@@ -18,12 +18,7 @@ share.get("/:token", async (c) => {
     })
     .from(schema.shareLinks)
     .innerJoin(schema.graphs, eq(schema.graphs.id, schema.shareLinks.graphId))
-    .where(
-      and(
-        eq(schema.shareLinks.token, token),
-        gt(schema.shareLinks.expiresAt, new Date())
-      )
-    );
+    .where(and(eq(schema.shareLinks.token, token), gt(schema.shareLinks.expiresAt, new Date())));
 
   if (result.length === 0) {
     return c.json({ error: "Share link not found or expired" }, 404);

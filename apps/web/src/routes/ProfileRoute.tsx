@@ -124,7 +124,9 @@ export default function ProfileRoute() {
 
       // Load email preferences
       try {
-        const prefs = await apiFetch<{ marketingEmails: boolean; productUpdates: boolean }>("/profile/email-preferences");
+        const prefs = await apiFetch<{ marketingEmails: boolean; productUpdates: boolean }>(
+          "/profile/email-preferences"
+        );
         setEmailPrefs(prefs);
       } catch {
         // Ignore errors, use defaults
@@ -136,13 +138,19 @@ export default function ProfileRoute() {
     }
   };
 
-  const handleUpdateEmailPrefs = async (key: "marketingEmails" | "productUpdates", value: boolean) => {
+  const handleUpdateEmailPrefs = async (
+    key: "marketingEmails" | "productUpdates",
+    value: boolean
+  ) => {
     setEmailPrefsLoading(true);
     try {
-      const updated = await apiFetch<{ marketingEmails: boolean; productUpdates: boolean }>("/profile/email-preferences", {
-        method: "PATCH",
-        body: JSON.stringify({ [key]: value }),
-      });
+      const updated = await apiFetch<{ marketingEmails: boolean; productUpdates: boolean }>(
+        "/profile/email-preferences",
+        {
+          method: "PATCH",
+          body: JSON.stringify({ [key]: value }),
+        }
+      );
       setEmailPrefs(updated);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update email preferences");
@@ -159,7 +167,7 @@ export default function ProfileRoute() {
         method: "PATCH",
         body: JSON.stringify({ name: newName }),
       });
-      setProfile((prev) => prev ? { ...prev, name: updated.name } : null);
+      setProfile((prev) => (prev ? { ...prev, name: updated.name } : null));
       setUser(user ? { ...user, name: updated.name } : null);
       setEditNameOpen(false);
     } catch (err) {
@@ -177,7 +185,7 @@ export default function ProfileRoute() {
         method: "PATCH",
         body: JSON.stringify({ image: newImage }),
       });
-      setProfile((prev) => prev ? { ...prev, image: updated.image } : null);
+      setProfile((prev) => (prev ? { ...prev, image: updated.image } : null));
       setUser(user ? { ...user, image: updated.image } : null);
       setEditImageOpen(false);
     } catch (err) {
@@ -260,9 +268,7 @@ export default function ProfileRoute() {
   };
 
   // Check if user has a password (credential account)
-  const hasPassword = profile?.linkedAccounts.some(
-    (account) => account.provider === "credential"
-  );
+  const hasPassword = profile?.linkedAccounts.some((account) => account.provider === "credential");
 
   const handleSendPasswordReset = async () => {
     if (!profile?.email) return;
@@ -352,10 +358,7 @@ export default function ProfileRoute() {
           {error && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
               {error}
-              <button
-                className="ml-2 underline"
-                onClick={() => setError(null)}
-              >
+              <button className="ml-2 underline" onClick={() => setError(null)}>
                 Dismiss
               </button>
             </div>
@@ -449,9 +452,7 @@ export default function ProfileRoute() {
               <div className="flex items-start gap-3">
                 <Shield className="mt-0.5 h-5 w-5 text-slate-600" />
                 <div>
-                  <h2 className="text-lg font-medium text-slate-900">
-                    Two-Factor Authentication
-                  </h2>
+                  <h2 className="text-lg font-medium text-slate-900">Two-Factor Authentication</h2>
                   <p className="mt-1 text-sm text-slate-500">
                     Add an extra layer of security to your account using an authenticator app.
                   </p>
@@ -493,7 +494,8 @@ export default function ProfileRoute() {
             </div>
             {!hasPassword && !twoFactorEnabled && (
               <p className="mt-3 text-sm text-amber-600">
-                You signed up with a social login provider. To enable 2FA, you need to set a password first.
+                You signed up with a social login provider. To enable 2FA, you need to set a
+                password first.
               </p>
             )}
           </section>
@@ -537,20 +539,25 @@ export default function ProfileRoute() {
               <h2 className="text-lg font-medium text-slate-900">Email Preferences</h2>
             </div>
             <p className="mb-4 text-sm text-slate-500">
-              Choose which emails you'd like to receive. Transactional emails (password resets, security alerts) cannot be disabled.
+              Choose which emails you'd like to receive. Transactional emails (password resets,
+              security alerts) cannot be disabled.
             </p>
             <div className="space-y-4">
               <label className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-700">Marketing emails</p>
-                  <p className="text-xs text-slate-500">Product announcements and promotional content</p>
+                  <p className="text-xs text-slate-500">
+                    Product announcements and promotional content
+                  </p>
                 </div>
                 <button
                   type="button"
                   role="switch"
                   aria-checked={emailPrefs.marketingEmails}
                   disabled={emailPrefsLoading}
-                  onClick={() => handleUpdateEmailPrefs("marketingEmails", !emailPrefs.marketingEmails)}
+                  onClick={() =>
+                    handleUpdateEmailPrefs("marketingEmails", !emailPrefs.marketingEmails)
+                  }
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 ${
                     emailPrefs.marketingEmails ? "bg-slate-900" : "bg-slate-200"
                   }`}
@@ -573,7 +580,9 @@ export default function ProfileRoute() {
                   role="switch"
                   aria-checked={emailPrefs.productUpdates}
                   disabled={emailPrefsLoading}
-                  onClick={() => handleUpdateEmailPrefs("productUpdates", !emailPrefs.productUpdates)}
+                  onClick={() =>
+                    handleUpdateEmailPrefs("productUpdates", !emailPrefs.productUpdates)
+                  }
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 disabled:opacity-50 ${
                     emailPrefs.productUpdates ? "bg-slate-900" : "bg-slate-200"
                   }`}
@@ -596,9 +605,7 @@ export default function ProfileRoute() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Name</DialogTitle>
-            <DialogDescription>
-              Enter your display name.
-            </DialogDescription>
+            <DialogDescription>Enter your display name.</DialogDescription>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -638,9 +645,7 @@ export default function ProfileRoute() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Edit Profile Picture</DialogTitle>
-            <DialogDescription>
-              Enter the URL of your profile image.
-            </DialogDescription>
+            <DialogDescription>Enter the URL of your profile image.</DialogDescription>
           </DialogHeader>
           <form
             onSubmit={(e) => {
@@ -688,16 +693,19 @@ export default function ProfileRoute() {
       </Dialog>
 
       {/* Setup 2FA Dialog */}
-      <Dialog open={setup2FAOpen} onOpenChange={(open) => {
-        if (!open) {
-          setSetup2FAOpen(false);
-          setTotpUri(null);
-          setVerifyCode("");
-          setTwoFactorError(null);
-          setTwoFactorPassword("");
-          setSecretCopied(false);
-        }
-      }}>
+      <Dialog
+        open={setup2FAOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSetup2FAOpen(false);
+            setTotpUri(null);
+            setVerifyCode("");
+            setTwoFactorError(null);
+            setTwoFactorPassword("");
+            setSecretCopied(false);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Set Up Two-Factor Authentication</DialogTitle>
@@ -769,16 +777,12 @@ export default function ProfileRoute() {
                     inputMode="numeric"
                   />
                 </div>
-                {twoFactorError && (
-                  <p className="text-sm text-red-600">{twoFactorError}</p>
-                )}
+                {twoFactorError && <p className="text-sm text-red-600">{twoFactorError}</p>}
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Password
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700">Password</label>
                   <Input
                     type="password"
                     value={twoFactorPassword}
@@ -788,9 +792,7 @@ export default function ProfileRoute() {
                     autoFocus
                   />
                 </div>
-                {twoFactorError && (
-                  <p className="text-sm text-red-600">{twoFactorError}</p>
-                )}
+                {twoFactorError && <p className="text-sm text-red-600">{twoFactorError}</p>}
               </div>
             )}
           </div>
@@ -826,25 +828,27 @@ export default function ProfileRoute() {
       </Dialog>
 
       {/* Disable 2FA Dialog */}
-      <Dialog open={disable2FAOpen} onOpenChange={(open) => {
-        if (!open) {
-          setDisable2FAOpen(false);
-          setTwoFactorPassword("");
-          setTwoFactorError(null);
-        }
-      }}>
+      <Dialog
+        open={disable2FAOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDisable2FAOpen(false);
+            setTwoFactorPassword("");
+            setTwoFactorError(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Disable Two-Factor Authentication</DialogTitle>
             <DialogDescription>
-              This will remove the extra security layer from your account. Enter your password to confirm.
+              This will remove the extra security layer from your account. Enter your password to
+              confirm.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700">
-                Password
-              </label>
+              <label className="block text-sm font-medium text-slate-700">Password</label>
               <Input
                 type="password"
                 value={twoFactorPassword}
@@ -854,9 +858,7 @@ export default function ProfileRoute() {
                 autoFocus
               />
             </div>
-            {twoFactorError && (
-              <p className="text-sm text-red-600">{twoFactorError}</p>
-            )}
+            {twoFactorError && <p className="text-sm text-red-600">{twoFactorError}</p>}
           </div>
           <DialogFooter>
             <button
@@ -879,13 +881,16 @@ export default function ProfileRoute() {
       </Dialog>
 
       {/* Set Password Dialog (for OAuth-only users) */}
-      <Dialog open={setPasswordOpen} onOpenChange={(open) => {
-        if (!open) {
-          setSetPasswordOpen(false);
-          setPasswordResetSent(false);
-          setPasswordError(null);
-        }
-      }}>
+      <Dialog
+        open={setPasswordOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSetPasswordOpen(false);
+            setPasswordResetSent(false);
+            setPasswordError(null);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Set a Password</DialogTitle>
@@ -902,19 +907,17 @@ export default function ProfileRoute() {
                   <Check className="h-6 w-6 text-green-600" />
                 </div>
                 <p className="text-center text-sm text-slate-600">
-                  We've sent a password reset link to <strong>{profile?.email}</strong>.
-                  After setting your password, return here to enable 2FA.
+                  We've sent a password reset link to <strong>{profile?.email}</strong>. After
+                  setting your password, return here to enable 2FA.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-slate-600">
-                  We'll send a password setup link to your email address ({profile?.email}).
-                  Once you've set a password, you'll be able to enable two-factor authentication.
+                  We'll send a password setup link to your email address ({profile?.email}). Once
+                  you've set a password, you'll be able to enable two-factor authentication.
                 </p>
-                {passwordError && (
-                  <p className="text-sm text-red-600">{passwordError}</p>
-                )}
+                {passwordError && <p className="text-sm text-red-600">{passwordError}</p>}
               </div>
             )}
           </div>
@@ -941,14 +944,17 @@ export default function ProfileRoute() {
       </Dialog>
 
       {/* Change Email Dialog */}
-      <Dialog open={editEmailOpen} onOpenChange={(open) => {
-        if (!open) {
-          setEditEmailOpen(false);
-          setNewEmail("");
-          setEmailChangeError(null);
-          setEmailChangeSent(false);
-        }
-      }}>
+      <Dialog
+        open={editEmailOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditEmailOpen(false);
+            setNewEmail("");
+            setEmailChangeError(null);
+            setEmailChangeSent(false);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Change Email Address</DialogTitle>
@@ -965,22 +971,18 @@ export default function ProfileRoute() {
                   <Check className="h-6 w-6 text-green-600" />
                 </div>
                 <p className="text-center text-sm text-slate-600">
-                  We've sent a verification link to <strong>{newEmail}</strong>.
-                  Click the link in the email to complete the change.
+                  We've sent a verification link to <strong>{newEmail}</strong>. Click the link in
+                  the email to complete the change.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    Current Email
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700">Current Email</label>
                   <p className="mt-1 text-sm text-slate-500">{profile?.email}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700">
-                    New Email
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700">New Email</label>
                   <Input
                     type="email"
                     value={newEmail}
@@ -990,9 +992,7 @@ export default function ProfileRoute() {
                     autoFocus
                   />
                 </div>
-                {emailChangeError && (
-                  <p className="text-sm text-red-600">{emailChangeError}</p>
-                )}
+                {emailChangeError && <p className="text-sm text-red-600">{emailChangeError}</p>}
               </div>
             )}
           </div>

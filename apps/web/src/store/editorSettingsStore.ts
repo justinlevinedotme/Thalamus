@@ -17,8 +17,7 @@ export const useEditorSettingsStore = create<EditorSettingsState>()(
       helperLinesEnabled: true,
       connectionSuggestionsEnabled: true,
       setHelperLinesEnabled: (enabled) => set({ helperLinesEnabled: enabled }),
-      setConnectionSuggestionsEnabled: (enabled) =>
-        set({ connectionSuggestionsEnabled: enabled }),
+      setConnectionSuggestionsEnabled: (enabled) => set({ connectionSuggestionsEnabled: enabled }),
     }),
     {
       name: "thalamus-editor-settings",

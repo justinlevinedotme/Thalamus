@@ -35,39 +35,43 @@ export function HelperLinesRenderer({ helperLines }: HelperLinesRendererProps) {
       }}
     >
       <g transform={`translate(${x}, ${y}) scale(${zoom})`}>
-        {helperLines.horizontal && draggedNode && (() => {
-          const line = helperLines.horizontal;
-          const extent = getLineExtent(line, nodes, draggedNode);
+        {helperLines.horizontal &&
+          draggedNode &&
+          (() => {
+            const line = helperLines.horizontal;
+            const extent = getLineExtent(line, nodes, draggedNode);
 
-          return (
-            <line
-              x1={extent.start}
-              y1={line.position}
-              x2={extent.end}
-              y2={line.position}
-              stroke={LINE_COLOR}
-              strokeWidth={1 / zoom}
-              strokeDasharray={`${4 / zoom} ${2 / zoom}`}
-            />
-          );
-        })()}
+            return (
+              <line
+                x1={extent.start}
+                y1={line.position}
+                x2={extent.end}
+                y2={line.position}
+                stroke={LINE_COLOR}
+                strokeWidth={1 / zoom}
+                strokeDasharray={`${4 / zoom} ${2 / zoom}`}
+              />
+            );
+          })()}
 
-        {helperLines.vertical && draggedNode && (() => {
-          const line = helperLines.vertical;
-          const extent = getLineExtent(line, nodes, draggedNode);
+        {helperLines.vertical &&
+          draggedNode &&
+          (() => {
+            const line = helperLines.vertical;
+            const extent = getLineExtent(line, nodes, draggedNode);
 
-          return (
-            <line
-              x1={line.position}
-              y1={extent.start}
-              x2={line.position}
-              y2={extent.end}
-              stroke={LINE_COLOR}
-              strokeWidth={1 / zoom}
-              strokeDasharray={`${4 / zoom} ${2 / zoom}`}
-            />
-          );
-        })()}
+            return (
+              <line
+                x1={line.position}
+                y1={extent.start}
+                x2={line.position}
+                y2={extent.end}
+                stroke={LINE_COLOR}
+                strokeWidth={1 / zoom}
+                strokeDasharray={`${4 / zoom} ${2 / zoom}`}
+              />
+            );
+          })()}
       </g>
     </svg>
   );

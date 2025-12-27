@@ -2,29 +2,31 @@
 
 ## Commands at a Glance
 
-| Command | Purpose | Mode |
-|---------|---------|------|
-| `/clavix:improve` | Optimize a prompt with auto-depth | Planning |
-| `/clavix:prd` | Generate PRD via strategic questions | Planning |
-| `/clavix:plan` | Create task breakdown from PRD | Planning |
-| `/clavix:implement` | Execute tasks or prompts | Implementation |
-| `/clavix:start` | Begin conversational exploration | Planning |
-| `/clavix:summarize` | Extract requirements from conversation | Planning |
-| `/clavix:refine` | Update existing PRD or prompt | Planning |
-| `/clavix:verify` | Check implementation against requirements | Verification |
-| `/clavix:archive` | Move completed project to archive | Management |
+| Command             | Purpose                                   | Mode           |
+| ------------------- | ----------------------------------------- | -------------- |
+| `/clavix:improve`   | Optimize a prompt with auto-depth         | Planning       |
+| `/clavix:prd`       | Generate PRD via strategic questions      | Planning       |
+| `/clavix:plan`      | Create task breakdown from PRD            | Planning       |
+| `/clavix:implement` | Execute tasks or prompts                  | Implementation |
+| `/clavix:start`     | Begin conversational exploration          | Planning       |
+| `/clavix:summarize` | Extract requirements from conversation    | Planning       |
+| `/clavix:refine`    | Update existing PRD or prompt             | Planning       |
+| `/clavix:verify`    | Check implementation against requirements | Verification   |
+| `/clavix:archive`   | Move completed project to archive         | Management     |
 
 > **Command Format:** Commands shown with colon (`:`) format. Some tools use hyphen (`-`): Claude Code uses `/clavix:improve`, Cursor uses `/clavix-improve`. Your tool autocompletes the correct format.
 
 ## Common Workflows
 
 **Quick optimization:**
+
 ```
 /clavix:improve "your prompt here"
   → /clavix:implement --latest
 ```
 
 **Full planning cycle:**
+
 ```
 /clavix:prd
   → /clavix:plan
@@ -34,6 +36,7 @@
 ```
 
 **Exploratory approach:**
+
 ```
 /clavix:start
   → (conversation)

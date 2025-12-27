@@ -52,10 +52,9 @@ export default function UnsubscribeRoute() {
     setStatus("loading");
 
     try {
-      const response = await fetch(
-        `${API_URL}/unsubscribe?token=${token}&category=${category}`,
-        { method: "POST" }
-      );
+      const response = await fetch(`${API_URL}/unsubscribe?token=${token}&category=${category}`, {
+        method: "POST",
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -99,9 +98,7 @@ export default function UnsubscribeRoute() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
               <Mail className="h-8 w-8 text-slate-600" />
             </div>
-            <h1 className="mt-6 text-xl font-semibold text-slate-900">
-              Unsubscribe from emails
-            </h1>
+            <h1 className="mt-6 text-xl font-semibold text-slate-900">Unsubscribe from emails</h1>
             <p className="mt-2 text-slate-600">
               Are you sure you want to unsubscribe{" "}
               <span className="font-medium text-slate-900">{email}</span> from{" "}
@@ -129,12 +126,10 @@ export default function UnsubscribeRoute() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
               <Check className="h-8 w-8 text-green-600" />
             </div>
-            <h1 className="mt-6 text-xl font-semibold text-slate-900">
-              Unsubscribed successfully
-            </h1>
+            <h1 className="mt-6 text-xl font-semibold text-slate-900">Unsubscribed successfully</h1>
             <p className="mt-2 text-slate-600">
-              You've been unsubscribed from {getCategoryLabel(category)}. You can
-              manage your email preferences in your{" "}
+              You've been unsubscribed from {getCategoryLabel(category)}. You can manage your email
+              preferences in your{" "}
               <Link to="/profile" className="text-slate-900 underline">
                 profile settings
               </Link>
@@ -154,9 +149,7 @@ export default function UnsubscribeRoute() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
               <X className="h-8 w-8 text-red-600" />
             </div>
-            <h1 className="mt-6 text-xl font-semibold text-slate-900">
-              Something went wrong
-            </h1>
+            <h1 className="mt-6 text-xl font-semibold text-slate-900">Something went wrong</h1>
             <p className="mt-2 text-slate-600">{error}</p>
             <Link
               to="/"

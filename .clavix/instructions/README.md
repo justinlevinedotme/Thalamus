@@ -44,6 +44,7 @@ Integration Adapters (THIN WRAPPERS)
 ### 1. Canonical Templates = Single Source of Truth
 
 **Canonical templates** (`src/templates/slash-commands/_canonical/`) define authoritative behavior:
+
 - Complete workflow descriptions with all steps
 - Official command behavior and output formats
 - Patterns, examples, and edge cases
@@ -54,6 +55,7 @@ Integration Adapters (THIN WRAPPERS)
 ### 2. Component Templates = DRY Building Blocks
 
 **Component templates** (`src/templates/slash-commands/_components/`) provide reusable sections:
+
 - `agent-protocols/` - Self-correction, state detection, decision rules
 - `sections/` - Quality dimensions, pattern visibility, escalation factors
 - `troubleshooting/` - Error recovery and mode confusion handling
@@ -63,6 +65,7 @@ Integration Adapters (THIN WRAPPERS)
 ### 3. Integration Adapters = Platform-Specific Wrappers
 
 **Integration adapters** (`src/templates/integrations/`) provide minimal platform wrappers:
+
 - Reference canonical templates, don't duplicate content
 - Platform-specific formatting and tool usage
 - Command format transformation (colon vs hyphen separators)
@@ -78,11 +81,11 @@ Integration Adapters (THIN WRAPPERS)
 
 Cross-workflow patterns and principles:
 
-| File | Purpose | Key Content |
-|------|---------|-------------|
-| `clavix-mode.md` | Planning vs implementation distinction | Mode table, command categorization, standard workflow |
-| `file-operations.md` | File creation patterns | Write tool usage, verification steps, error handling |
-| `verification.md` | Checkpoint patterns | Self-correction triggers, validation approaches |
+| File                 | Purpose                                | Key Content                                           |
+| -------------------- | -------------------------------------- | ----------------------------------------------------- |
+| `clavix-mode.md`     | Planning vs implementation distinction | Mode table, command categorization, standard workflow |
+| `file-operations.md` | File creation patterns                 | Write tool usage, verification steps, error handling  |
+| `verification.md`    | Checkpoint patterns                    | Self-correction triggers, validation approaches       |
 
 **Purpose:** Define concepts used across multiple workflows to avoid duplication.
 
@@ -90,13 +93,14 @@ Cross-workflow patterns and principles:
 
 Problem → Solution guides:
 
-| File | Purpose | Symptoms & Solutions |
-|------|---------|---------------------|
-| `jumped-to-implementation.md` | Agent implemented during planning | Detect, stop, apologize, return to planning |
-| `skipped-file-creation.md` | Files not created | Explicit Write tool steps, verification protocol |
-| `mode-confusion.md` | Unclear planning vs implementation | Ask user to clarify, explain mode boundaries |
+| File                          | Purpose                            | Symptoms & Solutions                             |
+| ----------------------------- | ---------------------------------- | ------------------------------------------------ |
+| `jumped-to-implementation.md` | Agent implemented during planning  | Detect, stop, apologize, return to planning      |
+| `skipped-file-creation.md`    | Files not created                  | Explicit Write tool steps, verification protocol |
+| `mode-confusion.md`           | Unclear planning vs implementation | Ask user to clarify, explain mode boundaries     |
 
 **Pattern:** Each troubleshooting file includes:
+
 - Symptoms (how to detect the problem)
 - Root cause (why it happened)
 - Solution (step-by-step fix)
@@ -114,36 +118,36 @@ All workflows follow this progression:
 PRD Creation → Task Planning → Implementation → Verification → Archive
 ```
 
-| Phase | Command | Output | Mode |
-|-------|---------|--------|------|
-| **Planning** | `/clavix:prd` or `/clavix:start` | `full-prd.md` + `quick-prd.md` | PLANNING |
-| **Task Prep** | `/clavix:plan` | `tasks.md` | PLANNING |
-| **Implementation** | `/clavix:implement` | Executed code | IMPLEMENTATION |
-| **Verification** | `/clavix:verify` | Verification report | VERIFICATION |
-| **Completion** | `/clavix:archive` | Archived project | MANAGEMENT |
+| Phase              | Command                          | Output                         | Mode           |
+| ------------------ | -------------------------------- | ------------------------------ | -------------- |
+| **Planning**       | `/clavix:prd` or `/clavix:start` | `full-prd.md` + `quick-prd.md` | PLANNING       |
+| **Task Prep**      | `/clavix:plan`                   | `tasks.md`                     | PLANNING       |
+| **Implementation** | `/clavix:implement`              | Executed code                  | IMPLEMENTATION |
+| **Verification**   | `/clavix:verify`                 | Verification report            | VERIFICATION   |
+| **Completion**     | `/clavix:archive`                | Archived project               | MANAGEMENT     |
 
 ### Command Mode Mapping
 
-| Command | Mode | Implement? |
-|---------|------|------------|
-| `/clavix:start` | Planning | ✗ NO |
-| `/clavix:summarize` | Planning | ✗ NO |
-| `/clavix:improve` | Planning | ✗ NO |
-| `/clavix:prd` | Planning | ✗ NO |
-| `/clavix:plan` | Planning | ✗ NO |
-| `/clavix:implement` | Implementation | ✓ YES |
-| `/clavix:verify` | Verification | Context-dependent |
-| `/clavix:archive` | Management | ✗ NO |
+| Command             | Mode           | Implement?        |
+| ------------------- | -------------- | ----------------- |
+| `/clavix:start`     | Planning       | ✗ NO              |
+| `/clavix:summarize` | Planning       | ✗ NO              |
+| `/clavix:improve`   | Planning       | ✗ NO              |
+| `/clavix:prd`       | Planning       | ✗ NO              |
+| `/clavix:plan`      | Planning       | ✗ NO              |
+| `/clavix:implement` | Implementation | ✓ YES             |
+| `/clavix:verify`    | Verification   | Context-dependent |
+| `/clavix:archive`   | Management     | ✗ NO              |
 
 ### Agent Operations (v5 Agentic-First)
 
 In v5, agents use native tools (Write, Edit, Bash) instead of CLI commands:
 
-| Operation | How Agent Performs It |
-|-----------|----------------------|
-| Save prompt | Use Write tool to create `.clavix/outputs/prompts/<id>.md` |
-| Mark task done | Use Edit tool to change `- [ ]` to `- [x]` in tasks.md |
-| Archive project | Use Bash tool to move directory to archive/ |
+| Operation       | How Agent Performs It                                      |
+| --------------- | ---------------------------------------------------------- |
+| Save prompt     | Use Write tool to create `.clavix/outputs/prompts/<id>.md` |
+| Mark task done  | Use Edit tool to change `- [ ]` to `- [x]` in tasks.md     |
+| Archive project | Use Bash tool to move directory to archive/                |
 
 ---
 
@@ -196,6 +200,7 @@ npm run validate:consistency
 ### Why Canonical Templates?
 
 **Canonical templates solve the documentation drift problem:**
+
 - Single authoritative source for workflow behavior
 - Agents can trust template instructions match CLI behavior
 - Updates propagate through validation, not manual duplication
@@ -204,6 +209,7 @@ npm run validate:consistency
 ### Why Component Templates?
 
 **Components prevent duplication:**
+
 - Quality dimensions defined once, used in improve.md
 - Agent protocols shared across all planning workflows
 - Troubleshooting sections reusable across contexts
@@ -212,6 +218,7 @@ npm run validate:consistency
 ### Why Integration Adapters?
 
 **Adapters handle platform differences:**
+
 - Command format: `/clavix:improve` vs `/clavix-improve`
 - Tool availability: Some platforms lack filesystem access
 - Context limits: Different token limits per platform
@@ -226,6 +233,7 @@ npm run validate:consistency
 **Root cause:** Agent didn't recognize planning mode boundary
 
 **Fix:**
+
 1. Check canonical template has CLAVIX MODE header at top
 2. Verify "DO NOT IMPLEMENT" warnings present
 3. Reference `troubleshooting/jumped-to-implementation.md`
@@ -235,6 +243,7 @@ npm run validate:consistency
 **Root cause:** File-saving protocol not explicit enough
 
 **Fix:**
+
 1. Add explicit step-by-step file creation section
 2. Include verification step with file listing
 3. Reference `troubleshooting/skipped-file-creation.md`
@@ -244,6 +253,7 @@ npm run validate:consistency
 **Root cause:** Template not updated during migration
 
 **Fix:**
+
 1. Run `npm run validate:consistency` to find all occurrences
 2. Replace legacy commands with current equivalents (e.g., `/clavix:implement`)
 3. Replace deprecated terminology (e.g., "fast mode" → "standard depth")
@@ -254,6 +264,7 @@ npm run validate:consistency
 **Root cause:** CLI changed without updating canonical template
 
 **Fix:**
+
 1. Read canonical template in `src/templates/slash-commands/_canonical/`
 2. Compare with actual CLI behavior
 3. Update canonical template to match CLI
@@ -265,11 +276,13 @@ npm run validate:consistency
 ## 📚 Key Files Reference
 
 ### Canonical Templates (Start Here)
+
 - `improve.md` - Unified prompt optimization
 - `prd.md` - PRD generation workflow
 - `implement.md` - Task and prompt execution workflow
 
 ### Agent Protocols
+
 - `_components/agent-protocols/AGENT_MANUAL.md` - Universal agent protocols
 - `_components/agent-protocols/cli-reference.md` - CLI command reference
 - `_components/agent-protocols/state-awareness.md` - Workflow state tracking
@@ -277,6 +290,7 @@ npm run validate:consistency
 - `_components/agent-protocols/task-blocking.md` - Blocked task handling
 
 ### Validation
+
 - `scripts/validate-consistency.ts` - TypeScript ↔ Template validator
 - `tests/consistency/cli-template-parity.test.ts` - CLI-Template mapping tests
 
