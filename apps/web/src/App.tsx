@@ -10,6 +10,7 @@ import LandingRoute from "./routes/LandingRoute";
 import ProfileRoute from "./routes/ProfileRoute";
 import ResetPasswordRoute from "./routes/ResetPasswordRoute";
 import ShareRoute from "./routes/ShareRoute";
+import TimelineRoute from "./routes/TimelineRoute";
 import UnsubscribeRoute from "./routes/UnsubscribeRoute";
 import VerifyEmailRoute from "./routes/VerifyEmailRoute";
 import { useAuthStore } from "./store/authStore";
@@ -27,6 +28,8 @@ export default function App() {
       <Route path="/docs" element={<DocsRoute />} />
       <Route path="/editor" element={<EditorRoute />} />
       <Route path="/docs/:graphId" element={<EditorRoute />} />
+      <Route path="/timeline" element={<TimelineRoute />} />
+      <Route path="/timeline/:graphId" element={<TimelineRoute />} />
       <Route path="/share/:token" element={<ShareRoute />} />
       <Route path="/billing" element={<BillingRoute />} />
       <Route path="/profile" element={<ProfileRoute />} />
