@@ -1,14 +1,39 @@
+import { useEffect, useRef, useState } from "react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { GitBranch, Layout, MousePointer2, Share2, Sparkles, Zap } from "lucide-react";
 
 export function Features() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-16 md:py-32 dark:bg-transparent">
+    <section ref={sectionRef} className="py-16 md:py-32 dark:bg-transparent">
       <div className="mx-auto max-w-5xl px-6">
         <div className="relative">
           <div className="relative z-10 grid grid-cols-6 gap-3">
             {/* Customizable - Large stat card */}
-            <Card className="relative col-span-full flex overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] lg:col-span-2">
+            <Card
+              className={`relative col-span-full flex overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] lg:col-span-2 ${isVisible ? "animate-fade-up" : "opacity-0"}`}
+            >
               <CardContent className="relative m-auto size-fit pt-6">
                 <div className="relative flex h-24 w-56 items-center">
                   <svg
@@ -29,7 +54,9 @@ export function Features() {
             </Card>
 
             {/* Visual editing card */}
-            <Card className="relative col-span-full overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] sm:col-span-3 lg:col-span-2">
+            <Card
+              className={`relative col-span-full overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] sm:col-span-3 lg:col-span-2 ${isVisible ? "animate-fade-up animation-delay-100" : "opacity-0"}`}
+            >
               <CardContent className="pt-6">
                 <div className="relative mx-auto flex aspect-square size-32 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/5">
                   <MousePointer2 className="m-auto size-12 text-accent-brand" strokeWidth={1.5} />
@@ -46,7 +73,9 @@ export function Features() {
             </Card>
 
             {/* Performance card with chart */}
-            <Card className="relative col-span-full overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] sm:col-span-3 lg:col-span-2">
+            <Card
+              className={`relative col-span-full overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] sm:col-span-3 lg:col-span-2 ${isVisible ? "animate-fade-up animation-delay-200" : "opacity-0"}`}
+            >
               <CardContent className="pt-6">
                 <div className="pt-6 lg:px-6">
                   <svg
@@ -116,7 +145,9 @@ export function Features() {
             </Card>
 
             {/* Auto Layout - Wide card with visualization */}
-            <Card className="relative col-span-full overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] lg:col-span-3">
+            <Card
+              className={`relative col-span-full overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] lg:col-span-3 ${isVisible ? "animate-fade-up animation-delay-300" : "opacity-0"}`}
+            >
               <CardContent className="grid pt-6 sm:grid-cols-2">
                 <div className="relative z-10 flex flex-col justify-between space-y-12 lg:space-y-6">
                   <div className="relative flex aspect-square size-12 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/5">
@@ -200,7 +231,9 @@ export function Features() {
             </Card>
 
             {/* Share & Export - Wide card with avatars */}
-            <Card className="relative col-span-full overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] lg:col-span-3">
+            <Card
+              className={`relative col-span-full overflow-hidden transition-shadow duration-300 hover:shadow-[0_0_30px_-10px_rgba(255,79,0,0.3)] lg:col-span-3 ${isVisible ? "animate-fade-up animation-delay-400" : "opacity-0"}`}
+            >
               <CardContent className="grid h-full pt-6 sm:grid-cols-2">
                 <div className="relative z-10 flex flex-col justify-between space-y-12 lg:space-y-6">
                   <div className="relative flex aspect-square size-12 rounded-full border before:absolute before:-inset-2 before:rounded-full before:border dark:border-white/10 dark:before:border-white/5">
