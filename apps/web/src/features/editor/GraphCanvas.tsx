@@ -670,20 +670,34 @@ export default function GraphCanvas() {
         }
       }
 
-      if (!connectionSuggestionsEnabled) {
+      if (!connectionSuggestionsEnabled || !reactFlowInstance) {
         return;
       }
 
-      const draggedHeight = draggedNode.height ?? 50;
+      // Get internal node from React Flow which has actual handleBounds
+      const draggedInternalNode = reactFlowInstance.getInternalNode(draggedNode.id);
+      if (!draggedInternalNode) return;
 
-      // Calculate the dragged node's target handle positions (left side)
-      const draggedTargetHandles = draggedNode.data?.targetHandles ?? [{ id: "target" }];
-      const draggedTargetPositions = draggedTargetHandles.map((_: unknown, index: number) => ({
-        x: draggedNode.position.x,
-        y:
-          draggedNode.position.y +
-          ((index + 1) / (draggedTargetHandles.length + 1)) * draggedHeight,
+      // Get actual target handle positions from handleBounds (left side of dragged node)
+      const draggedTargetBounds = draggedInternalNode.internals.handleBounds?.target ?? [];
+      const draggedTargetPositions = draggedTargetBounds.map((handle) => ({
+        x: draggedNode.position.x + handle.x + handle.width / 2,
+        y: draggedNode.position.y + handle.y + handle.height / 2,
       }));
+
+      // Fallback if no handle bounds yet (node just created)
+      if (draggedTargetPositions.length === 0) {
+        const draggedHeight = draggedNode.height ?? 50;
+        const draggedTargetHandles = draggedNode.data?.targetHandles ?? [{ id: "target" }];
+        draggedTargetHandles.forEach((_: unknown, index: number) => {
+          draggedTargetPositions.push({
+            x: draggedNode.position.x,
+            y:
+              draggedNode.position.y +
+              ((index + 1) / (draggedTargetHandles.length + 1)) * draggedHeight,
+          });
+        });
+      }
 
       let closestMatch: {
         sourceNodeId: string;
@@ -710,21 +724,30 @@ export default function GraphCanvas() {
           continue;
         }
 
-        const nodePos = spatialIndex.nodePositions.get(nodeId);
-        if (!nodePos) continue;
-
         const node = nodes.find((n) => n.id === nodeId);
         if (!node) continue;
 
-        const nodeWidth = nodePos.width;
-        const nodeHeight = nodePos.height;
+        // Get actual source handle positions from handleBounds (right side)
+        const internalNode = reactFlowInstance.getInternalNode(nodeId);
+        const sourceBounds = internalNode?.internals.handleBounds?.source ?? [];
 
-        // Calculate this node's source handle positions (right side)
-        const sourceHandles = node.data?.sourceHandles ?? [{ id: "source" }];
-        const sourcePositions = sourceHandles.map((_, index) => ({
-          x: nodePos.x + nodeWidth,
-          y: nodePos.y + ((index + 1) / (sourceHandles.length + 1)) * nodeHeight,
-        }));
+        let sourcePositions: { x: number; y: number }[];
+        if (sourceBounds.length > 0) {
+          // Use actual handle bounds from React Flow
+          sourcePositions = sourceBounds.map((handle) => ({
+            x: node.position.x + handle.x + handle.width / 2,
+            y: node.position.y + handle.y + handle.height / 2,
+          }));
+        } else {
+          // Fallback to calculated positions
+          const nodeWidth = node.width ?? 150;
+          const nodeHeight = node.height ?? 50;
+          const sourceHandles = node.data?.sourceHandles ?? [{ id: "source" }];
+          sourcePositions = sourceHandles.map((_, index) => ({
+            x: node.position.x + nodeWidth,
+            y: node.position.y + ((index + 1) / (sourceHandles.length + 1)) * nodeHeight,
+          }));
+        }
 
         // Find the closest source handle to any of the dragged node's target handles
         for (const sourcePos of sourcePositions) {
@@ -760,6 +783,7 @@ export default function GraphCanvas() {
     },
     [
       connectionSuggestionsEnabled,
+      reactFlowInstance,
       nodes,
       spatialIndex,
       edgeLookup,
