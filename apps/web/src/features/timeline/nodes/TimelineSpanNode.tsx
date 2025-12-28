@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Handle, Position, type Node, type NodeProps, useReactFlow } from "@xyflow/react";
+import { type Node, type NodeProps, useReactFlow } from "@xyflow/react";
 import type { TimelineSpanData } from "../types";
 import { useTimelineStore } from "../timelineStore";
 
@@ -133,20 +133,6 @@ export const TimelineSpanNode = memo(function TimelineSpanNode({
         borderColor: data.color ?? undefined,
       }}
     >
-      {/* Source handle (right edge) */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!w-2 !h-2 !bg-primary !border-background"
-      />
-
-      {/* Target handle (left edge) */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="!w-2 !h-2 !bg-primary !border-background"
-      />
-
       {/* Left resize handle */}
       <div
         className={`
