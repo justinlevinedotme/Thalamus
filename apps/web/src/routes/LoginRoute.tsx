@@ -22,8 +22,11 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { useAuthStore } from "../store/authStore";
 import { twoFactor, authClient } from "../lib/authClient";
+import { useTheme } from "../lib/theme";
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
@@ -114,6 +117,8 @@ type OAuthProvider = (typeof OAUTH_PROVIDERS)[number]["id"];
 export default function LoginRoute() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const { signIn, signInWithProvider, status, error, setError, setUser } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -199,145 +204,158 @@ export default function LoginRoute() {
   }, [location.pathname, location.search, navigate, setError]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-12">
-      {/* Subtle background pattern */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-slate-200/40 blur-3xl" />
-        <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-slate-300/30 blur-3xl" />
-      </div>
+    <div className="relative min-h-screen w-full">
+      {/* Horizon Glow */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background: isDark
+            ? "radial-gradient(125% 125% at 50% 90%, #000000 40%, #1a0a00 100%)"
+            : "radial-gradient(125% 125% at 50% 90%, #ffffff 40%, #fff5f0 100%)",
+        }}
+      />
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <Header />
 
-      <Card className="relative w-full max-w-md border-slate-200/80 shadow-xl shadow-slate-200/50">
-        <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-2xl font-semibold tracking-tight">Welcome back</CardTitle>
-          <CardDescription>Sign in to access your graphs and share links</CardDescription>
-        </CardHeader>
+        <main className="flex flex-1 items-center justify-center px-4 py-12">
+          <Card className="relative w-full max-w-md border-border shadow-xl">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-2xl font-semibold tracking-tight">Welcome back</CardTitle>
+              <CardDescription>Sign in to access your graphs and share links</CardDescription>
+            </CardHeader>
 
-        <CardContent className="space-y-4">
-          {/* OAuth Providers - Compact button group (only shown if any are enabled) */}
-          {enabledProviders.length > 0 && (
-            <>
-              <div className="flex justify-center gap-2">
-                {enabledProviders.map((provider) => (
-                  <Button
-                    key={provider.id}
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={`h-10 w-10 transition-all duration-200 ${provider.color}`}
-                    onClick={() => handleOAuthSignIn(provider.id)}
-                    disabled={status === "loading"}
-                    title={`Sign in with ${provider.label}`}
-                  >
-                    {provider.icon}
-                  </Button>
-                ))}
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-slate-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">or continue with email</span>
-                </div>
-              </div>
-            </>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="login-email">Email</Label>
-              <Input
-                id="login-email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className="h-10"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="login-password">Password</Label>
-                <Link
-                  to="/forgot-password"
-                  className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <Input
-                  id="login-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                  className="h-10 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {TURNSTILE_SITE_KEY && (
-              <div className="flex justify-center">
-                <Turnstile
-                  ref={turnstileRef}
-                  siteKey={TURNSTILE_SITE_KEY}
-                  onSuccess={setCaptchaToken}
-                  onError={() => setCaptchaToken(null)}
-                  onExpire={() => setCaptchaToken(null)}
-                />
-              </div>
-            )}
-
-            {error && (
-              <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              className="h-10 w-full"
-              disabled={status === "loading" || (!!TURNSTILE_SITE_KEY && !captchaToken)}
-            >
-              {status === "loading" ? (
+            <CardContent className="space-y-4">
+              {/* OAuth Providers - Compact button group (only shown if any are enabled) */}
+              {enabledProviders.length > 0 && (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </Button>
-          </form>
-        </CardContent>
+                  <div className="flex justify-center gap-2">
+                    {enabledProviders.map((provider) => (
+                      <Button
+                        key={provider.id}
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className={`h-10 w-10 transition-all duration-200 ${provider.color}`}
+                        onClick={() => handleOAuthSignIn(provider.id)}
+                        disabled={status === "loading"}
+                        title={`Sign in with ${provider.label}`}
+                      >
+                        {provider.icon}
+                      </Button>
+                    ))}
+                  </div>
 
-        <CardFooter className="flex justify-center border-t border-slate-100 pt-6">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link
-              to="/signup"
-              className="font-medium text-foreground underline-offset-4 hover:underline"
-            >
-              Create one
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">
+                        or continue with email
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">Email</Label>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                    className="h-10"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="login-password">Password</Label>
+                    <Link
+                      to="/forgot-password"
+                      className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                      className="h-10 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {TURNSTILE_SITE_KEY && (
+                  <div className="flex justify-center">
+                    <Turnstile
+                      ref={turnstileRef}
+                      siteKey={TURNSTILE_SITE_KEY}
+                      onSuccess={setCaptchaToken}
+                      onError={() => setCaptchaToken(null)}
+                      onExpire={() => setCaptchaToken(null)}
+                    />
+                  </div>
+                )}
+
+                {error && (
+                  <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="h-10 w-full"
+                  disabled={status === "loading" || (!!TURNSTILE_SITE_KEY && !captchaToken)}
+                >
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign in"
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+
+            <CardFooter className="flex justify-center border-t border-border pt-6">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
+                  className="font-medium text-foreground underline-offset-4 hover:underline"
+                >
+                  Create one
+                </Link>
+              </p>
+            </CardFooter>
+          </Card>
+        </main>
+
+        <Footer />
+      </div>
 
       {/* 2FA Verification Dialog */}
       <Dialog

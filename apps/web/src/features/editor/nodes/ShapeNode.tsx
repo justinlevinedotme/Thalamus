@@ -1,22 +1,21 @@
-import { NodeResizer } from "@reactflow/node-resizer";
-import "@reactflow/node-resizer/dist/style.css";
+import { NodeResizer, type Node, type NodeProps } from "@xyflow/react";
 import { flushSync } from "react-dom";
-import { type NodeProps } from "reactflow";
 
 import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
-const MIN_WIDTH = 100;
-const MIN_HEIGHT = 60;
-
-export default function ShapeNode({
-  data,
-  selected,
-}: NodeProps<{
+type ShapeNodeData = {
   label: string;
   kind: NodeKind;
   style?: NodeStyle;
   groupId?: string;
-}>) {
+};
+
+type ShapeNodeType = Node<ShapeNodeData, "shape">;
+
+const MIN_WIDTH = 100;
+const MIN_HEIGHT = 60;
+
+export default function ShapeNode({ data, selected }: NodeProps<ShapeNodeType>) {
   const { selectGroupNodes } = useGraphStore();
 
   // Handle mousedown to select all group nodes BEFORE React Flow starts dragging
@@ -52,9 +51,9 @@ export default function ShapeNode({
   const hasBorder = borderWidth > 0;
   const borderColor =
     selected && hasBorder
-      ? "#64748b"
+      ? undefined // Let CSS class handle selected state
       : (data.style?.borderColor ??
-        (data.style?.color === "transparent" ? "#e2e8f0" : (data.style?.color ?? "#3B82F6")));
+        (data.style?.color === "transparent" ? undefined : (data.style?.color ?? "#3B82F6")));
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color ?? "#DBEAFE",
@@ -69,11 +68,13 @@ export default function ShapeNode({
         minWidth={MIN_WIDTH}
         minHeight={MIN_HEIGHT}
         isVisible={selected}
-        lineClassName="!border-slate-400"
-        handleClassName="!w-2.5 !h-2.5 !bg-white !border-slate-400"
+        lineClassName="!border-muted-foreground"
+        handleClassName="!w-2.5 !h-2.5 !bg-background !border-muted-foreground"
       />
       <div
-        className={`h-full w-full transition ${shapeClass} ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
+        className={`h-full w-full transition ${shapeClass} ${
+          selected && hasBorder ? "!border-muted-foreground" : ""
+        } ${selected && !hasBorder ? "ring-2 ring-muted-foreground ring-offset-0" : ""}`}
         style={nodeStyle}
         aria-label="Shape container"
         onMouseDown={handleMouseDown}

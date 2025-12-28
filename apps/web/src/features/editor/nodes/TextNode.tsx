@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
-import { type NodeProps } from "reactflow";
+import { type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
 import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
+
+type TextNodeData = {
+  label: string;
+  kind: NodeKind;
+  style?: NodeStyle;
+  groupId?: string;
+};
+
+type TextNodeType = Node<TextNodeData, "text">;
 
 // Strip HTML tags for plain text display
 const stripHtml = (html: string): string => {
@@ -24,16 +33,7 @@ const sizeToTextClass = (size: string | undefined): string => {
   }
 };
 
-export default function TextNode({
-  id,
-  data,
-  selected,
-}: NodeProps<{
-  label: string;
-  kind: NodeKind;
-  style?: NodeStyle;
-  groupId?: string;
-}>) {
+export default function TextNode({ id, data, selected }: NodeProps<TextNodeType>) {
   const { editingNodeId, startEditingNode, stopEditingNode, updateNodeLabel, selectGroupNodes } =
     useGraphStore();
   const isEditing = editingNodeId === id;
@@ -96,13 +96,13 @@ export default function TextNode({
 
   // Text nodes have no background by default, transparent
   const nodeStyle: React.CSSProperties = {
-    color: data.style?.textColor ?? "#1e293b",
+    color: data.style?.textColor,
   };
 
   return (
     <div
       className={`relative px-2 py-1 font-semibold transition ${textSizeClass} ${
-        selected ? "ring-2 ring-slate-400 ring-offset-2 rounded" : ""
+        selected ? "ring-2 ring-muted-foreground ring-offset-2 rounded" : ""
       }`}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
@@ -115,7 +115,7 @@ export default function TextNode({
         {data.style?.icon && (
           <span
             className="flex-shrink-0 flex items-center"
-            style={{ color: data.style?.iconColor ?? data.style?.textColor ?? "#1e293b" }}
+            style={{ color: data.style?.iconColor ?? data.style?.textColor }}
           >
             <NodeIconDisplay icon={data.style.icon} className="h-[1em] w-[1em]" />
           </span>
@@ -130,7 +130,7 @@ export default function TextNode({
               onEscape={handleEscape}
               placeholder="Heading"
               className="w-full bg-transparent"
-              textColor={data.style?.textColor ?? "#1e293b"}
+              textColor={data.style?.textColor}
               singleLine
               autoFocus
             />

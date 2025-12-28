@@ -229,7 +229,7 @@ export default function NodeStyleInspector() {
 
   if (selectedNodes.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-500">
+      <div className="rounded-lg border border-border bg-background p-4 text-sm text-muted-foreground">
         Select a node to edit its type and style.
       </div>
     );
@@ -287,17 +287,19 @@ export default function NodeStyleInspector() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-        <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">{getHeaderText()}</h2>
+      <div className="rounded-lg border border-border bg-background shadow-sm">
+        <h2 className="px-3 pt-3 text-sm font-semibold text-foreground">{getHeaderText()}</h2>
 
         {/* Handles - only show for single selection of regular nodes */}
         {showHandles && (
           <div className="space-y-3 px-3 py-3">
             <div className="flex items-center justify-between gap-4">
-              <label className="text-xs font-semibold uppercase text-slate-500">Inputs</label>
+              <label className="text-xs font-semibold uppercase text-muted-foreground">
+                Inputs
+              </label>
               <div className="flex items-center gap-1">
                 <button
-                  className="flex h-7 w-7 items-center justify-center rounded-l-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                  className="flex h-7 w-7 items-center justify-center rounded-l-md border border-border text-muted-foreground hover:bg-secondary disabled:opacity-50"
                   type="button"
                   onClick={() =>
                     updateNodeHandles(
@@ -311,11 +313,11 @@ export default function NodeStyleInspector() {
                 >
                   −
                 </button>
-                <span className="flex h-7 w-8 items-center justify-center border-y border-slate-200 bg-white text-xs text-slate-700">
+                <span className="flex h-7 w-8 items-center justify-center border-y border-border bg-background text-xs text-foreground">
                   {targetHandleCount}
                 </span>
                 <button
-                  className="flex h-7 w-7 items-center justify-center rounded-r-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                  className="flex h-7 w-7 items-center justify-center rounded-r-md border border-border text-muted-foreground hover:bg-secondary disabled:opacity-50"
                   type="button"
                   onClick={() =>
                     updateNodeHandles(
@@ -333,10 +335,12 @@ export default function NodeStyleInspector() {
             </div>
 
             <div className="flex items-center justify-between gap-4">
-              <label className="text-xs font-semibold uppercase text-slate-500">Outputs</label>
+              <label className="text-xs font-semibold uppercase text-muted-foreground">
+                Outputs
+              </label>
               <div className="flex items-center gap-1">
                 <button
-                  className="flex h-7 w-7 items-center justify-center rounded-l-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                  className="flex h-7 w-7 items-center justify-center rounded-l-md border border-border text-muted-foreground hover:bg-secondary disabled:opacity-50"
                   type="button"
                   onClick={() =>
                     updateNodeHandles(
@@ -350,11 +354,11 @@ export default function NodeStyleInspector() {
                 >
                   −
                 </button>
-                <span className="flex h-7 w-8 items-center justify-center border-y border-slate-200 bg-white text-xs text-slate-700">
+                <span className="flex h-7 w-8 items-center justify-center border-y border-border bg-background text-xs text-foreground">
                   {sourceHandleCount}
                 </span>
                 <button
-                  className="flex h-7 w-7 items-center justify-center rounded-r-md border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50"
+                  className="flex h-7 w-7 items-center justify-center rounded-r-md border border-border text-muted-foreground hover:bg-secondary disabled:opacity-50"
                   type="button"
                   onClick={() =>
                     updateNodeHandles(
@@ -372,18 +376,18 @@ export default function NodeStyleInspector() {
             </div>
 
             <div className="flex items-center justify-between gap-4">
-              <label className="text-xs font-semibold uppercase text-slate-500">Icon</label>
+              <label className="text-xs font-semibold uppercase text-muted-foreground">Icon</label>
               <div className="flex items-center gap-1">
                 <IconPicker value={currentIcon} onChange={(icon) => handleStyleUpdate({ icon })}>
                   <button
                     type="button"
-                    className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
+                    className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-border px-2 text-base hover:bg-secondary"
                     style={{ color: currentIconColor ?? "#1e293b" }}
                   >
                     {currentIcon ? (
                       <NodeIconDisplay icon={currentIcon} className="h-4 w-4" />
                     ) : (
-                      <Smile className="h-4 w-4 text-slate-400" />
+                      <Smile className="h-4 w-4 text-muted-foreground" />
                     )}
                   </button>
                 </IconPicker>
@@ -403,7 +407,7 @@ export default function NodeStyleInspector() {
                 )}
                 {currentIcon && (
                   <button
-                    className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
                     type="button"
                     onClick={() => handleStyleUpdate({ icon: undefined, iconColor: undefined })}
                     aria-label="Clear icon"
@@ -418,16 +422,16 @@ export default function NodeStyleInspector() {
 
         {/* Multi-select info message */}
         {isMultiSelect && (
-          <div className="px-3 py-2 text-xs text-slate-500">
+          <div className="px-3 py-2 text-xs text-muted-foreground">
             Style changes apply to all selected nodes
           </div>
         )}
 
         {/* Text node simplified controls - just color, size, icon */}
         {isTextNode || allTextNodes ? (
-          <div className="space-y-3 px-3 py-3 border-t border-slate-200">
+          <div className="space-y-3 px-3 py-3 border-t border-border">
             <div className="flex items-center justify-between gap-4">
-              <label className="text-xs text-slate-500">Color</label>
+              <label className="text-xs text-muted-foreground">Color</label>
               <ColorPicker
                 value={currentTextColor ?? "#1e293b"}
                 onChange={(color) => handleStyleUpdate({ textColor: color })}
@@ -441,7 +445,7 @@ export default function NodeStyleInspector() {
                     <ColorSwatch color={currentTextColor} className="h-5 w-5" />
                   ) : (
                     <div
-                      className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                      className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                       title="Mixed"
                     />
                   )}
@@ -450,10 +454,10 @@ export default function NodeStyleInspector() {
             </div>
 
             <div className="flex items-center justify-between gap-4">
-              <label className="text-xs text-slate-500">Size</label>
+              <label className="text-xs text-muted-foreground">Size</label>
               <ToggleGroup
                 type="single"
-                className="h-7 rounded-md border border-slate-200 bg-white"
+                className="h-7 rounded-md border border-border bg-background"
                 value={currentSize ?? ""}
                 onValueChange={(value) => {
                   if (!value) {
@@ -468,7 +472,7 @@ export default function NodeStyleInspector() {
                     <TooltipTrigger asChild>
                       <ToggleGroupItem
                         value={size.value}
-                        className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                        className="h-full w-10 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                         variant="ghost"
                       >
                         {size.value.toUpperCase()}
@@ -481,18 +485,18 @@ export default function NodeStyleInspector() {
             </div>
 
             <div className="flex items-center justify-between gap-4">
-              <label className="text-xs text-slate-500">Icon</label>
+              <label className="text-xs text-muted-foreground">Icon</label>
               <div className="flex items-center gap-1">
                 <IconPicker value={currentIcon} onChange={(icon) => handleStyleUpdate({ icon })}>
                   <button
                     type="button"
-                    className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
+                    className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-border px-2 text-base hover:bg-secondary"
                     style={{ color: currentIconColor ?? "#1e293b" }}
                   >
                     {currentIcon ? (
                       <NodeIconDisplay icon={currentIcon} className="h-4 w-4" />
                     ) : (
-                      <Smile className="h-4 w-4 text-slate-400" />
+                      <Smile className="h-4 w-4 text-muted-foreground" />
                     )}
                   </button>
                 </IconPicker>
@@ -512,7 +516,7 @@ export default function NodeStyleInspector() {
                 )}
                 {currentIcon && (
                   <button
-                    className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                    className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
                     type="button"
                     onClick={() => handleStyleUpdate({ icon: undefined, iconColor: undefined })}
                     aria-label="Clear icon"
@@ -526,14 +530,14 @@ export default function NodeStyleInspector() {
         ) : isKeyNode || allKeyNodes ? (
           /* Key node controls - background, border, title color, body color, separator/icon color, icon */
           <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
-            <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">
-              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+            <AccordionItem value="appearance" className="border-b-0 border-t border-border">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
                 Appearance
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3 pt-0">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Background</label>
+                    <label className="text-xs text-muted-foreground">Background</label>
                     <ColorPicker
                       value={currentColor ?? "#FFFFFF"}
                       onChange={(color) => handleStyleUpdate({ color })}
@@ -547,7 +551,7 @@ export default function NodeStyleInspector() {
                           <ColorSwatch color={currentColor} className="h-5 w-5" />
                         ) : (
                           <div
-                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                             title="Mixed"
                           />
                         )}
@@ -558,14 +562,14 @@ export default function NodeStyleInspector() {
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="border" className="border-b-0 border-t border-slate-200">
-              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+            <AccordionItem value="border" className="border-b-0 border-t border-border">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
                 Border
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3 pt-0">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Color</label>
+                    <label className="text-xs text-muted-foreground">Color</label>
                     <ColorPicker
                       value={currentBorderColor ?? "#e2e8f0"}
                       onChange={(color) => handleStyleUpdate({ borderColor: color })}
@@ -579,7 +583,7 @@ export default function NodeStyleInspector() {
                           <ColorSwatch color={currentBorderColor} className="h-5 w-5" />
                         ) : (
                           <div
-                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                             title="Mixed"
                           />
                         )}
@@ -588,10 +592,10 @@ export default function NodeStyleInspector() {
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Style</label>
+                    <label className="text-xs text-muted-foreground">Style</label>
                     <ToggleGroup
                       type="single"
-                      className="h-7 rounded-md border border-slate-200 bg-white"
+                      className="h-7 rounded-md border border-border bg-background"
                       value={currentBorderStyle ?? "solid"}
                       onValueChange={(value) => {
                         if (!value) {
@@ -606,7 +610,7 @@ export default function NodeStyleInspector() {
                           <TooltipTrigger asChild>
                             <ToggleGroupItem
                               value={style.value}
-                              className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                              className="h-full w-8 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                               variant="ghost"
                             >
                               {style.icon}
@@ -619,10 +623,10 @@ export default function NodeStyleInspector() {
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Width</label>
+                    <label className="text-xs text-muted-foreground">Width</label>
                     <ToggleGroup
                       type="single"
-                      className="h-7 rounded-md border border-slate-200 bg-white"
+                      className="h-7 rounded-md border border-border bg-background"
                       value={String(currentBorderWidth ?? 1)}
                       onValueChange={(value) => {
                         if (!value) {
@@ -637,7 +641,7 @@ export default function NodeStyleInspector() {
                           <TooltipTrigger asChild>
                             <ToggleGroupItem
                               value={String(width.value)}
-                              className="h-full w-8 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                              className="h-full w-8 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                               variant="ghost"
                             >
                               {width.value}
@@ -652,14 +656,14 @@ export default function NodeStyleInspector() {
               </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem value="text" className="border-b-0 border-t border-slate-200">
-              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+            <AccordionItem value="text" className="border-b-0 border-t border-border">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
                 Text & Icon
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3 pt-0">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Title</label>
+                    <label className="text-xs text-muted-foreground">Title</label>
                     <ColorPicker
                       value={currentTextColor ?? "#334155"}
                       onChange={(color) => handleStyleUpdate({ textColor: color })}
@@ -673,7 +677,7 @@ export default function NodeStyleInspector() {
                           <ColorSwatch color={currentTextColor} className="h-5 w-5" />
                         ) : (
                           <div
-                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                             title="Mixed"
                           />
                         )}
@@ -682,7 +686,7 @@ export default function NodeStyleInspector() {
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Body</label>
+                    <label className="text-xs text-muted-foreground">Body</label>
                     <ColorPicker
                       value={currentBodyTextColor ?? "#64748b"}
                       onChange={(color) => handleStyleUpdate({ bodyTextColor: color })}
@@ -696,7 +700,7 @@ export default function NodeStyleInspector() {
                           <ColorSwatch color={currentBodyTextColor} className="h-5 w-5" />
                         ) : (
                           <div
-                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                             title="Mixed"
                           />
                         )}
@@ -705,7 +709,7 @@ export default function NodeStyleInspector() {
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Separator</label>
+                    <label className="text-xs text-muted-foreground">Separator</label>
                     <ColorPicker
                       value={currentSeparatorColor ?? "#e2e8f0"}
                       onChange={(color) => handleStyleUpdate({ separatorColor: color })}
@@ -719,7 +723,7 @@ export default function NodeStyleInspector() {
                           <ColorSwatch color={currentSeparatorColor} className="h-5 w-5" />
                         ) : (
                           <div
-                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                             title="Mixed"
                           />
                         )}
@@ -728,7 +732,7 @@ export default function NodeStyleInspector() {
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Icon</label>
+                    <label className="text-xs text-muted-foreground">Icon</label>
                     <div className="flex items-center gap-1">
                       <IconPicker
                         value={currentIcon}
@@ -736,13 +740,13 @@ export default function NodeStyleInspector() {
                       >
                         <button
                           type="button"
-                          className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-slate-200 px-2 text-base hover:bg-slate-50"
+                          className="flex h-7 min-w-[3.5rem] items-center justify-center gap-1 rounded-md border border-border px-2 text-base hover:bg-secondary"
                           style={{ color: currentIconColor ?? "#64748b" }}
                         >
                           {currentIcon ? (
                             <NodeIconDisplay icon={currentIcon} className="h-4 w-4" />
                           ) : (
-                            <Smile className="h-4 w-4 text-slate-400" />
+                            <Smile className="h-4 w-4 text-muted-foreground" />
                           )}
                         </button>
                       </IconPicker>
@@ -765,7 +769,7 @@ export default function NodeStyleInspector() {
                       )}
                       {currentIcon && (
                         <button
-                          className="flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
+                          className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
                           type="button"
                           onClick={() =>
                             handleStyleUpdate({ icon: undefined, iconColor: undefined })
@@ -784,14 +788,14 @@ export default function NodeStyleInspector() {
         ) : (
           /* Regular node controls */
           <Accordion type="single" collapsible defaultValue="appearance" className="w-full">
-            <AccordionItem value="appearance" className="border-b-0 border-t border-slate-200">
-              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+            <AccordionItem value="appearance" className="border-b-0 border-t border-border">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
                 Appearance
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3 pt-0">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Background</label>
+                    <label className="text-xs text-muted-foreground">Background</label>
                     <ColorPicker
                       value={currentColor ?? "#E2E8F0"}
                       onChange={(color) => handleStyleUpdate({ color })}
@@ -805,7 +809,7 @@ export default function NodeStyleInspector() {
                           <ColorSwatch color={currentColor} className="h-5 w-5" />
                         ) : (
                           <div
-                            className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                            className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                             title="Mixed"
                           />
                         )}
@@ -814,10 +818,10 @@ export default function NodeStyleInspector() {
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Shape</label>
+                    <label className="text-xs text-muted-foreground">Shape</label>
                     <ToggleGroup
                       type="single"
-                      className="h-7 rounded-md border border-slate-200 bg-white"
+                      className="h-7 rounded-md border border-border bg-background"
                       value={currentShape ?? ""}
                       onValueChange={(value) => {
                         if (!value) {
@@ -832,7 +836,7 @@ export default function NodeStyleInspector() {
                           <TooltipTrigger asChild>
                             <ToggleGroupItem
                               value={shape.value}
-                              className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                              className="h-full w-8 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                               variant="ghost"
                             >
                               {shape.icon}
@@ -845,10 +849,10 @@ export default function NodeStyleInspector() {
                   </div>
 
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Size</label>
+                    <label className="text-xs text-muted-foreground">Size</label>
                     <ToggleGroup
                       type="single"
-                      className="h-7 rounded-md border border-slate-200 bg-white"
+                      className="h-7 rounded-md border border-border bg-background"
                       value={currentSize ?? ""}
                       onValueChange={(value) => {
                         if (!value) {
@@ -863,7 +867,7 @@ export default function NodeStyleInspector() {
                           <TooltipTrigger asChild>
                             <ToggleGroupItem
                               value={size.value}
-                              className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                              className="h-full w-10 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                               variant="ghost"
                             >
                               {size.value.toUpperCase()}
@@ -878,10 +882,10 @@ export default function NodeStyleInspector() {
                   {/* Edge padding - hide for shape and key nodes */}
                   {!isShapeNode && !allShapeNodes && !isKeyNode && !allKeyNodes && (
                     <div className="flex items-center justify-between gap-4">
-                      <label className="text-xs text-slate-500">Edge Padding</label>
+                      <label className="text-xs text-muted-foreground">Edge Padding</label>
                       <ToggleGroup
                         type="single"
-                        className="h-7 rounded-md border border-slate-200 bg-white"
+                        className="h-7 rounded-md border border-border bg-background"
                         value={currentEdgePadding ?? ""}
                         onValueChange={(value) => {
                           if (!value) {
@@ -896,7 +900,7 @@ export default function NodeStyleInspector() {
                             <TooltipTrigger asChild>
                               <ToggleGroupItem
                                 value={padding.value}
-                                className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                                className="h-full w-10 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                                 variant="ghost"
                               >
                                 {padding.value === "none" ? "0" : padding.value.toUpperCase()}
@@ -914,14 +918,14 @@ export default function NodeStyleInspector() {
 
             {/* Text section - hide for shape and key nodes */}
             {!isShapeNode && !allShapeNodes && !isKeyNode && !allKeyNodes && (
-              <AccordionItem value="text" className="border-b-0 border-t border-slate-200">
-                <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+              <AccordionItem value="text" className="border-b-0 border-t border-border">
+                <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
                   Text
                 </AccordionTrigger>
                 <AccordionContent className="px-3 pb-3 pt-0">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-4">
-                      <label className="text-xs text-slate-500">Title</label>
+                      <label className="text-xs text-muted-foreground">Title</label>
                       <ColorPicker
                         value={currentTextColor ?? "#1e293b"}
                         onChange={(color) => handleStyleUpdate({ textColor: color })}
@@ -935,7 +939,7 @@ export default function NodeStyleInspector() {
                             <ColorSwatch color={currentTextColor} className="h-5 w-5" />
                           ) : (
                             <div
-                              className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                              className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                               title="Mixed"
                             />
                           )}
@@ -944,7 +948,7 @@ export default function NodeStyleInspector() {
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
-                      <label className="text-xs text-slate-500">Body</label>
+                      <label className="text-xs text-muted-foreground">Body</label>
                       <ColorPicker
                         value={currentBodyTextColor ?? currentTextColor ?? "#475569"}
                         onChange={(color) => handleStyleUpdate({ bodyTextColor: color })}
@@ -961,7 +965,7 @@ export default function NodeStyleInspector() {
                             />
                           ) : (
                             <div
-                              className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                              className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                               title="Mixed"
                             />
                           )}
@@ -975,14 +979,14 @@ export default function NodeStyleInspector() {
 
             {/* Border section - show for all nodes except text */}
             {!isTextNode && !allTextNodes && (
-              <AccordionItem value="border" className="border-b-0 border-t border-slate-200">
-                <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+              <AccordionItem value="border" className="border-b-0 border-t border-border">
+                <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
                   Border
                 </AccordionTrigger>
                 <AccordionContent className="px-3 pb-3 pt-0">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-4">
-                      <label className="text-xs text-slate-500">Color</label>
+                      <label className="text-xs text-muted-foreground">Color</label>
                       <ColorPicker
                         value={
                           currentBorderColor ??
@@ -999,7 +1003,7 @@ export default function NodeStyleInspector() {
                             <ColorSwatch color={currentBorderColor} className="h-5 w-5" />
                           ) : (
                             <div
-                              className="h-5 w-5 rounded border border-slate-300 bg-gradient-to-br from-slate-200 via-white to-slate-200"
+                              className="h-5 w-5 rounded border border-border bg-gradient-to-br from-muted via-background to-muted"
                               title="Mixed"
                             />
                           )}
@@ -1008,10 +1012,10 @@ export default function NodeStyleInspector() {
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
-                      <label className="text-xs text-slate-500">Style</label>
+                      <label className="text-xs text-muted-foreground">Style</label>
                       <ToggleGroup
                         type="single"
-                        className="h-7 rounded-md border border-slate-200 bg-white"
+                        className="h-7 rounded-md border border-border bg-background"
                         value={currentBorderStyle ?? "solid"}
                         onValueChange={(value) => {
                           if (!value) {
@@ -1026,7 +1030,7 @@ export default function NodeStyleInspector() {
                             <TooltipTrigger asChild>
                               <ToggleGroupItem
                                 value={style.value}
-                                className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                                className="h-full w-8 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                                 variant="ghost"
                               >
                                 {style.icon}
@@ -1039,10 +1043,10 @@ export default function NodeStyleInspector() {
                     </div>
 
                     <div className="flex items-center justify-between gap-4">
-                      <label className="text-xs text-slate-500">Width</label>
+                      <label className="text-xs text-muted-foreground">Width</label>
                       <ToggleGroup
                         type="single"
-                        className="h-7 rounded-md border border-slate-200 bg-white"
+                        className="h-7 rounded-md border border-border bg-background"
                         value={String(currentBorderWidth ?? (isShapeNode || allShapeNodes ? 2 : 1))}
                         onValueChange={(value) => {
                           if (!value) {
@@ -1057,7 +1061,7 @@ export default function NodeStyleInspector() {
                             <TooltipTrigger asChild>
                               <ToggleGroupItem
                                 value={String(width.value)}
-                                className="h-full w-8 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                                className="h-full w-8 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                                 variant="ghost"
                               >
                                 {width.value}

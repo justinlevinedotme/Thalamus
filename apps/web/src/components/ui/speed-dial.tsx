@@ -75,7 +75,7 @@ export function SpeedDial({ actions, className }: SpeedDialProps) {
               <button
                 type="button"
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-md bg-white border border-slate-200 text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-300",
+                  "flex h-10 w-10 items-center justify-center rounded-md bg-background border border-border text-foreground shadow-sm transition-all duration-200 hover:bg-secondary hover:border-border",
                   isOpen ? "scale-100 opacity-100" : "scale-75 opacity-0"
                 )}
                 style={{
@@ -90,7 +90,7 @@ export function SpeedDial({ actions, className }: SpeedDialProps) {
             <TooltipContent side="bottom" className="flex items-center gap-2">
               {action.label}
               {action.kbd && (
-                <kbd className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                <kbd className="ml-1 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                   {action.kbd}
                 </kbd>
               )}
@@ -105,8 +105,8 @@ export function SpeedDial({ actions, className }: SpeedDialProps) {
         className={cn(
           "flex h-10 w-10 items-center justify-center rounded-md transition-all duration-200",
           isOpen
-            ? "bg-slate-700 text-white hover:bg-slate-600 rotate-45"
-            : "bg-slate-900 text-white hover:bg-slate-800"
+            ? "bg-foreground/80 text-background hover:bg-foreground/70 rotate-45"
+            : "bg-foreground text-background hover:bg-foreground/90"
         )}
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? "Close menu" : "Add item"}

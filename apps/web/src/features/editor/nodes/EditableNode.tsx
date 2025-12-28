@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "reactflow";
+import { Handle, Position, useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
@@ -11,6 +11,21 @@ import {
   type NodeStyle,
   useGraphStore,
 } from "../../../store/graphStore";
+
+type EditableNodeData = {
+  label: string;
+  body?: string;
+  kind: NodeKind;
+  style?: NodeStyle;
+  sourceHandles?: NodeHandle[];
+  targetHandles?: NodeHandle[];
+  groupId?: string;
+};
+
+type EditableNodeType = Node<EditableNodeData, "editable">;
+
+// Default text color for nodes without explicit textColor (ensures readability on light backgrounds)
+const DEFAULT_TEXT_COLOR = "#1f2937"; // gray-800
 
 const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
   switch (padding) {
@@ -31,19 +46,7 @@ const stripHtml = (html: string): string => {
   return doc.body.textContent || "";
 };
 
-export default function EditableNode({
-  id,
-  data,
-  selected,
-}: NodeProps<{
-  label: string;
-  body?: string;
-  kind: NodeKind;
-  style?: NodeStyle;
-  sourceHandles?: NodeHandle[];
-  targetHandles?: NodeHandle[];
-  groupId?: string;
-}>) {
+export default function EditableNode({ id, data, selected }: NodeProps<EditableNodeType>) {
   const { editingNodeId, startEditingNode, stopEditingNode, updateNodeLabel, updateNodeBody } =
     useGraphStore();
   const updateNodeInternals = useUpdateNodeInternals();
@@ -151,7 +154,7 @@ export default function EditableNode({
     ? hasBorder
       ? undefined
       : undefined // Let CSS class handle selected state
-    : (data.style?.borderColor ?? "#e2e8f0"); // Default to slate-200
+    : data.style?.borderColor; // Use theme-aware border color
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color,
@@ -169,8 +172,8 @@ export default function EditableNode({
   return (
     <div
       className={`relative h-full w-full px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
-        selected && hasBorder ? "!border-slate-500" : ""
-      } ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
+        selected && hasBorder ? "!border-muted-foreground" : ""
+      } ${selected && !hasBorder ? "ring-2 ring-muted-foreground ring-offset-0" : ""}`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}
       tabIndex={0}
@@ -210,7 +213,7 @@ export default function EditableNode({
         {data.style?.icon && (
           <span
             className="flex-shrink-0 flex items-center"
-            style={{ color: data.style?.iconColor ?? data.style?.textColor ?? "#1e293b" }}
+            style={{ color: data.style?.iconColor ?? data.style?.textColor ?? DEFAULT_TEXT_COLOR }}
           >
             <NodeIconDisplay icon={data.style.icon} className="h-4 w-4" />
           </span>
@@ -232,14 +235,14 @@ export default function EditableNode({
               onFocus={() => setEditingField("title")}
               placeholder="Node title"
               className="w-full bg-transparent font-medium"
-              textColor={data.style?.textColor ?? "#1e293b"}
+              textColor={data.style?.textColor ?? DEFAULT_TEXT_COLOR}
               singleLine
               autoFocus={editingField === "title"}
             />
           ) : (
             <div
               className="node-rich-text font-medium w-full"
-              style={{ color: data.style?.textColor ?? "#1e293b" }}
+              style={{ color: data.style?.textColor ?? DEFAULT_TEXT_COLOR }}
               dangerouslySetInnerHTML={{ __html: data.label }}
             />
           )}
@@ -262,13 +265,15 @@ export default function EditableNode({
             onFocus={() => setEditingField("body")}
             placeholder="Add notes..."
             className="mt-1 w-full bg-transparent text-xs"
-            textColor={data.style?.bodyTextColor ?? data.style?.textColor ?? "#475569"}
+            textColor={data.style?.bodyTextColor ?? data.style?.textColor ?? DEFAULT_TEXT_COLOR}
             autoFocus={editingField === "body"}
           />
         ) : (
           <div
             className="nodrag node-rich-text mt-1 w-full text-xs cursor-text"
-            style={{ color: data.style?.bodyTextColor ?? data.style?.textColor ?? "#475569" }}
+            style={{
+              color: data.style?.bodyTextColor ?? data.style?.textColor ?? DEFAULT_TEXT_COLOR,
+            }}
             dangerouslySetInnerHTML={{ __html: draftBody || data.body || "" }}
             onClick={(e) => {
               e.stopPropagation();
@@ -282,7 +287,7 @@ export default function EditableNode({
       {/* Hint popover when editing title and no body exists */}
       {isEditing && editingField === "title" && !hasBody && (
         <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none z-50">
-          <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1 shadow-md text-[11px] text-slate-500 whitespace-nowrap">
+          <div className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 shadow-md text-[11px] text-muted-foreground whitespace-nowrap">
             <Kbd>Tab</Kbd>
             <span>to add body text</span>
           </div>

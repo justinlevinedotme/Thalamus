@@ -1,9 +1,7 @@
-import { NodeResizer } from "@reactflow/node-resizer";
-import "@reactflow/node-resizer/dist/style.css";
 import { Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { type NodeProps } from "reactflow";
+import { NodeResizer, type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
@@ -38,7 +36,12 @@ type NodeKeyData = {
   entries?: NodeKeyEntry[];
 };
 
-export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyData>) {
+type NodeKeyNodeType = Node<NodeKeyData, "nodeKey">;
+
+// Default text color for nodes without explicit textColor (ensures readability on light backgrounds)
+const DEFAULT_TEXT_COLOR = "#1f2937"; // gray-800
+
+export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyNodeType>) {
   const { selectGroupNodes, updateNodeLabel, updateNodeBody } = useGraphStore();
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [draftTitle, setDraftTitle] = useState(data.label);
@@ -143,7 +146,7 @@ export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyDat
         const isInInput =
           activeElement?.tagName === "INPUT" || activeElement?.tagName === "TEXTAREA";
 
-        if (containerRef.current?.contains(activeElement as Node) || !isInInput) {
+        if (containerRef.current?.contains(activeElement as globalThis.Node) || !isInInput) {
           event.preventDefault();
           addEntry();
         }
@@ -189,13 +192,13 @@ export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyDat
   const borderWidth = data.style?.borderWidth ?? 1;
   const borderStyle = data.style?.borderStyle ?? "solid";
   const hasBorder = borderWidth > 0;
-  const borderColor = selected && hasBorder ? "#64748b" : (data.style?.borderColor ?? "#e2e8f0");
+  const borderColor = selected && hasBorder ? undefined : data.style?.borderColor;
 
-  // Text colors from style
-  const titleColor = data.style?.textColor ?? "#334155";
-  const bodyTextColor = data.style?.bodyTextColor ?? "#64748b";
-  const separatorColor = data.style?.separatorColor ?? "#e2e8f0";
-  const iconColor = data.style?.iconColor ?? "#64748b";
+  // Text colors from style with fallback for existing nodes
+  const titleColor = data.style?.textColor ?? DEFAULT_TEXT_COLOR;
+  const bodyTextColor = data.style?.bodyTextColor ?? DEFAULT_TEXT_COLOR;
+  const separatorColor = data.style?.separatorColor;
+  const iconColor = data.style?.iconColor ?? DEFAULT_TEXT_COLOR;
 
   const nodeStyle: React.CSSProperties = {
     backgroundColor: data.style?.color ?? "#FFFFFF",
@@ -210,12 +213,14 @@ export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyDat
         minWidth={MIN_WIDTH}
         minHeight={MIN_HEIGHT}
         isVisible={selected}
-        lineClassName="!border-slate-400"
-        handleClassName="!w-2.5 !h-2.5 !bg-white !border-slate-400"
+        lineClassName="!border-muted-foreground"
+        handleClassName="!w-2.5 !h-2.5 !bg-background !border-muted-foreground"
       />
       <div
         ref={containerRef}
-        className={`relative h-full w-full flex flex-col rounded-lg p-3 transition ${selected && !hasBorder ? "ring-2 ring-slate-500 ring-offset-0" : ""}`}
+        className={`relative h-full w-full flex flex-col rounded-lg p-3 transition ${
+          selected && hasBorder ? "!border-muted-foreground" : ""
+        } ${selected && !hasBorder ? "ring-2 ring-muted-foreground ring-offset-0" : ""}`}
         style={nodeStyle}
         onMouseDown={handleMouseDown}
         tabIndex={0}
@@ -341,7 +346,7 @@ export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyDat
         {/* Tab hint popover when selected */}
         {selected && (
           <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 pointer-events-none z-50">
-            <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1 shadow-md text-[11px] text-slate-500 whitespace-nowrap">
+            <div className="flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 shadow-md text-[11px] text-muted-foreground whitespace-nowrap">
               <Kbd>Tab</Kbd>
               <span>to add entry</span>
             </div>

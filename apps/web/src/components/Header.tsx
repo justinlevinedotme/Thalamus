@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FolderOpen, LogOut, Settings, Share2, User } from "lucide-react";
 
+import { ThalamusLogo } from "./ThalamusLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,18 +21,18 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
   const { user, signOut } = useAuthStore();
 
   return (
-    <header className="border-b border-slate-200 bg-white px-4 py-4">
+    <header className="bg-transparent px-4 py-4">
       <nav className={`flex items-center justify-between ${fullWidth ? "" : "mx-auto max-w-6xl"}`}>
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-xl font-semibold text-slate-900">
-            Thalamus
+          <Link to="/" className="flex items-center">
+            <ThalamusLogo size="md" />
           </Link>
           {children}
         </div>
         <div className="flex items-center gap-4">
           {onShare ? (
             <button
-              className="flex items-center gap-1.5 rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
               type="button"
               onClick={onShare}
             >
@@ -43,7 +44,7 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200"
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-secondary text-muted-foreground transition hover:bg-secondary/80"
                   type="button"
                   aria-label="Profile menu"
                 >
@@ -67,15 +68,15 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                      <User className="h-5 w-5 text-slate-500" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                      <User className="h-5 w-5 text-muted-foreground" />
                     </div>
                   )}
                   <div className="flex flex-col">
                     {user.name && (
-                      <span className="text-sm font-medium text-slate-900">{user.name}</span>
+                      <span className="text-sm font-medium text-foreground">{user.name}</span>
                     )}
-                    <span className="text-sm text-slate-500">{user.email}</span>
+                    <span className="text-sm text-muted-foreground">{user.email}</span>
                   </div>
                 </div>
                 <DropdownMenuSeparator />
@@ -102,13 +103,13 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
             <>
               <Link
                 to="/login"
-                className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+                className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
               >
                 Sign in
               </Link>
               <Link
                 to="/signup"
-                className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
               >
                 Get Started
               </Link>

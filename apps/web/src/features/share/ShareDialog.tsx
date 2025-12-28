@@ -59,17 +59,17 @@ export default function ShareDialog({ open, graphId, onClose }: ShareDialogProps
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
-      <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm px-4">
+      <div className="w-full max-w-lg rounded-lg bg-background border border-border p-6 shadow-lg">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Share link</h2>
-            <p className="text-sm text-slate-500">
+            <h2 className="text-lg font-semibold text-foreground">Share link</h2>
+            <p className="text-sm text-muted-foreground">
               Links expire after 7 days. Anyone with the link can view the graph.
             </p>
           </div>
           <button
-            className="text-sm text-slate-500 hover:text-slate-700"
+            className="text-sm text-muted-foreground hover:text-foreground"
             type="button"
             onClick={onClose}
             aria-label="Close share dialog"
@@ -81,18 +81,20 @@ export default function ShareDialog({ open, graphId, onClose }: ShareDialogProps
         <div className="mt-4 space-y-3">
           {shareToken ? (
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase text-slate-500">Share URL</label>
+              <label className="text-xs font-semibold uppercase text-muted-foreground">
+                Share URL
+              </label>
               <Input readOnly value={shareUrl} />
               <div className="flex items-center gap-2">
                 <button
-                  className="rounded-md bg-slate-900 px-3 py-1.5 text-sm text-white"
+                  className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90"
                   type="button"
                   onClick={handleCopy}
                 >
                   Copy link
                 </button>
                 {expiresAt ? (
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-muted-foreground">
                     Expires {new Date(expiresAt).toLocaleString()}
                   </span>
                 ) : null}
@@ -100,7 +102,7 @@ export default function ShareDialog({ open, graphId, onClose }: ShareDialogProps
             </div>
           ) : (
             <button
-              className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm text-white disabled:opacity-50"
+              className="w-full rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               type="button"
               onClick={handleGenerate}
               disabled={status === "loading"}

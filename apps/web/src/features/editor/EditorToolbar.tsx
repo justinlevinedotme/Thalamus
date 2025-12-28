@@ -66,7 +66,7 @@ export default function EditorToolbar({
   };
 
   return (
-    <div className="border-b border-slate-200 bg-white">
+    <div className="border-b border-border bg-background">
       {/* Top nav bar - consistent with other pages */}
       <Header fullWidth onShare={onShare}>
         <div className="ml-4 min-w-[200px] max-w-md flex-1">
@@ -80,7 +80,7 @@ export default function EditorToolbar({
       </Header>
 
       {/* Menubar - Google Docs style */}
-      <div className="flex items-center gap-2 border-t border-slate-100 px-4 py-1">
+      <div className="flex items-center gap-2 border-t border-border px-4 py-1">
         <Menubar className="h-auto border-0 bg-transparent p-0">
           <MenubarMenu>
             <MenubarTrigger className="px-2 py-1 text-sm font-normal">File</MenubarTrigger>
@@ -135,15 +135,15 @@ export default function EditorToolbar({
 
         <div className="ml-auto flex items-center gap-3">
           {saveStatus === "saving" ? (
-            <span className="text-xs text-slate-400">Saving...</span>
+            <span className="text-xs text-muted-foreground">Saving...</span>
           ) : lastSavedAt ? (
-            <span className="text-xs text-slate-400">{formatLastSaved(lastSavedAt)}</span>
+            <span className="text-xs text-muted-foreground">{formatLastSaved(lastSavedAt)}</span>
           ) : null}
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
+                  className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition hover:bg-secondary disabled:opacity-50"
                   type="button"
                   onClick={undo}
                   disabled={!canUndo}
@@ -157,7 +157,7 @@ export default function EditorToolbar({
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
+                  className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition hover:bg-secondary disabled:opacity-50"
                   type="button"
                   onClick={redo}
                   disabled={!canRedo}
@@ -168,13 +168,13 @@ export default function EditorToolbar({
               </TooltipTrigger>
               <TooltipContent>Redo</TooltipContent>
             </Tooltip>
-            <div className="mx-1 h-4 w-px bg-slate-200" />
+            <div className="mx-1 h-4 w-px bg-border" />
             <DropdownMenu>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <DropdownMenuTrigger asChild>
                     <button
-                      className="flex h-7 w-7 items-center justify-center rounded text-slate-500 transition hover:bg-slate-100 disabled:opacity-50"
+                      className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground transition hover:bg-secondary disabled:opacity-50"
                       type="button"
                       aria-label="Export"
                     >

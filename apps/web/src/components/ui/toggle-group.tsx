@@ -9,7 +9,7 @@ const toggleGroupVariants = cva("inline-flex rounded-md", {
   variants: {
     variant: {
       default: "bg-transparent",
-      outline: "border border-slate-200",
+      outline: "border border-border",
     },
     size: {
       default: "h-9",
@@ -62,7 +62,7 @@ const ToggleGroupItem = React.forwardRef<
       value={value}
       className={cn(
         buttonVariants({ variant, size }),
-        isSelected && "!bg-slate-200 !text-slate-900",
+        isSelected && "!bg-accent !text-accent-foreground",
         className
       )}
       {...props}

@@ -2,7 +2,11 @@
 // exporting with edge labels doesn't work for some reason, we need to hide them during export
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
-import { getNodesBounds, type Node as ReactFlowNode, type Edge as ReactFlowEdge } from "reactflow";
+import {
+  getNodesBounds,
+  type Node as ReactFlowNode,
+  type Edge as ReactFlowEdge,
+} from "@xyflow/react";
 
 const slugify = (value: string) =>
   value
@@ -71,10 +75,10 @@ function getClassName(element: Element): string {
 }
 
 // Check if element should be filtered out from export
-function shouldFilterElement(element: Element): boolean {
+function shouldFilterElement(element: Element, transparentBackground: boolean): boolean {
   const className = getClassName(element);
 
-  // Elements to hide during export
+  // Elements to always hide during export
   const hiddenClasses = [
     "react-flow__controls",
     "react-flow__minimap",
@@ -87,6 +91,11 @@ function shouldFilterElement(element: Element): boolean {
     "react-flow__edge-text",
     "react-flow__edge-textbg",
   ];
+
+  // Hide background pattern when transparent
+  if (transparentBackground) {
+    hiddenClasses.push("react-flow__background");
+  }
 
   for (const hiddenClass of hiddenClasses) {
     if (className.includes(hiddenClass)) {
@@ -176,7 +185,7 @@ async function captureGraphImage(
         if (domNode.nodeType !== 1) {
           return true;
         }
-        return !shouldFilterElement(domNode as Element);
+        return !shouldFilterElement(domNode as Element, options.transparentBackground ?? false);
       },
     });
 

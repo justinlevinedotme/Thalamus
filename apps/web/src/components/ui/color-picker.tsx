@@ -392,13 +392,13 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
           <TabsList className="w-full rounded-none border-b bg-transparent p-0">
             <TabsTrigger
               value="picker"
-              className="flex-1 rounded-none border-b-2 border-transparent py-2 text-xs data-[state=active]:border-slate-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              className="flex-1 rounded-none border-b-2 border-transparent py-2 text-xs data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               Picker
             </TabsTrigger>
             <TabsTrigger
               value="presets"
-              className="flex-1 rounded-none border-b-2 border-transparent py-2 text-xs data-[state=active]:border-slate-900 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              className="flex-1 rounded-none border-b-2 border-transparent py-2 text-xs data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               Presets
             </TabsTrigger>
@@ -407,7 +407,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
           <TabsContent value="picker" className="m-0 p-3 space-y-3">
             {/* Saturation/Brightness picker */}
             <div
-              className="relative h-40 w-full cursor-crosshair rounded-md border border-slate-200"
+              className="relative h-40 w-full cursor-crosshair rounded-md border border-border"
               style={{
                 background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, rgb(${hueRgb.r}, ${hueRgb.g}, ${hueRgb.b}))`,
               }}
@@ -465,7 +465,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
 
             {/* Color preview, hex input, and eyedropper */}
             <div className="flex items-center gap-2">
-              <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-md border border-slate-200 shadow-sm">
+              <div className="relative h-8 w-8 flex-shrink-0 overflow-hidden rounded-md border border-border shadow-sm">
                 {/* Checkerboard background for transparency */}
                 <div
                   className="absolute inset-0"
@@ -487,7 +487,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
                 <button
                   type="button"
                   onClick={handleEyeDropper}
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
+                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground transition hover:bg-secondary hover:text-foreground"
                   title="Pick color from screen"
                 >
                   <Pipette className="h-4 w-4" />
@@ -498,7 +498,9 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
             {/* RGBA inputs */}
             <div className={`grid gap-2 ${showAlpha ? "grid-cols-4" : "grid-cols-3"}`}>
               <div>
-                <label className="mb-1 block text-[10px] font-medium text-slate-500">R</label>
+                <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+                  R
+                </label>
                 <Input
                   type="number"
                   min={0}
@@ -509,7 +511,9 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[10px] font-medium text-slate-500">G</label>
+                <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+                  G
+                </label>
                 <Input
                   type="number"
                   min={0}
@@ -520,7 +524,9 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
                 />
               </div>
               <div>
-                <label className="mb-1 block text-[10px] font-medium text-slate-500">B</label>
+                <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+                  B
+                </label>
                 <Input
                   type="number"
                   min={0}
@@ -532,7 +538,9 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
               </div>
               {showAlpha && (
                 <div>
-                  <label className="mb-1 block text-[10px] font-medium text-slate-500">A</label>
+                  <label className="mb-1 block text-[10px] font-medium text-muted-foreground">
+                    A
+                  </label>
                   <Input
                     type="number"
                     min={0}
@@ -549,7 +557,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
             {/* Recently used colors */}
             {recentColors.length > 0 && (
               <div>
-                <label className="mb-2 block text-[10px] font-medium uppercase text-slate-500">
+                <label className="mb-2 block text-[10px] font-medium uppercase text-muted-foreground">
                   Recent
                 </label>
                 <div className="flex gap-1">
@@ -557,7 +565,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
                     <button
                       key={`${color}-${index}`}
                       type="button"
-                      className="h-6 w-6 rounded-sm border border-slate-200 transition hover:scale-110 hover:border-slate-400"
+                      className="h-6 w-6 rounded-sm border border-border transition hover:scale-110 hover:border-muted-foreground"
                       style={{ backgroundColor: color }}
                       onClick={() => handlePresetClick(color)}
                       title={color}
@@ -574,7 +582,7 @@ export function ColorPicker({ value, onChange, children, showAlpha = true }: Col
                 <button
                   key={color}
                   type="button"
-                  className="h-6 w-6 rounded-sm border border-slate-200 transition hover:scale-110 hover:border-slate-400"
+                  className="h-6 w-6 rounded-sm border border-border transition hover:scale-110 hover:border-muted-foreground"
                   style={{ backgroundColor: color }}
                   onClick={() => handlePresetClick(color)}
                   title={color}
@@ -595,7 +603,7 @@ export function ColorSwatch({ color, className = "" }: { color: string; classNam
 
   return (
     <span
-      className={`relative inline-block overflow-hidden rounded-full border border-slate-300 shadow-sm ${className}`}
+      className={`relative inline-block overflow-hidden rounded-full border border-border shadow-sm ${className}`}
     >
       {/* Checkerboard background for transparency */}
       {hasAlpha && (

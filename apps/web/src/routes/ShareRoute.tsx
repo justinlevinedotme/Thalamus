@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import ReactFlow, { Background, Controls, type ReactFlowInstance } from "reactflow";
-import "reactflow/dist/style.css";
+import { ReactFlow, Background, Controls, type ReactFlowInstance } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 
 import { getSharedGraph } from "../features/share/shareApi";
 import type { GraphPayload } from "../features/cloud/graphApi";
@@ -59,28 +59,28 @@ export default function ShareRoute() {
   }, [flowInstance, payload]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
-      <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="flex items-center justify-between border-b border-border bg-background px-4 py-3">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">{graphTitle}</h1>
-          <p className="text-xs text-slate-500">Read-only shared view</p>
+          <h1 className="text-lg font-semibold text-foreground">{graphTitle}</h1>
+          <p className="text-xs text-muted-foreground">Read-only shared view</p>
         </div>
-        <Link className="text-sm text-slate-600 underline" to="/docs">
+        <Link className="text-sm text-muted-foreground underline hover:text-foreground" to="/docs">
           Back to docs
         </Link>
       </header>
 
       <div className="flex-1 p-4">
         {loading ? (
-          <div className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500">
+          <div className="rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground">
             Loading share link...
           </div>
         ) : error ? (
-          <div className="rounded-lg border border-red-200 bg-white p-6 text-sm text-red-600">
+          <div className="rounded-lg border border-destructive/50 bg-card p-6 text-sm text-destructive">
             {error}
           </div>
         ) : (
-          <div className="relative h-[calc(100vh-6rem)] rounded-lg border border-slate-200 bg-white">
+          <div className="relative h-[calc(100vh-6rem)] rounded-lg border border-border bg-card">
             <div className="h-full w-full">
               <ReactFlow
                 className="h-full w-full"
@@ -99,7 +99,7 @@ export default function ShareRoute() {
               </ReactFlow>
             </div>
             {payload?.nodes?.length === 0 ? (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-slate-400">
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
                 No nodes yet
               </div>
             ) : null}

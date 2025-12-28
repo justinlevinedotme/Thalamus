@@ -1,15 +1,13 @@
-import type { Edge, Node } from "reactflow";
-
-import type { RelationshipData } from "../../store/graphStore";
+import type { AppEdge, AppNode } from "../../store/graphStore";
 
 export type FocusResult = {
-  nodes: Node[];
-  edges: Edge<RelationshipData>[];
+  nodes: AppNode[];
+  edges: AppEdge[];
 };
 
 export function getFocusSubgraph(
-  nodes: Node[],
-  edges: Edge<RelationshipData>[],
+  nodes: AppNode[],
+  edges: AppEdge[],
   focusNodeId?: string
 ): FocusResult {
   if (!focusNodeId) {

@@ -84,36 +84,36 @@ export default function UnsubscribeRoute() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-8 text-center">
+    <div className="flex min-h-screen items-center justify-center bg-secondary px-4">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 text-center">
         {status === "loading" && (
           <>
-            <Loader2 className="mx-auto h-12 w-12 animate-spin text-slate-400" />
-            <p className="mt-4 text-slate-600">Processing...</p>
+            <Loader2 className="mx-auto h-12 w-12 animate-spin text-muted-foreground" />
+            <p className="mt-4 text-muted-foreground">Processing...</p>
           </>
         )}
 
         {status === "confirming" && (
           <>
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-              <Mail className="h-8 w-8 text-slate-600" />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
+              <Mail className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h1 className="mt-6 text-xl font-semibold text-slate-900">Unsubscribe from emails</h1>
-            <p className="mt-2 text-slate-600">
+            <h1 className="mt-6 text-xl font-semibold text-foreground">Unsubscribe from emails</h1>
+            <p className="mt-2 text-muted-foreground">
               Are you sure you want to unsubscribe{" "}
-              <span className="font-medium text-slate-900">{email}</span> from{" "}
+              <span className="font-medium text-foreground">{email}</span> from{" "}
               {getCategoryLabel(category)}?
             </p>
             <div className="mt-6 flex gap-3">
               <Link
                 to="/"
-                className="flex-1 rounded-md border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary"
               >
                 Cancel
               </Link>
               <button
                 onClick={handleUnsubscribe}
-                className="flex-1 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                className="flex-1 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:bg-foreground/90"
               >
                 Unsubscribe
               </button>
@@ -126,18 +126,20 @@ export default function UnsubscribeRoute() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
               <Check className="h-8 w-8 text-green-600" />
             </div>
-            <h1 className="mt-6 text-xl font-semibold text-slate-900">Unsubscribed successfully</h1>
-            <p className="mt-2 text-slate-600">
+            <h1 className="mt-6 text-xl font-semibold text-foreground">
+              Unsubscribed successfully
+            </h1>
+            <p className="mt-2 text-muted-foreground">
               You've been unsubscribed from {getCategoryLabel(category)}. You can manage your email
               preferences in your{" "}
-              <Link to="/profile" className="text-slate-900 underline">
+              <Link to="/profile" className="text-foreground underline">
                 profile settings
               </Link>
               .
             </p>
             <Link
               to="/"
-              className="mt-6 inline-block rounded-md bg-slate-900 px-6 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="mt-6 inline-block rounded-md bg-foreground px-6 py-2 text-sm font-medium text-background transition hover:bg-foreground/90"
             >
               Go to homepage
             </Link>
@@ -149,11 +151,11 @@ export default function UnsubscribeRoute() {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
               <X className="h-8 w-8 text-red-600" />
             </div>
-            <h1 className="mt-6 text-xl font-semibold text-slate-900">Something went wrong</h1>
-            <p className="mt-2 text-slate-600">{error}</p>
+            <h1 className="mt-6 text-xl font-semibold text-foreground">Something went wrong</h1>
+            <p className="mt-2 text-muted-foreground">{error}</p>
             <Link
               to="/"
-              className="mt-6 inline-block rounded-md bg-slate-900 px-6 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+              className="mt-6 inline-block rounded-md bg-foreground px-6 py-2 text-sm font-medium text-background transition hover:bg-foreground/90"
             >
               Go to homepage
             </Link>

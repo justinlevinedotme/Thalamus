@@ -14,7 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../lib/theme";
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
@@ -113,6 +116,8 @@ const PASSWORD_REQUIREMENTS = [
 export default function SignupRoute() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const { signUp, signInWithProvider, status, error, setError } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -186,224 +191,242 @@ export default function SignupRoute() {
   }, [location.pathname, location.search, navigate, setError]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-12">
-      {/* Subtle background pattern */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-4 top-0 h-72 w-72 rounded-full bg-slate-200/40 blur-3xl" />
-        <div className="absolute -right-4 bottom-0 h-72 w-72 rounded-full bg-slate-300/30 blur-3xl" />
-      </div>
+    <div className="relative min-h-screen w-full">
+      {/* Horizon Glow */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background: isDark
+            ? "radial-gradient(125% 125% at 50% 90%, #000000 40%, #1a0a00 100%)"
+            : "radial-gradient(125% 125% at 50% 90%, #ffffff 40%, #fff5f0 100%)",
+        }}
+      />
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <Header />
 
-      <Card className="relative w-full max-w-md border-slate-200/80 shadow-xl shadow-slate-200/50">
-        <CardHeader className="space-y-1 pb-4">
-          <CardTitle className="text-2xl font-semibold tracking-tight">Create account</CardTitle>
-          <CardDescription>Save up to 20 graphs and share time-limited links</CardDescription>
-        </CardHeader>
+        <main className="flex flex-1 items-center justify-center px-4 py-12">
+          <Card className="relative w-full max-w-md border-border shadow-xl">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-2xl font-semibold tracking-tight">
+                Create account
+              </CardTitle>
+              <CardDescription>Save up to 20 graphs and share time-limited links</CardDescription>
+            </CardHeader>
 
-        <CardContent className="space-y-4">
-          {/* OAuth Providers - Compact button group (only shown if any are enabled) */}
-          {enabledProviders.length > 0 && (
-            <>
-              <div className="flex justify-center gap-2">
-                {enabledProviders.map((provider) => (
-                  <Button
-                    key={provider.id}
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={`h-10 w-10 transition-all duration-200 ${provider.color}`}
-                    onClick={() => handleOAuthSignIn(provider.id)}
-                    disabled={status === "loading"}
-                    title={`Sign up with ${provider.label}`}
-                  >
-                    {provider.icon}
-                  </Button>
-                ))}
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-slate-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">or continue with email</span>
-                </div>
-              </div>
-            </>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="signup-email">Email</Label>
-              <Input
-                id="signup-email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={() => setTouched((t) => ({ ...t, email: true }))}
-                required
-                autoComplete="email"
-                className={`h-10 ${
-                  touched.email && !isEmailValid && email.length > 0
-                    ? "border-destructive focus-visible:ring-destructive"
-                    : ""
-                }`}
-              />
-              {touched.email && !isEmailValid && email.length > 0 && (
-                <p className="text-xs text-destructive">Please enter a valid email address</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="signup-password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="signup-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a strong password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={() => setTouched((t) => ({ ...t, password: true }))}
-                  required
-                  autoComplete="new-password"
-                  className="h-10 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-
-              {/* Password requirements checklist */}
-              {(touched.password || password.length > 0) && (
-                <div className="mt-2 space-y-1">
-                  {passwordValidation.map((req) => (
-                    <div
-                      key={req.id}
-                      className={`flex items-center gap-2 text-xs transition-colors ${
-                        req.passed ? "text-green-600" : "text-muted-foreground"
-                      }`}
-                    >
-                      {req.passed ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
-                      <span>{req.label}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="signup-confirm-password">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="signup-confirm-password"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  onBlur={() => setTouched((t) => ({ ...t, confirmPassword: true }))}
-                  required
-                  autoComplete="new-password"
-                  className={`h-10 pr-10 ${
-                    touched.confirmPassword && confirmPassword.length > 0 && !passwordsMatch
-                      ? "border-destructive focus-visible:ring-destructive"
-                      : touched.confirmPassword && passwordsMatch
-                        ? "border-green-500 focus-visible:ring-green-500"
-                        : ""
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-                  tabIndex={-1}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-              {touched.confirmPassword && confirmPassword.length > 0 && !passwordsMatch && (
-                <p className="text-xs text-destructive">Passwords do not match</p>
-              )}
-              {touched.confirmPassword && passwordsMatch && (
-                <p className="flex items-center gap-1 text-xs text-green-600">
-                  <Check className="h-3 w-3" />
-                  Passwords match
-                </p>
-              )}
-            </div>
-
-            {TURNSTILE_SITE_KEY && (
-              <div className="flex justify-center">
-                <Turnstile
-                  ref={turnstileRef}
-                  siteKey={TURNSTILE_SITE_KEY}
-                  onSuccess={setCaptchaToken}
-                  onError={() => setCaptchaToken(null)}
-                  onExpire={() => setCaptchaToken(null)}
-                />
-              </div>
-            )}
-
-            {error && (
-              <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {error}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              className="h-10 w-full"
-              disabled={
-                status === "loading" ||
-                (!!TURNSTILE_SITE_KEY && !captchaToken) ||
-                !isPasswordValid ||
-                !passwordsMatch ||
-                !isEmailValid
-              }
-            >
-              {status === "loading" ? (
+            <CardContent className="space-y-4">
+              {/* OAuth Providers - Compact button group (only shown if any are enabled) */}
+              {enabledProviders.length > 0 && (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating account...
+                  <div className="flex justify-center gap-2">
+                    {enabledProviders.map((provider) => (
+                      <Button
+                        key={provider.id}
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className={`h-10 w-10 transition-all duration-200 ${provider.color}`}
+                        onClick={() => handleOAuthSignIn(provider.id)}
+                        disabled={status === "loading"}
+                        title={`Sign up with ${provider.label}`}
+                      >
+                        {provider.icon}
+                      </Button>
+                    ))}
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">
+                        or continue with email
+                      </span>
+                    </div>
+                  </div>
                 </>
-              ) : (
-                "Create account"
               )}
-            </Button>
 
-            <p className="text-center text-xs text-muted-foreground">
-              By creating an account, you agree to our{" "}
-              <Link to="/terms" className="underline underline-offset-4 hover:text-foreground">
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link to="/privacy" className="underline underline-offset-4 hover:text-foreground">
-                Privacy Policy
-              </Link>
-            </p>
-          </form>
-        </CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => setTouched((t) => ({ ...t, email: true }))}
+                    required
+                    autoComplete="email"
+                    className={`h-10 ${
+                      touched.email && !isEmailValid && email.length > 0
+                        ? "border-destructive focus-visible:ring-destructive"
+                        : ""
+                    }`}
+                  />
+                  {touched.email && !isEmailValid && email.length > 0 && (
+                    <p className="text-xs text-destructive">Please enter a valid email address</p>
+                  )}
+                </div>
 
-        <CardFooter className="flex justify-center border-t border-slate-100 pt-6">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-foreground underline-offset-4 hover:underline"
-            >
-              Sign in
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="signup-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a strong password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+                      required
+                      autoComplete="new-password"
+                      className="h-10 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+
+                  {/* Password requirements checklist */}
+                  {(touched.password || password.length > 0) && (
+                    <div className="mt-2 space-y-1">
+                      {passwordValidation.map((req) => (
+                        <div
+                          key={req.id}
+                          className={`flex items-center gap-2 text-xs transition-colors ${
+                            req.passed ? "text-green-600" : "text-muted-foreground"
+                          }`}
+                        >
+                          {req.passed ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                          <span>{req.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-confirm-password">Confirm Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="signup-confirm-password"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      onBlur={() => setTouched((t) => ({ ...t, confirmPassword: true }))}
+                      required
+                      autoComplete="new-password"
+                      className={`h-10 pr-10 ${
+                        touched.confirmPassword && confirmPassword.length > 0 && !passwordsMatch
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : touched.confirmPassword && passwordsMatch
+                            ? "border-green-500 focus-visible:ring-green-500"
+                            : ""
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  {touched.confirmPassword && confirmPassword.length > 0 && !passwordsMatch && (
+                    <p className="text-xs text-destructive">Passwords do not match</p>
+                  )}
+                  {touched.confirmPassword && passwordsMatch && (
+                    <p className="flex items-center gap-1 text-xs text-green-600">
+                      <Check className="h-3 w-3" />
+                      Passwords match
+                    </p>
+                  )}
+                </div>
+
+                {TURNSTILE_SITE_KEY && (
+                  <div className="flex justify-center">
+                    <Turnstile
+                      ref={turnstileRef}
+                      siteKey={TURNSTILE_SITE_KEY}
+                      onSuccess={setCaptchaToken}
+                      onError={() => setCaptchaToken(null)}
+                      onExpire={() => setCaptchaToken(null)}
+                    />
+                  </div>
+                )}
+
+                {error && (
+                  <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="h-10 w-full"
+                  disabled={
+                    status === "loading" ||
+                    (!!TURNSTILE_SITE_KEY && !captchaToken) ||
+                    !isPasswordValid ||
+                    !passwordsMatch ||
+                    !isEmailValid
+                  }
+                >
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    "Create account"
+                  )}
+                </Button>
+
+                <p className="text-center text-xs text-muted-foreground">
+                  By creating an account, you agree to our{" "}
+                  <Link to="/terms" className="underline underline-offset-4 hover:text-foreground">
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    to="/privacy"
+                    className="underline underline-offset-4 hover:text-foreground"
+                  >
+                    Privacy Policy
+                  </Link>
+                </p>
+              </form>
+            </CardContent>
+
+            <CardFooter className="flex justify-center border-t border-border pt-6">
+              <p className="text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="font-medium text-foreground underline-offset-4 hover:underline"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </CardFooter>
+          </Card>
+        </main>
+
+        <Footer />
+      </div>
     </div>
   );
 }

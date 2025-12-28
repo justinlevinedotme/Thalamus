@@ -1,11 +1,9 @@
-import type { Edge, Node } from "reactflow";
-
 import { apiFetch } from "../../lib/apiClient";
-import type { NodeGroup, RelationshipData } from "../../store/graphStore";
+import type { AppEdge, AppNode, NodeGroup } from "../../store/graphStore";
 
 export type GraphPayload = {
-  nodes: Node[];
-  edges: Edge<RelationshipData>[];
+  nodes: AppNode[];
+  edges: AppEdge[];
   groups?: NodeGroup[];
 };
 

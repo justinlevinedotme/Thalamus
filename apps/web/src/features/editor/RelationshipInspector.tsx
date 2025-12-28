@@ -184,7 +184,7 @@ export default function RelationshipInspector() {
 
   if (!selectedEdge) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-500">
+      <div className="rounded-lg border border-border bg-background p-4 text-sm text-muted-foreground">
         Select a relationship to edit its label, type, and direction.
       </div>
     );
@@ -192,12 +192,12 @@ export default function RelationshipInspector() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
-        <h2 className="px-3 pt-3 text-sm font-semibold text-slate-700">Path Style</h2>
+      <div className="rounded-lg border border-border bg-background shadow-sm">
+        <h2 className="px-3 pt-3 text-sm font-semibold text-foreground">Path Style</h2>
 
         {/* Label Input */}
         <div className="flex items-center justify-between gap-4 px-3 py-3">
-          <label className="text-xs font-semibold uppercase text-slate-500">Label</label>
+          <label className="text-xs font-semibold uppercase text-muted-foreground">Label</label>
           <div className="relative flex-1">
             <Input
               className="pr-8"
@@ -209,7 +209,7 @@ export default function RelationshipInspector() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 transition hover:text-slate-600"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground transition hover:text-foreground"
                     type="button"
                     onClick={() => updateEdgeLabel(selectedEdge.id, "")}
                     aria-label="Clear label"
@@ -225,14 +225,14 @@ export default function RelationshipInspector() {
 
         <Accordion type="single" collapsible defaultValue="line-style" className="w-full">
           {/* Line Style Section */}
-          <AccordionItem value="line-style" className="border-b-0 border-t border-slate-200">
-            <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+          <AccordionItem value="line-style" className="border-b-0 border-t border-border">
+            <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
               Line Style
             </AccordionTrigger>
             <AccordionContent className="px-3 pb-3 pt-0">
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Color</label>
+                  <label className="text-xs text-muted-foreground">Color</label>
                   <ColorPicker
                     value={selectedEdge.data?.style?.color ?? "#94A3B8"}
                     onChange={(color) => updateEdgeStyle(selectedEdge.id, { color })}
@@ -240,22 +240,22 @@ export default function RelationshipInspector() {
                   >
                     <button
                       type="button"
-                      className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                      className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-2"
                     >
                       <ColorSwatch
                         color={selectedEdge.data?.style?.color ?? "#94A3B8"}
                         className="h-4 w-4"
                       />
-                      <span className="text-[10px] text-slate-500">Color</span>
+                      <span className="text-[10px] text-muted-foreground">Color</span>
                     </button>
                   </ColorPicker>
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Thickness</label>
+                  <label className="text-xs text-muted-foreground">Thickness</label>
                   <ToggleGroup
                     type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    className="h-7 rounded-md border border-border bg-background"
                     value={String(selectedEdge.data?.style?.thickness ?? 2)}
                     onValueChange={(value) => {
                       if (!value) {
@@ -272,7 +272,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={String(thickness.value)}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                            className="h-full w-8 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                             variant="ghost"
                           >
                             <svg className="h-4 w-4" viewBox="0 0 16 16" fill="currentColor">
@@ -293,10 +293,10 @@ export default function RelationshipInspector() {
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Style</label>
+                  <label className="text-xs text-muted-foreground">Style</label>
                   <ToggleGroup
                     type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    className="h-7 rounded-md border border-border bg-background"
                     value={selectedEdge.data?.style?.lineStyle ?? "solid"}
                     onValueChange={(value) => {
                       if (!value) {
@@ -313,7 +313,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={style.value}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                            className="h-full w-8 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                             variant="ghost"
                           >
                             {style.icon}
@@ -326,10 +326,10 @@ export default function RelationshipInspector() {
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Curvature</label>
+                  <label className="text-xs text-muted-foreground">Curvature</label>
                   <ToggleGroup
                     type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    className="h-7 rounded-md border border-border bg-background"
                     value={selectedEdge.data?.style?.curvature ?? "smoothstep"}
                     onValueChange={(value) => {
                       if (!value) {
@@ -346,7 +346,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={curvature.value}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700 data-[state=on]:bg-slate-200 data-[state=on]:text-slate-900 data-[state=on]:hover:bg-slate-200 data-[state=on]:hover:text-slate-900"
+                            className="h-full w-8 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground data-[state=on]:bg-muted data-[state=on]:text-foreground data-[state=on]:hover:bg-muted data-[state=on]:hover:text-foreground"
                             variant="ghost"
                           >
                             {curvature.icon}
@@ -362,17 +362,17 @@ export default function RelationshipInspector() {
           </AccordionItem>
 
           {/* Arrow Section */}
-          <AccordionItem value="arrow" className="border-b-0 border-t border-slate-200">
-            <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+          <AccordionItem value="arrow" className="border-b-0 border-t border-border">
+            <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
               Arrow
             </AccordionTrigger>
             <AccordionContent className="px-3 pb-3 pt-0">
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">End Type</label>
+                  <label className="text-xs text-muted-foreground">End Type</label>
                   <ToggleGroup
                     type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    className="h-7 rounded-md border border-border bg-background"
                     value={selectedEdge.data?.style?.markerEnd ?? "arrow"}
                     onValueChange={(value) => {
                       if (!value) {
@@ -389,7 +389,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={marker.value}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700"
+                            className="h-full w-8 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground"
                             variant="ghost"
                           >
                             {marker.icon}
@@ -402,10 +402,10 @@ export default function RelationshipInspector() {
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Start Type</label>
+                  <label className="text-xs text-muted-foreground">Start Type</label>
                   <ToggleGroup
                     type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    className="h-7 rounded-md border border-border bg-background"
                     value={selectedEdge.data?.style?.markerStart ?? "none"}
                     onValueChange={(value) => {
                       if (!value) {
@@ -422,7 +422,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={marker.value}
-                            className="h-full w-8 rounded-none border-r border-slate-200 text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700"
+                            className="h-full w-8 rounded-none border-r border-border text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground"
                             variant="ghost"
                           >
                             {marker.icon}
@@ -435,10 +435,10 @@ export default function RelationshipInspector() {
                 </div>
 
                 <div className="flex items-center justify-between gap-4">
-                  <label className="text-xs text-slate-500">Size</label>
+                  <label className="text-xs text-muted-foreground">Size</label>
                   <ToggleGroup
                     type="single"
-                    className="h-7 rounded-md border border-slate-200 bg-white"
+                    className="h-7 rounded-md border border-border bg-background"
                     value={selectedEdge.data?.style?.markerSize ?? "md"}
                     onValueChange={(value) => {
                       if (!value) {
@@ -455,7 +455,7 @@ export default function RelationshipInspector() {
                         <TooltipTrigger asChild>
                           <ToggleGroupItem
                             value={size.value}
-                            className="h-full w-10 rounded-none border-r border-slate-200 text-xs text-slate-500 last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-slate-50 hover:text-slate-700"
+                            className="h-full w-10 rounded-none border-r border-border text-xs text-muted-foreground last:border-r-0 first:rounded-l-[5px] last:rounded-r-[5px] hover:bg-secondary hover:text-foreground"
                             variant="ghost"
                           >
                             {size.value.toUpperCase()}
@@ -472,14 +472,14 @@ export default function RelationshipInspector() {
 
           {/* Label Style Section */}
           {hasLabel ? (
-            <AccordionItem value="label-style" className="border-b-0 border-t border-slate-200">
-              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-slate-600 hover:no-underline hover:bg-slate-50">
+            <AccordionItem value="label-style" className="border-b-0 border-t border-border">
+              <AccordionTrigger className="px-3 py-2 text-xs font-medium text-muted-foreground hover:no-underline hover:bg-secondary">
                 Label Style
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3 pt-0">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Background</label>
+                    <label className="text-xs text-muted-foreground">Background</label>
                     <ColorPicker
                       value={labelStyle.backgroundColor}
                       onChange={(color) =>
@@ -491,15 +491,15 @@ export default function RelationshipInspector() {
                     >
                       <button
                         type="button"
-                        className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                        className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-2"
                       >
                         <ColorSwatch color={labelStyle.backgroundColor} className="h-4 w-4" />
-                        <span className="text-[10px] text-slate-500">Color</span>
+                        <span className="text-[10px] text-muted-foreground">Color</span>
                       </button>
                     </ColorPicker>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Text Color</label>
+                    <label className="text-xs text-muted-foreground">Text Color</label>
                     <ColorPicker
                       value={labelStyle.textColor}
                       onChange={(color) =>
@@ -511,15 +511,15 @@ export default function RelationshipInspector() {
                     >
                       <button
                         type="button"
-                        className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-slate-200 bg-white px-2"
+                        className="flex h-7 w-24 cursor-pointer items-center gap-2 rounded-md border border-border bg-background px-2"
                       >
                         <ColorSwatch color={labelStyle.textColor} className="h-4 w-4" />
-                        <span className="text-[10px] text-slate-500">Color</span>
+                        <span className="text-[10px] text-muted-foreground">Color</span>
                       </button>
                     </ColorPicker>
                   </div>
                   <div className="flex items-center justify-between gap-4">
-                    <label className="text-xs text-slate-500">Border</label>
+                    <label className="text-xs text-muted-foreground">Border</label>
                     <div className="flex items-center gap-2">
                       <ColorPicker
                         value={labelStyle.borderColor}
@@ -532,7 +532,7 @@ export default function RelationshipInspector() {
                       >
                         <button
                           type="button"
-                          className={`flex h-7 w-16 cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 ${!labelStyle.showBorder ? "opacity-50" : ""}`}
+                          className={`flex h-7 w-16 cursor-pointer items-center gap-1.5 rounded-md border border-border bg-background px-2 ${!labelStyle.showBorder ? "opacity-50" : ""}`}
                           disabled={!labelStyle.showBorder}
                         >
                           <ColorSwatch color={labelStyle.borderColor} className="h-4 w-4" />
@@ -541,8 +541,8 @@ export default function RelationshipInspector() {
                       <button
                         className={`rounded border px-2 py-1 text-xs transition ${
                           labelStyle.showBorder
-                            ? "border-slate-300 bg-slate-100 text-slate-700"
-                            : "border-slate-200 bg-white text-slate-400"
+                            ? "border-muted bg-muted text-foreground"
+                            : "border-border bg-background text-muted-foreground"
                         }`}
                         type="button"
                         onClick={() =>
