@@ -63,6 +63,7 @@ export interface TimelineSpanData {
   trackId: string;
   label: string;
   description?: string;
+  icon?: NodeIcon;
   color?: string;
   style?: Partial<NodeStyle>;
   [key: string]: unknown; // Index signature for React Flow v12 compatibility
