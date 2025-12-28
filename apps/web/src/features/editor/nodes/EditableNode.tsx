@@ -8,6 +8,7 @@ import {
   type EdgePadding,
   type NodeHandle,
   type NodeKind,
+  type NodeSize,
   type NodeStyle,
   useGraphStore,
 } from "../../../store/graphStore";
@@ -37,6 +38,31 @@ const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
       return 24;
     default:
       return 0;
+  }
+};
+
+// Size class mappings for node dimensions
+const getSizeClasses = (size: NodeSize | undefined): string => {
+  switch (size) {
+    case "sm":
+      return "text-xs px-2 py-1";
+    case "lg":
+      return "text-base px-4 py-3";
+    case "md":
+    default:
+      return "text-sm px-3 py-2";
+  }
+};
+
+const getIconSizeClass = (size: NodeSize | undefined): string => {
+  switch (size) {
+    case "sm":
+      return "h-3 w-3";
+    case "lg":
+      return "h-5 w-5";
+    case "md":
+    default:
+      return "h-4 w-4";
   }
 };
 
@@ -168,10 +194,12 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
   const targetHandles = data.targetHandles ?? [{ id: "target" }];
   const sourceHandles = data.sourceHandles ?? [{ id: "source" }];
   const paddingOffset = edgePaddingToOffset(data.style?.edgePadding);
+  const sizeClasses = getSizeClasses(data.style?.size);
+  const iconSizeClass = getIconSizeClass(data.style?.size);
 
   return (
     <div
-      className={`relative h-full w-full px-3 py-2 text-sm shadow-sm transition ${shapeClass} ${
+      className={`relative h-full w-full shadow-sm transition ${shapeClass} ${sizeClasses} ${
         selected && hasBorder ? "!border-muted-foreground" : ""
       } ${selected && !hasBorder ? "ring-2 ring-muted-foreground ring-offset-0" : ""}`}
       onDoubleClick={handleDoubleClick}
@@ -215,7 +243,7 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
             className="flex-shrink-0 flex items-center"
             style={{ color: data.style?.iconColor ?? data.style?.textColor ?? DEFAULT_TEXT_COLOR }}
           >
-            <NodeIconDisplay icon={data.style.icon} className="h-4 w-4" />
+            <NodeIconDisplay icon={data.style.icon} className={iconSizeClass} />
           </span>
         )}
         <div className="flex-1 min-w-0">
