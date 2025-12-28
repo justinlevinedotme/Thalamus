@@ -133,20 +133,22 @@ export const TimelineSpanNode = memo(function TimelineSpanNode({
         borderColor: data.color ?? undefined,
       }}
     >
-      {/* Left resize handle */}
+      {/* Left resize handle - nodrag class prevents React Flow from dragging */}
       <div
         className={`
-          absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize z-10
+          nodrag nopan
+          absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize z-10
           hover:bg-primary/30 active:bg-primary/50
           ${resizing === "left" ? "bg-primary/50" : ""}
         `}
         onMouseDown={handleLeftMouseDown}
       />
 
-      {/* Right resize handle */}
+      {/* Right resize handle - nodrag class prevents React Flow from dragging */}
       <div
         className={`
-          absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize z-10
+          nodrag nopan
+          absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize z-10
           hover:bg-primary/30 active:bg-primary/50
           ${resizing === "right" ? "bg-primary/50" : ""}
         `}
