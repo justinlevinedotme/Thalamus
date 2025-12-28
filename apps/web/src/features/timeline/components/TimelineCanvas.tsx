@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -9,25 +9,28 @@ import {
   type Connection,
   type ReactFlowInstance,
   BackgroundVariant,
+  useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 import { useTimelineStore } from "../timelineStore";
-import type { TimelineNode, TimelineEdge, TimelineTrack } from "../types";
+import type { TimelineNode, TimelineEdge } from "../types";
 import { timelineNodeTypes } from "../nodeTypes";
 import { AxisRenderer } from "./AxisRenderer";
 import { TrackLanes } from "./TrackLanes";
+import { EventComposer } from "./EventComposer";
 
 // Constants for layout
-const TRACK_HEIGHT = 80;
-const AXIS_WIDTH = 60;
-const CANVAS_WIDTH = 1000;
+export const TRACK_HEIGHT = 80;
+export const TRACK_START_Y = 100;
+export const CANVAS_WIDTH = 1000;
 
 interface TimelineCanvasProps {
   onNodeSelect?: (nodeId: string | undefined) => void;
 }
 
-export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
+// Inner component that has access to useReactFlow
+function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
   const {
     nodes,
     edges,
@@ -38,9 +41,18 @@ export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
     onEdgesChange,
     onConnect,
     selectNode,
-    selectedNodeId,
-    setFlowInstance,
+    addEvent,
+    addSpan,
+    updateNodeData,
   } = useTimelineStore();
+
+  const { screenToFlowPosition } = useReactFlow();
+
+  // Composer state
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [composerPosition, setComposerPosition] = useState({ x: 0, y: 0 });
+  const [composerTrackId, setComposerTrackId] = useState<string | null>(null);
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
 
   // Handle node selection
   const handleNodeClick = useCallback(
@@ -51,11 +63,49 @@ export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
     [selectNode, onNodeSelect]
   );
 
+  // Handle node double-click to edit
+  const handleNodeDoubleClick = useCallback((_event: React.MouseEvent, node: TimelineNode) => {
+    setEditingNodeId(node.id);
+    setComposerTrackId(node.data.trackId);
+    setComposerPosition({ x: node.position.x, y: node.position.y });
+    setComposerOpen(true);
+  }, []);
+
   // Handle pane click (deselect)
   const handlePaneClick = useCallback(() => {
     selectNode(undefined);
     onNodeSelect?.(undefined);
   }, [selectNode, onNodeSelect]);
+
+  // Handle double-click on canvas to create new event
+  const handlePaneDoubleClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (tracks.length === 0) return;
+
+      // Get flow position from screen coordinates
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      // Find which track was clicked
+      const trackIndex = Math.floor((position.y - TRACK_START_Y) / TRACK_HEIGHT);
+      const clampedIndex = Math.max(0, Math.min(trackIndex, tracks.length - 1));
+      const track = tracks[clampedIndex];
+
+      if (!track) return;
+
+      // Calculate axis position (0-1)
+      const axisPosition = Math.max(0, Math.min(1, position.x / CANVAS_WIDTH));
+
+      // Open composer for new event
+      setEditingNodeId(null);
+      setComposerTrackId(track.id);
+      setComposerPosition({ x: position.x, y: TRACK_START_Y + clampedIndex * TRACK_HEIGHT });
+      setComposerOpen(true);
+    },
+    [tracks, screenToFlowPosition]
+  );
 
   // Handle node changes with track/axis constraints
   const handleNodesChange = useCallback(
@@ -66,15 +116,17 @@ export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
           const node = nodes.find((n) => n.id === change.id);
           if (node) {
             const trackIndex = tracks.findIndex((t) => t.id === node.data.trackId);
-            const trackY = 100 + trackIndex * TRACK_HEIGHT;
+            const trackY = TRACK_START_Y + trackIndex * TRACK_HEIGHT;
 
             // Snap to axis if enabled
             let newX = change.position.x;
             if (gridSettings.snapToAxis) {
-              // Snap to axis grid (quantize position)
               const gridStep = CANVAS_WIDTH / (axisConfig.tickCount ?? 10);
               newX = Math.round(newX / gridStep) * gridStep;
             }
+
+            // Clamp X to canvas bounds
+            newX = Math.max(0, Math.min(newX, CANVAS_WIDTH - 80));
 
             // Constrain Y to track lane
             const newY = gridSettings.snapToTrack ? trackY : change.position.y;
@@ -93,6 +145,23 @@ export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
     [nodes, tracks, gridSettings, axisConfig, onNodesChange]
   );
 
+  // Handle node drag stop - update axis position in data
+  const handleNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: TimelineNode) => {
+      const axisPosition = Math.max(0, Math.min(1, node.position.x / CANVAS_WIDTH));
+
+      if (node.data.type === "event") {
+        updateNodeData(node.id, { axisPosition });
+      } else if (node.data.type === "span") {
+        // For spans, update start position and recalculate end
+        const width = (node.data.endPosition - node.data.startPosition) * CANVAS_WIDTH;
+        const endPosition = Math.min(1, (node.position.x + width) / CANVAS_WIDTH);
+        updateNodeData(node.id, { startPosition: axisPosition, endPosition });
+      }
+    },
+    [updateNodeData]
+  );
+
   // Handle edge changes
   const handleEdgesChange = useCallback(
     (changes: EdgeChange<TimelineEdge>[]) => {
@@ -109,21 +178,37 @@ export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
     [onConnect]
   );
 
-  // Initialize flow instance
-  const handleInit = useCallback(
-    (instance: ReactFlowInstance<TimelineNode, TimelineEdge>) => {
-      setFlowInstance(instance);
+  // Handle composer save
+  const handleComposerSave = useCallback(
+    (data: { label: string; description?: string; isSpan: boolean; duration?: number }) => {
+      if (!composerTrackId) return;
+
+      const axisPosition = Math.max(0, Math.min(1, composerPosition.x / CANVAS_WIDTH));
+
+      if (editingNodeId) {
+        // Update existing node
+        updateNodeData(editingNodeId, {
+          label: data.label,
+          description: data.description,
+        });
+      } else {
+        // Create new node
+        if (data.isSpan && data.duration) {
+          const endPosition = Math.min(1, axisPosition + data.duration / 100);
+          addSpan(composerTrackId, axisPosition, endPosition, data.label);
+        } else {
+          addEvent(composerTrackId, axisPosition, data.label);
+        }
+      }
+
+      setComposerOpen(false);
+      setEditingNodeId(null);
     },
-    [setFlowInstance]
+    [composerTrackId, composerPosition, editingNodeId, addEvent, addSpan, updateNodeData]
   );
 
-  // Calculate canvas height based on tracks
-  const canvasHeight = useMemo(() => {
-    return Math.max(400, 100 + tracks.length * TRACK_HEIGHT + 100);
-  }, [tracks.length]);
-
   return (
-    <div className="h-full w-full relative">
+    <>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -132,8 +217,10 @@ export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
         onNodeClick={handleNodeClick}
+        onNodeDoubleClick={handleNodeDoubleClick}
+        onNodeDragStop={handleNodeDragStop}
         onPaneClick={handlePaneClick}
-        onInit={handleInit}
+        onDoubleClick={handlePaneDoubleClick}
         fitView
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.1}
@@ -141,9 +228,11 @@ export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         proOptions={{ hideAttribution: true }}
         selectNodesOnDrag={false}
+        nodesDraggable={true}
+        nodesConnectable={true}
       >
         {/* Track lanes background */}
-        <TrackLanes tracks={tracks} trackHeight={TRACK_HEIGHT} />
+        <TrackLanes tracks={tracks} trackHeight={TRACK_HEIGHT} canvasWidth={CANVAS_WIDTH} />
 
         {/* Axis renderer */}
         <AxisRenderer
@@ -174,8 +263,55 @@ export default function TimelineCanvas({ onNodeSelect }: TimelineCanvasProps) {
             <span>{nodes.length} events</span>
             <span className="mx-2">·</span>
             <span>{tracks.length} tracks</span>
+            {tracks.length > 0 && (
+              <>
+                <span className="mx-2">·</span>
+                <span className="text-muted-foreground/70">Double-click to add event</span>
+              </>
+            )}
           </div>
         </Panel>
+      </ReactFlow>
+
+      {/* Event Composer Modal */}
+      <EventComposer
+        open={composerOpen}
+        onOpenChange={setComposerOpen}
+        onSave={handleComposerSave}
+        editingNode={editingNodeId ? nodes.find((n) => n.id === editingNodeId) : undefined}
+        tracks={tracks}
+        selectedTrackId={composerTrackId}
+      />
+    </>
+  );
+}
+
+// Wrapper component that provides ReactFlowProvider context
+export default function TimelineCanvas(props: TimelineCanvasProps) {
+  const { nodes, edges, tracks, axisConfig, gridSettings, setFlowInstance } = useTimelineStore();
+
+  // Initialize flow instance
+  const handleInit = useCallback(
+    (instance: ReactFlowInstance<TimelineNode, TimelineEdge>) => {
+      setFlowInstance(instance);
+    },
+    [setFlowInstance]
+  );
+
+  return (
+    <div className="h-full w-full relative">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={timelineNodeTypes}
+        onInit={handleInit}
+        fitView
+        fitViewOptions={{ padding: 0.2 }}
+        minZoom={0.1}
+        maxZoom={2}
+        proOptions={{ hideAttribution: true }}
+      >
+        <TimelineCanvasInner {...props} />
       </ReactFlow>
     </div>
   );
