@@ -24,7 +24,8 @@ export type NodeKind =
   | "text"
   | "shape"
   | "pathKey"
-  | "nodeKey";
+  | "nodeKey"
+  | "composed";
 
 export type NodeShape = "rounded" | "pill" | "circle" | "square";
 export type NodeSize = "sm" | "md" | "lg";
@@ -157,6 +158,7 @@ type GraphState = {
   updateNodeBody: (nodeId: string, body: string) => void;
   updateNodeStyle: (nodeId: string, style: Partial<NodeStyle>) => void;
   updateNodeHandles: (nodeId: string, sourceCount: number, targetCount: number) => void;
+  updateNodeLayout: (nodeId: string, layout: unknown) => void;
   setNodeKind: (nodeId: string, kind: NodeKind) => void;
   updateEdgeLabel: (edgeId: string, label: string) => void;
   updateEdgeData: (edgeId: string, data: Partial<RelationshipData>) => void;
@@ -165,6 +167,7 @@ type GraphState = {
     position?: { x: number; y: number };
     label?: string;
     kind?: NodeKind;
+    layout?: unknown; // ComposedNodeLayout for composed nodes
   }) => void;
   addNodeAtCenter: (kind?: NodeKind) => void;
   duplicateNode: (nodeId: string) => void;
@@ -237,6 +240,15 @@ const nodeStyleDefaults: Record<NodeKind, NodeStyle> = {
     borderStyle: "solid",
     textColor: DEFAULT_NODE_TEXT_COLOR,
   },
+  composed: {
+    color: "#FFFFFF",
+    shape: "rounded",
+    size: "md",
+    borderColor: "#e2e8f0",
+    borderWidth: 1,
+    borderStyle: "solid",
+    textColor: DEFAULT_NODE_TEXT_COLOR,
+  },
 };
 
 const defaultEdgeStyle: EdgeStyle = {
@@ -287,6 +299,8 @@ const getNodeType = (kind: NodeKind): string => {
       return "pathKey";
     case "nodeKey":
       return "nodeKey";
+    case "composed":
+      return "composed";
     default:
       return "editable";
   }
@@ -301,6 +315,7 @@ const normalizeNodes = (nodes: Node<GraphNodeData>[]) =>
       ...node,
       type: nodeType,
       data: {
+        ...node.data, // Preserve all existing data including layout
         label: node.data?.label ?? "Untitled",
         body: node.data?.body,
         kind,
@@ -633,6 +648,31 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         ),
       };
     }),
+  updateNodeLayout: (nodeId, layout) =>
+    set((state) => {
+      const target = state.nodes.find((node) => node.id === nodeId);
+      if (!target) {
+        return {};
+      }
+      return {
+        nodes: state.nodes.map((node) =>
+          node.id === nodeId
+            ? {
+                ...node,
+                data: {
+                  ...node.data,
+                  layout,
+                  label: (layout as { name?: string })?.name || node.data.label,
+                },
+              }
+            : node
+        ),
+        ...setHistory(
+          [...state.historyPast, cloneGraph(state.nodes, state.edges, state.groups)],
+          []
+        ),
+      };
+    }),
   setNodeKind: (nodeId, kind) =>
     set((state) => {
       const target = state.nodes.find((node) => node.id === nodeId);
@@ -758,6 +798,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
           return "Path Key";
         case "nodeKey":
           return "Node Key";
+        case "composed":
+          return "Composed Node";
         default:
           return "New node";
       }
@@ -784,6 +826,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         label: input?.label ?? getDefaultLabel(),
         kind,
         style: nodeStyleDefaults[kind],
+        ...(input?.layout ? { layout: input.layout } : {}),
       },
     };
     set((state) => ({

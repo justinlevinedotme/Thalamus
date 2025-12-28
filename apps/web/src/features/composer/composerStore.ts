@@ -1,0 +1,462 @@
+import { create } from "zustand";
+import {
+  type ComposedNodeLayout,
+  type ComposedRow,
+  type ComposedHandle,
+  type ContentBlock,
+  type ComposerMode,
+  type NodeTemplate,
+  type ComposedHeader,
+  type ComposedFooter,
+  type ComposedNodeStyle,
+  createDefaultLayout,
+  createDefaultRow,
+} from "./types";
+
+// Generate unique IDs
+const generateId = () => crypto.randomUUID();
+
+interface ComposerState {
+  // Modal state
+  isOpen: boolean;
+  mode: ComposerMode;
+  targetNodeId?: string; // For editing existing node
+
+  // Current layout being edited
+  currentLayout: ComposedNodeLayout | null;
+
+  // Selection state
+  selectedRowId: string | null;
+  selectedElementType: "row" | "leftHandle" | "rightHandle" | "content" | null;
+
+  // Template management (for future use)
+  templates: NodeTemplate[];
+  isLoadingTemplates: boolean;
+
+  // Modal actions
+  openComposer: (mode: ComposerMode, nodeId?: string, layout?: ComposedNodeLayout) => void;
+  closeComposer: () => void;
+
+  // Layout actions
+  setLayout: (layout: ComposedNodeLayout) => void;
+  resetLayout: () => void;
+  updateLayoutName: (name: string) => void;
+  updateLayoutDescription: (description: string) => void;
+
+  // Header actions
+  setHeader: (header: ComposedHeader | undefined) => void;
+  updateHeader: (updates: Partial<ComposedHeader>) => void;
+
+  // Footer actions
+  setFooter: (footer: ComposedFooter | undefined) => void;
+  updateFooter: (updates: Partial<ComposedFooter>) => void;
+
+  // Style actions
+  updateStyle: (updates: Partial<ComposedNodeStyle>) => void;
+
+  // Row actions
+  addRow: (index?: number) => string; // Returns new row ID
+  updateRow: (rowId: string, updates: Partial<ComposedRow>) => void;
+  removeRow: (rowId: string) => void;
+  reorderRows: (startIndex: number, endIndex: number) => void;
+  duplicateRow: (rowId: string) => string | null; // Returns new row ID
+
+  // Handle actions
+  setRowHandle: (
+    rowId: string,
+    position: "left" | "right",
+    handle: ComposedHandle | undefined
+  ) => void;
+  updateRowHandle: (
+    rowId: string,
+    position: "left" | "right",
+    updates: Partial<ComposedHandle>
+  ) => void;
+
+  // Content actions
+  setRowContent: (rowId: string, content: ContentBlock | undefined) => void;
+  updateRowContent: (rowId: string, updates: Partial<ContentBlock>) => void;
+
+  // Selection actions
+  selectRow: (rowId: string | null) => void;
+  selectElement: (
+    rowId: string | null,
+    elementType: "row" | "leftHandle" | "rightHandle" | "content" | null
+  ) => void;
+  clearSelection: () => void;
+
+  // Template actions (placeholder for future)
+  loadTemplates: () => Promise<void>;
+  saveAsTemplate: (name: string, description?: string) => Promise<NodeTemplate | null>;
+  deleteTemplate: (templateId: string) => Promise<void>;
+  applyTemplate: (template: NodeTemplate) => void;
+}
+
+export const useComposerStore = create<ComposerState>((set, get) => ({
+  // Initial state
+  isOpen: false,
+  mode: "create",
+  targetNodeId: undefined,
+  currentLayout: null,
+  selectedRowId: null,
+  selectedElementType: null,
+  templates: [],
+  isLoadingTemplates: false,
+
+  // Modal actions
+  openComposer: (mode, nodeId, layout) => {
+    const newLayout = layout ?? createDefaultLayout(generateId(), "New Node");
+    set({
+      isOpen: true,
+      mode,
+      targetNodeId: nodeId,
+      currentLayout: newLayout,
+      selectedRowId: null,
+      selectedElementType: null,
+    });
+  },
+
+  closeComposer: () => {
+    set({
+      isOpen: false,
+      mode: "create",
+      targetNodeId: undefined,
+      currentLayout: null,
+      selectedRowId: null,
+      selectedElementType: null,
+    });
+  },
+
+  // Layout actions
+  setLayout: (layout) => {
+    set({ currentLayout: layout });
+  },
+
+  resetLayout: () => {
+    set({
+      currentLayout: createDefaultLayout(generateId(), "New Node"),
+      selectedRowId: null,
+      selectedElementType: null,
+    });
+  },
+
+  updateLayoutName: (name) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+    set({
+      currentLayout: { ...currentLayout, name },
+    });
+  },
+
+  updateLayoutDescription: (description) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+    set({
+      currentLayout: { ...currentLayout, description },
+    });
+  },
+
+  // Header actions
+  setHeader: (header) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+    set({
+      currentLayout: { ...currentLayout, header },
+    });
+  },
+
+  updateHeader: (updates) => {
+    const { currentLayout } = get();
+    if (!currentLayout || !currentLayout.header) return;
+    set({
+      currentLayout: {
+        ...currentLayout,
+        header: { ...currentLayout.header, ...updates },
+      },
+    });
+  },
+
+  // Footer actions
+  setFooter: (footer) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+    set({
+      currentLayout: { ...currentLayout, footer },
+    });
+  },
+
+  updateFooter: (updates) => {
+    const { currentLayout } = get();
+    if (!currentLayout || !currentLayout.footer) return;
+    set({
+      currentLayout: {
+        ...currentLayout,
+        footer: { ...currentLayout.footer, ...updates },
+      },
+    });
+  },
+
+  // Style actions
+  updateStyle: (updates) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+    set({
+      currentLayout: {
+        ...currentLayout,
+        style: { ...currentLayout.style, ...updates },
+      },
+    });
+  },
+
+  // Row actions
+  addRow: (index) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return "";
+
+    const newRow = createDefaultRow(generateId());
+    const rows = [...currentLayout.rows];
+
+    if (index !== undefined && index >= 0 && index <= rows.length) {
+      rows.splice(index, 0, newRow);
+    } else {
+      rows.push(newRow);
+    }
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+      selectedRowId: newRow.id,
+      selectedElementType: "row",
+    });
+
+    return newRow.id;
+  },
+
+  updateRow: (rowId, updates) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+
+    const rows = currentLayout.rows.map((row) => (row.id === rowId ? { ...row, ...updates } : row));
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+    });
+  },
+
+  removeRow: (rowId) => {
+    const { currentLayout, selectedRowId } = get();
+    if (!currentLayout) return;
+
+    const rows = currentLayout.rows.filter((row) => row.id !== rowId);
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+      selectedRowId: selectedRowId === rowId ? null : selectedRowId,
+      selectedElementType: selectedRowId === rowId ? null : get().selectedElementType,
+    });
+  },
+
+  reorderRows: (startIndex, endIndex) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+
+    const rows = [...currentLayout.rows];
+    const [removed] = rows.splice(startIndex, 1);
+    rows.splice(endIndex, 0, removed);
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+    });
+  },
+
+  duplicateRow: (rowId) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return null;
+
+    const rowIndex = currentLayout.rows.findIndex((row) => row.id === rowId);
+    if (rowIndex === -1) return null;
+
+    const originalRow = currentLayout.rows[rowIndex];
+    const newRow: ComposedRow = {
+      ...JSON.parse(JSON.stringify(originalRow)), // Deep clone
+      id: generateId(),
+      leftHandle: originalRow.leftHandle
+        ? { ...originalRow.leftHandle, id: generateId() }
+        : undefined,
+      rightHandle: originalRow.rightHandle
+        ? { ...originalRow.rightHandle, id: generateId() }
+        : undefined,
+      content: originalRow.content ? { ...originalRow.content, id: generateId() } : undefined,
+    };
+
+    const rows = [...currentLayout.rows];
+    rows.splice(rowIndex + 1, 0, newRow);
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+      selectedRowId: newRow.id,
+      selectedElementType: "row",
+    });
+
+    return newRow.id;
+  },
+
+  // Handle actions
+  setRowHandle: (rowId, position, handle) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+
+    const rows = currentLayout.rows.map((row) => {
+      if (row.id !== rowId) return row;
+      if (position === "left") {
+        return { ...row, leftHandle: handle };
+      } else {
+        return { ...row, rightHandle: handle };
+      }
+    });
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+    });
+  },
+
+  updateRowHandle: (rowId, position, updates) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+
+    const rows = currentLayout.rows.map((row) => {
+      if (row.id !== rowId) return row;
+      const handle = position === "left" ? row.leftHandle : row.rightHandle;
+      if (!handle) return row;
+
+      const updatedHandle = { ...handle, ...updates };
+      if (position === "left") {
+        return { ...row, leftHandle: updatedHandle };
+      } else {
+        return { ...row, rightHandle: updatedHandle };
+      }
+    });
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+    });
+  },
+
+  // Content actions
+  setRowContent: (rowId, content) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+
+    const rows = currentLayout.rows.map((row) => (row.id === rowId ? { ...row, content } : row));
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+    });
+  },
+
+  updateRowContent: (rowId, updates) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return;
+
+    const rows = currentLayout.rows.map((row) => {
+      if (row.id !== rowId || !row.content) return row;
+      // Merge updates into the existing content block
+      const updatedContent = Object.assign({}, row.content, updates);
+      return {
+        ...row,
+        content: updatedContent as ContentBlock,
+      };
+    });
+
+    set({
+      currentLayout: { ...currentLayout, rows },
+    });
+  },
+
+  // Selection actions
+  selectRow: (rowId) => {
+    set({
+      selectedRowId: rowId,
+      selectedElementType: rowId ? "row" : null,
+    });
+  },
+
+  selectElement: (rowId, elementType) => {
+    set({
+      selectedRowId: rowId,
+      selectedElementType: elementType,
+    });
+  },
+
+  clearSelection: () => {
+    set({
+      selectedRowId: null,
+      selectedElementType: null,
+    });
+  },
+
+  // Template actions (placeholders for future implementation)
+  loadTemplates: async () => {
+    set({ isLoadingTemplates: true });
+    // TODO: Implement API call
+    // const templates = await composerApi.listTemplates();
+    set({ templates: [], isLoadingTemplates: false });
+  },
+
+  saveAsTemplate: async (name, description) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return null;
+
+    const template: NodeTemplate = {
+      ...currentLayout,
+      id: generateId(),
+      name,
+      description,
+      isTemplate: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // TODO: Implement API call
+    // await composerApi.createTemplate(template);
+
+    set((state) => ({
+      templates: [...state.templates, template],
+    }));
+
+    return template;
+  },
+
+  deleteTemplate: async (templateId) => {
+    // TODO: Implement API call
+    // await composerApi.deleteTemplate(templateId);
+
+    set((state) => ({
+      templates: state.templates.filter((t) => t.id !== templateId),
+    }));
+  },
+
+  applyTemplate: (template) => {
+    const newLayout: ComposedNodeLayout = {
+      ...JSON.parse(JSON.stringify(template)), // Deep clone
+      id: generateId(),
+      isTemplate: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Regenerate all IDs
+    newLayout.rows = newLayout.rows.map((row) => ({
+      ...row,
+      id: generateId(),
+      leftHandle: row.leftHandle ? { ...row.leftHandle, id: generateId() } : undefined,
+      rightHandle: row.rightHandle ? { ...row.rightHandle, id: generateId() } : undefined,
+      content: row.content ? { ...row.content, id: generateId() } : undefined,
+    }));
+
+    set({
+      currentLayout: newLayout,
+      selectedRowId: null,
+      selectedElementType: null,
+    });
+  },
+}));

@@ -445,6 +445,7 @@ export default function GraphCanvas() {
         ...node,
         type: node.type ?? "editable",
         data: {
+          ...node.data, // Preserve all data including layout for composed nodes
           label: node.data?.label ?? "Untitled",
           body: node.data?.body,
           kind: (node.data?.kind ?? "idea") as NodeKind,
