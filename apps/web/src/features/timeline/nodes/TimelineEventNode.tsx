@@ -6,6 +6,7 @@ type TimelineEventNodeType = Node<TimelineEventData, "timelineEvent">;
 
 const MARKER_SIZE = 10;
 const STEM_HEIGHT = 40;
+const TICK_HEIGHT = 8;
 
 // Timeline event node - marker on timeline with card above or below
 export const TimelineEventNode = memo(function TimelineEventNode({
@@ -55,7 +56,7 @@ export const TimelineEventNode = memo(function TimelineEventNode({
     />
   );
 
-  // Marker component
+  // Marker component (dot on the line)
   const Marker = (
     <div
       className="rounded-full transition-all duration-150 flex-shrink-0"
@@ -67,10 +68,22 @@ export const TimelineEventNode = memo(function TimelineEventNode({
     />
   );
 
+  // Tick mark component (vertical line extending from marker)
+  const Tick = (
+    <div
+      className="transition-colors duration-150"
+      style={{
+        width: 2,
+        height: TICK_HEIGHT,
+        backgroundColor: markerColor,
+      }}
+    />
+  );
+
   // Date label component
   const DateLabel = data.dateLabel ? (
     <div
-      className="text-xs font-medium text-foreground"
+      className="text-xs font-medium text-foreground whitespace-nowrap"
       style={{ color: isHighlighted ? markerColor : undefined }}
     >
       {data.dateLabel}
@@ -78,20 +91,30 @@ export const TimelineEventNode = memo(function TimelineEventNode({
   ) : null;
 
   if (isAbove) {
-    // Card above: Card -> Stem -> Marker -> DateLabel
+    // Card above timeline: Card -> Stem -> Marker -> Tick -> DateLabel
     return (
       <div className="relative flex flex-col items-center">
         {Card}
         {Stem}
         {Marker}
-        {DateLabel && <div className="mt-1">{DateLabel}</div>}
+        {DateLabel && (
+          <>
+            {Tick}
+            <div className="mt-0.5">{DateLabel}</div>
+          </>
+        )}
       </div>
     );
   } else {
-    // Card below: DateLabel -> Marker -> Stem -> Card
+    // Card below timeline: DateLabel -> Tick -> Marker -> Stem -> Card
     return (
       <div className="relative flex flex-col items-center">
-        {DateLabel && <div className="mb-1">{DateLabel}</div>}
+        {DateLabel && (
+          <>
+            <div className="mb-0.5">{DateLabel}</div>
+            {Tick}
+          </>
+        )}
         {Marker}
         {Stem}
         {Card}
