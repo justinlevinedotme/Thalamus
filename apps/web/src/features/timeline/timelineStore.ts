@@ -106,11 +106,25 @@ interface TimelineState {
 // Generate unique IDs
 const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-// Calculate Y position based on track
-const getTrackY = (tracks: TimelineTrack[], trackId: string, trackHeight = 80): number => {
+// Timeline line offset from bottom of track
+const TIMELINE_OFFSET = 16;
+
+// Calculate Y position for events - positioned so marker lands on timeline
+// Timeline line is at trackY + trackHeight - TIMELINE_OFFSET
+// Event marker is at bottom of node, so we position node above the line
+const getEventY = (tracks: TimelineTrack[], trackId: string, trackHeight = 80): number => {
   const trackIndex = tracks.findIndex((t) => t.id === trackId);
   if (trackIndex === -1) return 100;
-  return 100 + trackIndex * trackHeight;
+  // Position at top of track with some padding
+  return 100 + trackIndex * trackHeight + 4;
+};
+
+// Calculate Y position for spans - centered in track
+const getSpanY = (tracks: TimelineTrack[], trackId: string, trackHeight = 80): number => {
+  const trackIndex = tracks.findIndex((t) => t.id === trackId);
+  if (trackIndex === -1) return 100;
+  // Center span vertically in track (span is 48px tall)
+  return 100 + trackIndex * trackHeight + (trackHeight - 48) / 2;
 };
 
 export const useTimelineStore = create<TimelineState>((set, get) => ({
@@ -154,7 +168,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       type: "timelineEvent",
       position: {
         x: axisPosition * 1000, // Scale position to canvas
-        y: getTrackY(state.tracks, trackId),
+        y: getEventY(state.tracks, trackId),
       },
       data: {
         type: "event",
@@ -179,7 +193,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       type: "timelineSpan",
       position: {
         x: start * 1000,
-        y: getTrackY(state.tracks, trackId),
+        y: getSpanY(state.tracks, trackId),
       },
       data: {
         type: "span",
@@ -307,7 +321,10 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       ...node,
       position: {
         ...node.position,
-        y: getTrackY(newTracks, node.data.trackId),
+        y:
+          node.data.type === "span"
+            ? getSpanY(newTracks, node.data.trackId)
+            : getEventY(newTracks, node.data.trackId),
       },
     }));
 

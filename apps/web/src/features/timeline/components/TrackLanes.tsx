@@ -58,9 +58,21 @@ export function TrackLanes({ tracks, trackHeight, canvasWidth = 2000 }: TrackLan
               }}
             />
 
+            {/* Horizontal timeline line through center of track */}
+            <div
+              className="absolute bg-border"
+              style={{
+                left: 0,
+                top: lane.yPosition + lane.height - 16, // Position near bottom where markers sit
+                width: canvasWidth,
+                height: 2,
+                borderRadius: 1,
+              }}
+            />
+
             {/* Lane divider line */}
             <div
-              className="absolute bg-border/50"
+              className="absolute bg-border/30"
               style={{
                 left: -100,
                 top: lane.yPosition + lane.height,
