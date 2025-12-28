@@ -7,12 +7,17 @@ import type { NodeIcon } from "../../store/graphStore";
 export type HandlePosition = "left" | "right";
 export type HandleType = "source" | "target";
 
+export type LabelPosition = "inside" | "outside" | "hidden";
+export type HandleStyle = "filled" | "outlined";
+
 export interface ComposedHandle {
   id: string;
   type: HandleType;
   position: HandlePosition;
   label?: string;
+  labelPosition?: LabelPosition;
   color?: string;
+  style?: HandleStyle;
 }
 
 // ============================================================================
@@ -91,11 +96,14 @@ export interface KeyValueBlock extends ContentBlockBase {
 }
 
 // Code block
+export type CodeTheme = "light" | "dark";
+
 export interface CodeBlock extends ContentBlockBase {
   type: "code";
   content: string;
   language?: string;
   showLineNumbers?: boolean;
+  theme?: CodeTheme;
 }
 
 // Separator/divider block
@@ -191,6 +199,7 @@ export interface ComposedFooter {
 export type BorderRadius = "none" | "sm" | "md" | "lg" | "full";
 export type ShadowSize = "none" | "sm" | "md" | "lg";
 export type BorderStyle = "solid" | "dashed" | "dotted";
+export type EdgePadding = "none" | "sm" | "md" | "lg";
 
 export interface ComposedNodeStyle {
   backgroundColor: string;
@@ -201,6 +210,7 @@ export interface ComposedNodeStyle {
   minWidth?: number;
   maxWidth?: number;
   shadow?: ShadowSize;
+  edgePadding?: EdgePadding;
 }
 
 // ============================================================================

@@ -3,14 +3,26 @@ import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { BaseNode } from "../../../components/ui/base-node";
 import { BlockRenderer } from "../../composer/components/blocks";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
-import type { ComposedNodeLayout, ComposedRow } from "../../composer/types";
+import type { ComposedNodeLayout, ComposedRow, EdgePadding } from "../../composer/types";
 import { BORDER_RADIUS, SHADOWS, ROW_PADDING } from "../../composer/constants";
 import { cn } from "../../../lib/utils";
+
+// Convert edge padding to pixel offset (same as edgePaddingToOffset in utils.ts)
+const EDGE_PADDING_OFFSET: Record<EdgePadding, number> = {
+  none: 0,
+  sm: 8,
+  md: 16,
+  lg: 24,
+};
+
+// Import the graph store's NodeStyle type for node-level style
+import type { NodeStyle } from "../../../store/graphStore";
 
 // Node data type for composed nodes
 export interface ComposedNodeData extends Record<string, unknown> {
   label: string;
   layout: ComposedNodeLayout;
+  style?: NodeStyle; // Node-level style from graph store (set by Map Style)
   runtimeValues?: {
     title?: string;
     editableBlocks?: Record<string, string>;
@@ -19,52 +31,58 @@ export interface ComposedNodeData extends Record<string, unknown> {
 
 type ComposedNodeType = Node<ComposedNodeData, "composed">;
 
-// Render a single row content (no handles - they're rendered separately)
+// Render a single row content (no handles or labels - they're rendered separately)
 function RowContent({ row }: { row: ComposedRow }) {
   const padding = ROW_PADDING[row.padding || "sm"];
 
+  // Get background color from row or from header block if it's a header
+  const backgroundColor =
+    row.backgroundColor ||
+    (row.content?.type === "header"
+      ? (row.content as { backgroundColor?: string }).backgroundColor
+      : undefined);
+
   return (
-    <div className="flex items-center gap-2 min-h-[24px]" style={{ padding }}>
-      {/* Left handle label */}
-      {row.leftHandle?.label && (
-        <span className="text-xs text-muted-foreground">{row.leftHandle.label}</span>
-      )}
-
-      {/* Content */}
+    <div className="flex items-center min-h-[24px]" style={{ padding, backgroundColor }}>
       <div className="flex-1 min-w-0">{row.content && <BlockRenderer block={row.content} />}</div>
-
-      {/* Right handle label */}
-      {row.rightHandle?.label && (
-        <span className="text-xs text-muted-foreground">{row.rightHandle.label}</span>
-      )}
     </div>
   );
 }
 
 function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) {
-  const { layout, runtimeValues } = data;
+  const { layout, runtimeValues, style: nodeStyle } = data;
   const nodeRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [rowPositions, setRowPositions] = useState<Map<string, number>>(new Map());
 
-  // Calculate row positions after render
+  // Check if this node has any handles defined
+  const hasAnyHandles = layout?.rows.some((row) => row.leftHandle || row.rightHandle) ?? false;
+
+  // Calculate row positions after render using offsetTop for more reliable positioning
   useLayoutEffect(() => {
-    if (!nodeRef.current) return;
+    const calculatePositions = () => {
+      if (!nodeRef.current) return;
 
-    const nodeRect = nodeRef.current.getBoundingClientRect();
-    const positions = new Map<string, number>();
+      const positions = new Map<string, number>();
 
-    rowRefs.current.forEach((el, rowId) => {
-      if (el) {
-        const rowRect = el.getBoundingClientRect();
-        // Calculate the center of the row relative to the node
-        const rowCenter = rowRect.top + rowRect.height / 2 - nodeRect.top;
-        positions.set(rowId, rowCenter);
-      }
-    });
+      rowRefs.current.forEach((el, rowId) => {
+        if (el) {
+          // Use offsetTop + half height for center position relative to parent
+          const rowCenter = el.offsetTop + el.offsetHeight / 2;
+          positions.set(rowId, rowCenter);
+        }
+      });
 
-    setRowPositions(positions);
-  }, [layout]);
+      setRowPositions(positions);
+    };
+
+    // Calculate immediately
+    calculatePositions();
+
+    // Also recalculate after a brief delay to handle any layout shifts
+    const timer = setTimeout(calculatePositions, 50);
+    return () => clearTimeout(timer);
+  }, [layout, layout?.rows, layout?.header]);
 
   if (!layout) {
     return (
@@ -77,6 +95,12 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
   const style = layout.style;
   const borderRadius = BORDER_RADIUS[style.borderRadius || "md"];
   const shadow = SHADOWS[style.shadow || "sm"];
+
+  // Use node-level edgePadding (from Map Style) if set, otherwise use layout's edgePadding
+  const effectiveEdgePadding = (nodeStyle?.edgePadding ||
+    style.edgePadding ||
+    "none") as EdgePadding;
+  const edgePaddingOffset = EDGE_PADDING_OFFSET[effectiveEdgePadding];
 
   return (
     <div
@@ -98,7 +122,7 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
         <div
           className="px-3 py-2 border-b overflow-hidden"
           style={{
-            backgroundColor: layout.header.backgroundColor,
+            backgroundColor: layout.header.backgroundColor || "#f8fafc",
             borderColor: style.borderColor,
             borderTopLeftRadius: borderRadius,
             borderTopRightRadius: borderRadius,
@@ -106,7 +130,7 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
         >
           <div
             className="font-medium text-sm flex items-center gap-1.5"
-            style={{ color: layout.header.textColor }}
+            style={{ color: layout.header.textColor || "#1e293b" }}
           >
             {layout.header.icon && (
               <NodeIconDisplay icon={layout.header.icon} className="h-4 w-4 flex-shrink-0" />
@@ -114,7 +138,9 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
             {runtimeValues?.title || layout.header.title}
           </div>
           {layout.header.subtitle && (
-            <div className="text-xs text-muted-foreground mt-0.5">{layout.header.subtitle}</div>
+            <div className="text-xs mt-0.5" style={{ color: "#64748b" }}>
+              {layout.header.subtitle}
+            </div>
           )}
         </div>
       )}
@@ -153,13 +179,36 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
         </div>
       )}
 
-      {/* Handles - positioned based on row centers */}
+      {/* Hidden handles to prevent React Flow default connection UI when no handles defined */}
+      {!hasAnyHandles && (
+        <>
+          <Handle
+            type="target"
+            position={Position.Left}
+            id="__hidden-target"
+            className="!opacity-0 !pointer-events-none !w-0 !h-0"
+            isConnectable={false}
+          />
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="__hidden-source"
+            className="!opacity-0 !pointer-events-none !w-0 !h-0"
+            isConnectable={false}
+          />
+        </>
+      )}
+
+      {/* Handles and labels - positioned based on row centers */}
       {layout.rows.flatMap((row) => {
         const topPos = rowPositions.get(row.id);
-        const handles = [];
+        const elements = [];
 
         if (row.leftHandle && topPos !== undefined) {
-          handles.push(
+          // Default to outlined for target/input handles
+          const isFilled = row.leftHandle.style === "filled";
+          const handleColor = row.leftHandle.color || "#64748b";
+          elements.push(
             <Handle
               key={`left-${row.leftHandle.id}`}
               type="target"
@@ -168,18 +217,38 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
               className="!w-3 !h-3"
               style={{
                 top: topPos,
-                background:
-                  row.leftHandle.type === "target"
-                    ? style.backgroundColor || "white"
-                    : row.leftHandle.color || "#64748b",
-                borderColor: row.leftHandle.color || "#64748b",
+                left: -edgePaddingOffset,
+                background: isFilled ? handleColor : style.backgroundColor || "white",
+                borderColor: handleColor,
                 borderWidth: 2,
               }}
             />
           );
+          // Left handle label
+          if (row.leftHandle.label && row.leftHandle.labelPosition !== "hidden") {
+            const isOutside = row.leftHandle.labelPosition !== "inside";
+            elements.push(
+              <span
+                key={`left-label-${row.leftHandle.id}`}
+                className="absolute text-xs text-muted-foreground pointer-events-none whitespace-nowrap"
+                style={{
+                  top: topPos,
+                  ...(isOutside
+                    ? { right: "100%", marginRight: 12 + edgePaddingOffset }
+                    : { left: 12 }),
+                  transform: "translateY(-50%)",
+                }}
+              >
+                {row.leftHandle.label}
+              </span>
+            );
+          }
         }
         if (row.rightHandle && topPos !== undefined) {
-          handles.push(
+          // Default to filled for source/output handles
+          const isFilled = row.rightHandle.style !== "outlined";
+          const handleColor = row.rightHandle.color || "#64748b";
+          elements.push(
             <Handle
               key={`right-${row.rightHandle.id}`}
               type="source"
@@ -188,15 +257,35 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
               className="!w-3 !h-3"
               style={{
                 top: topPos,
-                background: row.rightHandle.color || "#64748b",
-                borderColor: row.rightHandle.color || "#64748b",
+                right: -edgePaddingOffset,
+                background: isFilled ? handleColor : style.backgroundColor || "white",
+                borderColor: handleColor,
                 borderWidth: 2,
               }}
             />
           );
+          // Right handle label
+          if (row.rightHandle.label && row.rightHandle.labelPosition !== "hidden") {
+            const isOutside = row.rightHandle.labelPosition !== "inside";
+            elements.push(
+              <span
+                key={`right-label-${row.rightHandle.id}`}
+                className="absolute text-xs text-muted-foreground pointer-events-none whitespace-nowrap"
+                style={{
+                  top: topPos,
+                  ...(isOutside
+                    ? { left: "100%", marginLeft: 12 + edgePaddingOffset }
+                    : { right: 12 }),
+                  transform: "translateY(-50%)",
+                }}
+              >
+                {row.rightHandle.label}
+              </span>
+            );
+          }
         }
 
-        return handles;
+        return elements;
       })}
     </div>
   );

@@ -105,7 +105,10 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
 
   // Modal actions
   openComposer: (mode, nodeId, layout) => {
-    const newLayout = layout ?? createDefaultLayout(generateId(), "New Node");
+    // Deep clone the layout to avoid mutating the original when editing
+    const newLayout = layout
+      ? JSON.parse(JSON.stringify(layout))
+      : createDefaultLayout(generateId(), "New Node");
     set({
       isOpen: true,
       mode,

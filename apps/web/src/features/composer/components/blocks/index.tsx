@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type {
   ContentBlock,
   HeaderBlock,
@@ -14,21 +15,17 @@ import type {
 import { BADGE_VARIANTS, STATUS_COLORS, FONT_SIZES, SPACER_HEIGHTS } from "../../constants";
 import { NodeIconDisplay } from "../../../../components/ui/icon-picker";
 import { cn } from "../../../../lib/utils";
+import { codeToHtml } from "shiki";
 
 interface BlockRendererProps {
   block: ContentBlock;
   preview?: boolean;
 }
 
-// Header block renderer
+// Header block renderer - renders as inline text (row provides the background via row.backgroundColor)
 function HeaderBlockRenderer({ block, preview }: { block: HeaderBlock; preview?: boolean }) {
   return (
-    <div
-      className={cn("px-2 py-1.5", preview && "text-xs")}
-      style={{
-        backgroundColor: block.backgroundColor || "#f8fafc",
-      }}
-    >
+    <div>
       <div
         className={cn("font-medium flex items-center gap-1.5", preview ? "text-xs" : "text-sm")}
         style={{ color: block.textColor || "#1e293b" }}
@@ -42,7 +39,10 @@ function HeaderBlockRenderer({ block, preview }: { block: HeaderBlock; preview?:
         {block.title}
       </div>
       {block.subtitle && (
-        <div className={cn("text-muted-foreground mt-0.5", preview ? "text-[10px]" : "text-xs")}>
+        <div
+          className={cn("mt-0.5", preview ? "text-[10px]" : "text-xs")}
+          style={{ color: "#64748b" }}
+        >
           {block.subtitle}
         </div>
       )}
@@ -139,26 +139,77 @@ function KeyValueBlockRenderer({ block, preview }: { block: KeyValueBlock; previ
   );
 }
 
-// Code block renderer
+// Code block renderer with syntax highlighting
 function CodeBlockRenderer({ block, preview }: { block: CodeBlock; preview?: boolean }) {
+  const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
+  const isDark = block.theme === "dark";
+
+  useEffect(() => {
+    if (preview || !block.content) return;
+
+    const highlight = async () => {
+      try {
+        const html = await codeToHtml(block.content, {
+          lang: block.language || "text",
+          theme: isDark ? "github-dark" : "github-light",
+        });
+        setHighlightedHtml(html);
+      } catch {
+        // Fallback to plain text if language not supported
+        setHighlightedHtml(null);
+      }
+    };
+
+    highlight();
+  }, [block.content, block.language, block.theme, preview, isDark]);
+
   if (preview) {
     return (
-      <div className="text-xs font-mono text-muted-foreground truncate bg-muted px-1 rounded">
+      <div
+        className={cn(
+          "text-xs font-mono truncate px-1 rounded",
+          isDark ? "bg-slate-800 text-slate-300" : "bg-muted text-muted-foreground"
+        )}
+      >
         {block.content.substring(0, 20)}...
       </div>
     );
   }
 
+  // Render with syntax highlighting if available
+  if (highlightedHtml) {
+    return (
+      <div
+        className={cn(
+          "code-block-highlighted rounded-md text-xs overflow-hidden [&_pre]:!p-2 [&_pre]:!m-0 [&_code]:!text-xs [&_code]:!leading-relaxed",
+          isDark ? "[&_pre]:!bg-slate-800" : "[&_pre]:!bg-slate-50"
+        )}
+        dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+      />
+    );
+  }
+
+  // Fallback to plain code display
   return (
-    <pre className="bg-muted rounded-md p-2 overflow-x-auto">
-      <code className="text-xs font-mono text-foreground">
+    <pre
+      className={cn(
+        "rounded-md p-2 overflow-hidden text-xs",
+        isDark ? "bg-slate-800 text-slate-200" : "bg-slate-50 text-foreground"
+      )}
+    >
+      <code className="font-mono block whitespace-pre-wrap break-all">
         {block.showLineNumbers
           ? block.content.split("\n").map((line, i) => (
               <div key={i} className="flex">
-                <span className="text-muted-foreground w-6 text-right mr-2 select-none">
+                <span
+                  className={cn(
+                    "w-6 text-right mr-2 select-none flex-shrink-0",
+                    isDark ? "text-slate-500" : "text-muted-foreground"
+                  )}
+                >
                   {i + 1}
                 </span>
-                <span>{line}</span>
+                <span className="break-all">{line}</span>
               </div>
             ))
           : block.content}
@@ -168,7 +219,7 @@ function CodeBlockRenderer({ block, preview }: { block: CodeBlock; preview?: boo
 }
 
 // Separator block renderer
-function SeparatorBlockRenderer({ block, preview }: { block: SeparatorBlock; preview?: boolean }) {
+function SeparatorBlockRenderer({ block }: { block: SeparatorBlock }) {
   const margin = {
     none: "0",
     sm: "0.25rem",
@@ -210,7 +261,7 @@ function IconBlockRenderer({ block, preview }: { block: IconBlock; preview?: boo
 }
 
 // Badge block renderer
-function BadgeBlockRenderer({ block, preview }: { block: BadgeBlock; preview?: boolean }) {
+function BadgeBlockRenderer({ block }: { block: BadgeBlock }) {
   const variant = BADGE_VARIANTS[block.variant || "default"];
   const sizeClasses = {
     xs: "text-[10px] px-1.5 py-0.5",

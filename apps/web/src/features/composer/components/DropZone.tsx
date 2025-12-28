@@ -126,6 +126,12 @@ function ContentSlot({ rowId, content }: { rowId: string; content?: ContentBlock
     setRowContent(rowId, undefined);
   };
 
+  // Get background color from header block if applicable
+  const backgroundColor =
+    content?.type === "header"
+      ? (content as { backgroundColor?: string }).backgroundColor
+      : undefined;
+
   return (
     <div
       ref={setNodeRef}
@@ -136,6 +142,7 @@ function ContentSlot({ rowId, content }: { rowId: string; content?: ContentBlock
         isSelected && "ring-2 ring-primary",
         content ? "cursor-pointer" : "border-2 border-dashed border-muted-foreground/20"
       )}
+      style={{ backgroundColor }}
     >
       {content ? (
         <div className="p-2">
@@ -171,7 +178,7 @@ function SortableRow({
   const { selectRow, selectedRowId, removeRow, reorderRows, duplicateRow } = useComposerStore();
   const isSelected = selectedRowId === row.id;
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const { setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.id,
   });
 
@@ -416,7 +423,7 @@ function PreviewPane() {
 }
 
 export function DropZone() {
-  const { currentLayout } = useComposerStore();
+  const { currentLayout, clearSelection } = useComposerStore();
 
   if (!currentLayout) {
     return (
@@ -428,11 +435,19 @@ export function DropZone() {
 
   const rowIds = currentLayout.rows.map((r) => r.id);
 
+  // Clear selection when clicking on the background (not on a row)
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    // Only clear if clicking directly on the background, not on a child element
+    if (e.target === e.currentTarget) {
+      clearSelection();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Build area */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="max-w-xl mx-auto space-y-2">
+      <div className="flex-1 overflow-y-auto p-4" onClick={handleBackgroundClick}>
+        <div className="max-w-xl mx-auto space-y-2" onClick={handleBackgroundClick}>
           <SortableContext items={rowIds} strategy={verticalListSortingStrategy}>
             {currentLayout.rows.map((row, index) => (
               <SortableRow

@@ -239,6 +239,13 @@ export const ROW_PADDING = {
   md: "0.75rem",
 };
 
+export const EDGE_PADDING = {
+  none: 0,
+  sm: 8,
+  md: 16,
+  lg: 24,
+};
+
 export const SEPARATOR_MARGIN = {
   none: "0",
   sm: "0.25rem",
@@ -288,6 +295,248 @@ export const TEXT_COLOR_PRESETS = [
 // ============================================================================
 
 export const BUILT_IN_TEMPLATES: NodeTemplate[] = [
+  // ============================================================================
+  // Basic Templates
+  // ============================================================================
+  {
+    id: "template-simple",
+    name: "Simple",
+    description: "Basic node with just text",
+    category: "Basic",
+    tags: ["simple", "text"],
+    isBuiltIn: true,
+    rows: [
+      {
+        id: "row-1",
+        content: {
+          id: "text-1",
+          type: "text",
+          content: "Simple text content",
+          fontSize: "sm",
+          fontWeight: "normal",
+          color: "#334155",
+        },
+        padding: "md",
+      },
+    ],
+    style: {
+      backgroundColor: "#ffffff",
+      borderColor: "#e2e8f0",
+      borderWidth: 1,
+      borderStyle: "solid",
+      borderRadius: "md",
+      shadow: "sm",
+    },
+  },
+  {
+    id: "template-titled",
+    name: "Titled",
+    description: "Header with text body",
+    category: "Basic",
+    tags: ["header", "text", "basic"],
+    isBuiltIn: true,
+    rows: [
+      {
+        id: "row-1",
+        content: {
+          id: "header-1",
+          type: "header",
+          title: "Title",
+          subtitle: "Subtitle",
+          backgroundColor: "#f8fafc",
+          textColor: "#1e293b",
+        },
+        padding: "sm",
+      },
+      {
+        id: "row-2",
+        content: {
+          id: "text-1",
+          type: "text",
+          content: "Description or body text goes here",
+          fontSize: "sm",
+          fontWeight: "normal",
+          color: "#64748b",
+        },
+        padding: "sm",
+      },
+    ],
+    style: {
+      backgroundColor: "#ffffff",
+      borderColor: "#e2e8f0",
+      borderWidth: 1,
+      borderStyle: "solid",
+      borderRadius: "md",
+      shadow: "sm",
+    },
+  },
+  {
+    id: "template-card",
+    name: "Card",
+    description: "Header with icon and content",
+    category: "Basic",
+    tags: ["card", "header", "icon"],
+    isBuiltIn: true,
+    rows: [
+      {
+        id: "row-1",
+        content: {
+          id: "header-1",
+          type: "header",
+          title: "Card Title",
+          icon: { type: "lucide", value: "file-text" },
+          backgroundColor: "#f1f5f9",
+          textColor: "#334155",
+        },
+        padding: "sm",
+      },
+      {
+        id: "row-2",
+        content: {
+          id: "text-1",
+          type: "text",
+          content: "Card content with some descriptive text",
+          fontSize: "sm",
+          fontWeight: "normal",
+          color: "#64748b",
+        },
+        padding: "sm",
+      },
+    ],
+    style: {
+      backgroundColor: "#ffffff",
+      borderColor: "#cbd5e1",
+      borderWidth: 1,
+      borderStyle: "solid",
+      borderRadius: "lg",
+      shadow: "md",
+    },
+  },
+  {
+    id: "template-note",
+    name: "Note",
+    description: "Simple note with badge",
+    category: "Basic",
+    tags: ["note", "badge"],
+    isBuiltIn: true,
+    rows: [
+      {
+        id: "row-1",
+        content: {
+          id: "badge-1",
+          type: "badge",
+          text: "Note",
+          variant: "info",
+          size: "sm",
+        },
+        padding: "sm",
+      },
+      {
+        id: "row-2",
+        content: {
+          id: "text-1",
+          type: "text",
+          content: "This is a note or reminder",
+          fontSize: "sm",
+          fontWeight: "normal",
+          color: "#334155",
+        },
+        padding: "sm",
+      },
+    ],
+    style: {
+      backgroundColor: "#eff6ff",
+      borderColor: "#93c5fd",
+      borderWidth: 1,
+      borderStyle: "solid",
+      borderRadius: "md",
+      shadow: "sm",
+    },
+  },
+  {
+    id: "template-process",
+    name: "Process",
+    description: "Node with input and output",
+    category: "Basic",
+    tags: ["process", "handles"],
+    isBuiltIn: true,
+    rows: [
+      {
+        id: "row-1",
+        leftHandle: { id: "in-1", type: "target", position: "left", color: "#64748b" },
+        content: {
+          id: "text-1",
+          type: "text",
+          content: "Process Step",
+          fontSize: "sm",
+          fontWeight: "medium",
+          color: "#334155",
+        },
+        rightHandle: { id: "out-1", type: "source", position: "right", color: "#64748b" },
+        padding: "md",
+      },
+    ],
+    style: {
+      backgroundColor: "#ffffff",
+      borderColor: "#cbd5e1",
+      borderWidth: 1,
+      borderStyle: "solid",
+      borderRadius: "md",
+      shadow: "sm",
+    },
+  },
+  {
+    id: "template-labeled-process",
+    name: "Labeled Process",
+    description: "Process with labeled handles",
+    category: "Basic",
+    tags: ["process", "labels", "handles"],
+    isBuiltIn: true,
+    rows: [
+      {
+        id: "row-1",
+        content: {
+          id: "header-1",
+          type: "header",
+          title: "Process",
+          backgroundColor: "#f8fafc",
+          textColor: "#1e293b",
+        },
+        padding: "sm",
+      },
+      {
+        id: "row-2",
+        leftHandle: { id: "in-1", type: "target", position: "left", label: "in", color: "#22c55e" },
+        content: {
+          id: "text-1",
+          type: "text",
+          content: "Transform data",
+          fontSize: "xs",
+          fontWeight: "normal",
+          color: "#64748b",
+        },
+        rightHandle: {
+          id: "out-1",
+          type: "source",
+          position: "right",
+          label: "out",
+          color: "#3b82f6",
+        },
+        padding: "sm",
+      },
+    ],
+    style: {
+      backgroundColor: "#ffffff",
+      borderColor: "#e2e8f0",
+      borderWidth: 1,
+      borderStyle: "solid",
+      borderRadius: "md",
+      shadow: "sm",
+    },
+  },
+  // ============================================================================
+  // DDD Templates
+  // ============================================================================
   {
     id: "template-event",
     name: "Event",
