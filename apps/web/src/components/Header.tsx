@@ -21,7 +21,7 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
   const { user, signOut } = useAuthStore();
 
   return (
-    <header className="border-b border-border bg-background px-4 py-4">
+    <header className="bg-transparent px-4 py-4">
       <nav className={`flex items-center justify-between ${fullWidth ? "" : "mx-auto max-w-6xl"}`}>
         <div className="flex items-center gap-4">
           <Link to="/" className="flex items-center">

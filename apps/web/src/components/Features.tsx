@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { GitBranch, Layout, MousePointer2, Share2, Sparkles, Zap } from "lucide-react";
+import { GitBranch, Github, Layout, MousePointer2, Share2, Sparkles, Zap } from "lucide-react";
 
 export function Features() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -50,6 +50,17 @@ export function Features() {
                   <span className="mx-auto block w-fit text-5xl font-semibold">100%</span>
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-semibold">Open Source</h2>
+                <div className="mt-4 flex justify-center">
+                  <a
+                    href="https://github.com/thalamusai/thalamus"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary"
+                  >
+                    <Github className="size-4" />
+                    View on GitHub
+                  </a>
+                </div>
               </CardContent>
             </Card>
 
