@@ -29,6 +29,7 @@ interface EventComposerProps {
     description?: string;
     isSpan: boolean;
     duration?: number;
+    dateLabel?: string;
   }) => void;
   editingNode?: TimelineNode;
   tracks: TimelineTrack[];
@@ -47,6 +48,7 @@ export function EventComposer({
 }: EventComposerProps) {
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
+  const [dateLabel, setDateLabel] = useState("");
   const [isSpan, setIsSpan] = useState(false);
   const [duration, setDuration] = useState(10);
 
@@ -56,6 +58,7 @@ export function EventComposer({
       if (editingNode) {
         setLabel(editingNode.data.label);
         setDescription(editingNode.data.description ?? "");
+        setDateLabel(editingNode.data.type === "event" ? (editingNode.data.dateLabel ?? "") : "");
         setIsSpan(editingNode.data.type === "span");
         if (editingNode.data.type === "span") {
           const dur = (editingNode.data.endPosition - editingNode.data.startPosition) * 100;
@@ -64,6 +67,7 @@ export function EventComposer({
       } else {
         setLabel("");
         setDescription("");
+        setDateLabel("");
         setIsSpan(defaultIsSpan);
         setDuration(10);
       }
@@ -78,6 +82,7 @@ export function EventComposer({
       description: description.trim() || undefined,
       isSpan,
       duration: isSpan ? duration : undefined,
+      dateLabel: dateLabel.trim() || undefined,
     });
   };
 
@@ -121,6 +126,23 @@ export function EventComposer({
               autoFocus
             />
           </div>
+
+          {/* Date Label - only for events */}
+          {!isSpan && (
+            <div className="grid gap-2">
+              <Label htmlFor="dateLabel">Date/Marker Label</Label>
+              <Input
+                id="dateLabel"
+                value={dateLabel}
+                onChange={(e) => setDateLabel(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="e.g., 1921, Jan 2024..."
+              />
+              <p className="text-xs text-muted-foreground">
+                Shown on the timeline next to the marker
+              </p>
+            </div>
+          )}
 
           {/* Description */}
           <div className="grid gap-2">
