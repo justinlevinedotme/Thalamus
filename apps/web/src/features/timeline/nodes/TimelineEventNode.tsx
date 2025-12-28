@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { type Node, type NodeProps } from "@xyflow/react";
 import type { TimelineEventData } from "../types";
 
 type TimelineEventNodeType = Node<TimelineEventData, "timelineEvent">;
@@ -21,20 +21,6 @@ export const TimelineEventNode = memo(function TimelineEventNode({
         minWidth: 80,
       }}
     >
-      {/* Source handle (right) */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!w-2 !h-2 !bg-primary !border-background"
-      />
-
-      {/* Target handle (left) */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="!w-2 !h-2 !bg-primary !border-background"
-      />
-
       {/* Icon if present */}
       {data.icon && (
         <div className="text-lg mb-1">{data.icon.type === "emoji" && data.icon.value}</div>
