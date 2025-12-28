@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -67,6 +67,9 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
   const [isCreatingSpan, setIsCreatingSpan] = useState(false);
   const [composerAbove, setComposerAbove] = useState(true);
 
+  // Track original Y positions when drag starts (to lock Y movement)
+  const dragStartYRef = useRef<Record<string, number>>({});
+
   // Handle node selection
   const handleNodeClick = useCallback(
     (_event: React.MouseEvent, node: TimelineNode) => {
@@ -119,15 +122,28 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
   const handleNodesChange = useCallback(
     (changes: NodeChange<TimelineNode>[]) => {
       const processedChanges = changes.map((change) => {
-        if (change.type === "position" && change.position && change.dragging) {
-          // Find the original node to get its Y position
-          const node = nodes.find((n) => n.id === change.id);
-          if (!node) return change;
+        if (change.type === "position" && change.position) {
+          const nodeId = change.id;
+
+          // Store original Y when drag starts
+          if (change.dragging && !(nodeId in dragStartYRef.current)) {
+            const node = nodes.find((n) => n.id === nodeId);
+            if (node) {
+              dragStartYRef.current[nodeId] = node.position.y;
+            }
+          }
+
+          // Get the locked Y position (use stored value, or find from current nodes)
+          let lockedY = dragStartYRef.current[nodeId];
+          if (lockedY === undefined) {
+            const node = nodes.find((n) => n.id === nodeId);
+            lockedY = node?.position.y ?? change.position.y;
+          }
 
           let newX = change.position.x;
 
           // Snap to grid if enabled
-          if (gridSettings.snapToAxis) {
+          if (gridSettings.snapToAxis && change.dragging) {
             const gridStep = CANVAS_WIDTH / (axisConfig.tickCount ?? 10);
             newX = Math.round(newX / gridStep) * gridStep;
           }
@@ -135,10 +151,15 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
           // Clamp X to canvas bounds
           newX = Math.max(0, Math.min(newX, CANVAS_WIDTH - 40));
 
+          // Clear stored Y AFTER we've used it for the final position
+          if (!change.dragging && nodeId in dragStartYRef.current) {
+            delete dragStartYRef.current[nodeId];
+          }
+
           // Lock Y to original position
           return {
             ...change,
-            position: { x: newX, y: node.position.y },
+            position: { x: newX, y: lockedY },
           };
         }
         return change;

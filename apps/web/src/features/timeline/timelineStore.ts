@@ -130,10 +130,10 @@ const getEventY = (position: "above" | "below" = "above"): number => {
   }
 };
 
-// Calculate Y position for spans - on the timeline
+// Calculate Y position for spans - centered on the timeline
 const getSpanY = (): number => {
-  // Center span vertically on the timeline
-  return TIMELINE_Y - 24; // Half of 48px span height
+  // Span is now just a bar with markers (10px tall), center it on timeline
+  return TIMELINE_Y - 5; // Half of 10px marker height
 };
 
 export const useTimelineStore = create<TimelineState>((set, get) => ({

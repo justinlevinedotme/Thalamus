@@ -6,26 +6,28 @@ import { useTimelineStore } from "../timelineStore";
 type TimelineSpanNodeType = Node<TimelineSpanData, "timelineSpan">;
 
 const CANVAS_WIDTH = 1000;
-const MIN_SPAN_WIDTH = 40; // Minimum width in pixels
+const MIN_SPAN_WIDTH = 40;
+const MARKER_SIZE = 10;
+const BAR_HEIGHT = 2;
 
-// Timeline span node - duration bar from start to end position
+// Timeline span node - two lollipop markers connected by a bar
 export const TimelineSpanNode = memo(function TimelineSpanNode({
   id,
   data,
   selected,
-  positionAbsoluteX,
   positionAbsoluteY,
 }: NodeProps<TimelineSpanNodeType>) {
   const { updateNodeData, pushHistory, onNodesChange } = useTimelineStore();
   const { screenToFlowPosition } = useReactFlow();
 
-  // Track which edge is being dragged
   const [resizing, setResizing] = useState<"left" | "right" | null>(null);
   const startDataRef = useRef<{
     startPosition: number;
     endPosition: number;
     startX: number;
   } | null>(null);
+
+  const markerColor = data.color ?? (selected ? "hsl(var(--primary))" : "hsl(var(--foreground))");
 
   // Calculate width based on start/end positions
   const width = useMemo(() => {
@@ -42,15 +44,12 @@ export const TimelineSpanNode = memo(function TimelineSpanNode({
       const newAxisPosition = Math.max(0, Math.min(1, flowPos.x / CANVAS_WIDTH));
 
       if (resizing === "left") {
-        // Resize from left - update startPosition and move node position
         const minStart = 0;
         const maxStart = startDataRef.current.endPosition - MIN_SPAN_WIDTH / CANVAS_WIDTH;
         const clampedStart = Math.max(minStart, Math.min(maxStart, newAxisPosition));
 
-        // Update both the data and the node position
         updateNodeData(id, { startPosition: clampedStart });
 
-        // Move the node's X position to match the new start
         const newX = clampedStart * CANVAS_WIDTH;
         onNodesChange([
           {
@@ -60,7 +59,6 @@ export const TimelineSpanNode = memo(function TimelineSpanNode({
           },
         ]);
       } else {
-        // Resize from right - update endPosition, keep startPosition fixed
         const minEnd = startDataRef.current.startPosition + MIN_SPAN_WIDTH / CANVAS_WIDTH;
         const maxEnd = 1;
         const clampedEnd = Math.max(minEnd, Math.min(maxEnd, newAxisPosition));
@@ -71,13 +69,11 @@ export const TimelineSpanNode = memo(function TimelineSpanNode({
     [resizing, id, updateNodeData, screenToFlowPosition, onNodesChange, positionAbsoluteY]
   );
 
-  // Handle mouse up to end resize
   const handleMouseUp = useCallback(() => {
     setResizing(null);
     startDataRef.current = null;
   }, []);
 
-  // Add/remove global event listeners during resize
   useEffect(() => {
     if (resizing) {
       window.addEventListener("mousemove", handleMouseMove);
@@ -89,10 +85,9 @@ export const TimelineSpanNode = memo(function TimelineSpanNode({
     }
   }, [resizing, handleMouseMove, handleMouseUp]);
 
-  // Start resizing from left edge
   const handleLeftMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      e.stopPropagation(); // Prevent node drag
+      e.stopPropagation();
       pushHistory();
       startDataRef.current = {
         startPosition: data.startPosition,
@@ -104,10 +99,9 @@ export const TimelineSpanNode = memo(function TimelineSpanNode({
     [data.startPosition, data.endPosition, pushHistory]
   );
 
-  // Start resizing from right edge
   const handleRightMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      e.stopPropagation(); // Prevent node drag
+      e.stopPropagation();
       pushHistory();
       startDataRef.current = {
         startPosition: data.startPosition,
@@ -120,56 +114,103 @@ export const TimelineSpanNode = memo(function TimelineSpanNode({
   );
 
   return (
-    <div
-      className={`
-        relative h-12 rounded-md border-2 bg-background shadow-sm
-        transition-colors duration-150
-        ${selected ? "border-primary ring-2 ring-primary/20" : "border-border"}
-        ${resizing ? "cursor-ew-resize" : ""}
-      `}
-      style={{
-        width,
-        backgroundColor: data.color ?? "rgba(59, 130, 246, 0.1)",
-        borderColor: data.color ?? undefined,
-      }}
-    >
-      {/* Left resize handle - nodrag class prevents React Flow from dragging */}
+    <div className="relative flex items-center" style={{ width, height: MARKER_SIZE }}>
+      {/* Left lollipop marker */}
       <div
         className={`
           nodrag nopan
-          absolute left-0 top-0 bottom-0 w-3 cursor-ew-resize z-10
-          hover:bg-primary/30 active:bg-primary/50
-          ${resizing === "left" ? "bg-primary/50" : ""}
+          absolute left-0 rounded-full cursor-ew-resize z-10
+          transition-all duration-150
+          ${selected ? "ring-2 ring-primary/20" : ""}
+          ${resizing === "left" ? "scale-125" : "hover:scale-110"}
         `}
+        style={{
+          width: MARKER_SIZE,
+          height: MARKER_SIZE,
+          backgroundColor: markerColor,
+          transform: `translateX(-${MARKER_SIZE / 2}px)`,
+        }}
         onMouseDown={handleLeftMouseDown}
       />
 
-      {/* Right resize handle - nodrag class prevents React Flow from dragging */}
+      {/* Connecting bar */}
+      <div
+        className="absolute left-0 right-0 transition-colors duration-150"
+        style={{
+          height: BAR_HEIGHT,
+          backgroundColor: markerColor,
+          top: (MARKER_SIZE - BAR_HEIGHT) / 2,
+        }}
+      />
+
+      {/* Right lollipop marker */}
       <div
         className={`
           nodrag nopan
-          absolute right-0 top-0 bottom-0 w-3 cursor-ew-resize z-10
-          hover:bg-primary/30 active:bg-primary/50
-          ${resizing === "right" ? "bg-primary/50" : ""}
+          absolute right-0 rounded-full cursor-ew-resize z-10
+          transition-all duration-150
+          ${selected ? "ring-2 ring-primary/20" : ""}
+          ${resizing === "right" ? "scale-125" : "hover:scale-110"}
         `}
+        style={{
+          width: MARKER_SIZE,
+          height: MARKER_SIZE,
+          backgroundColor: markerColor,
+          transform: `translateX(${MARKER_SIZE / 2}px)`,
+        }}
         onMouseDown={handleRightMouseDown}
       />
 
-      {/* Content */}
-      <div className="h-full flex items-center px-3">
-        {/* Icon if present */}
-        {data.icon && (
-          <div className="text-lg mr-2">{data.icon.type === "emoji" && data.icon.value}</div>
-        )}
-
-        {/* Label */}
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-foreground truncate">{data.label}</div>
-          {data.description && (
-            <div className="text-xs text-muted-foreground truncate">{data.description}</div>
-          )}
+      {/* Label (centered above the bar) */}
+      {data.label && (
+        <div
+          className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap pointer-events-none"
+          style={{ bottom: MARKER_SIZE + 4 }}
+        >
+          <div
+            className={`
+              px-2 py-1 rounded border border-dashed bg-background text-xs font-medium
+              ${selected ? "border-primary" : "border-border"}
+            `}
+            style={{
+              borderColor: data.color ? markerColor : undefined,
+              borderStyle: data.color ? "solid" : "dashed",
+            }}
+          >
+            {data.label}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Start date label */}
+      {data.rawStartValue && (
+        <div
+          className="absolute text-xs font-medium whitespace-nowrap pointer-events-none"
+          style={{
+            left: 0,
+            top: MARKER_SIZE + 4,
+            transform: `translateX(-${MARKER_SIZE / 2}px)`,
+            color: markerColor,
+          }}
+        >
+          {String(data.rawStartValue)}
+        </div>
+      )}
+
+      {/* End date label */}
+      {data.rawEndValue && (
+        <div
+          className="absolute text-xs font-medium whitespace-nowrap pointer-events-none"
+          style={{
+            right: 0,
+            top: MARKER_SIZE + 4,
+            transform: `translateX(${MARKER_SIZE / 2}px)`,
+            color: markerColor,
+          }}
+        >
+          {String(data.rawEndValue)}
+        </div>
+      )}
     </div>
   );
 });
