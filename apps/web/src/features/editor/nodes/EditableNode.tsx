@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
-import { Handle, Position, useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react";
+import { useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
+import { BaseNode } from "../../../components/ui/base-node";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
 import { Kbd } from "../../../components/ui/kbd";
 import {
-  type EdgePadding,
   type NodeHandle,
   type NodeKind,
-  type NodeSize,
   type NodeStyle,
   useGraphStore,
 } from "../../../store/graphStore";
+import { NodeHandles } from "./NodeHandles";
+import { DEFAULT_TEXT_COLOR, getSizeClasses, getIconSizeClass, stripHtml } from "./utils";
 
 type EditableNodeData = {
   label: string;
@@ -24,53 +25,6 @@ type EditableNodeData = {
 };
 
 type EditableNodeType = Node<EditableNodeData, "editable">;
-
-// Default text color for nodes without explicit textColor (ensures readability on light backgrounds)
-const DEFAULT_TEXT_COLOR = "#1f2937"; // gray-800
-
-const edgePaddingToOffset = (padding: EdgePadding | undefined): number => {
-  switch (padding) {
-    case "sm":
-      return 8;
-    case "md":
-      return 16;
-    case "lg":
-      return 24;
-    default:
-      return 0;
-  }
-};
-
-// Size class mappings for node dimensions
-const getSizeClasses = (size: NodeSize | undefined): string => {
-  switch (size) {
-    case "sm":
-      return "text-xs px-2 py-1";
-    case "lg":
-      return "text-base px-4 py-3";
-    case "md":
-    default:
-      return "text-sm px-3 py-2";
-  }
-};
-
-const getIconSizeClass = (size: NodeSize | undefined): string => {
-  switch (size) {
-    case "sm":
-      return "h-3 w-3";
-    case "lg":
-      return "h-5 w-5";
-    case "md":
-    default:
-      return "h-4 w-4";
-  }
-};
-
-// Strip HTML tags for plain text display
-const stripHtml = (html: string): string => {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  return doc.body.textContent || "";
-};
 
 export default function EditableNode({ id, data, selected }: NodeProps<EditableNodeType>) {
   const { editingNodeId, startEditingNode, stopEditingNode, updateNodeLabel, updateNodeBody } =
@@ -159,19 +113,6 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
     }
   };
 
-  const shapeClass = (() => {
-    switch (data.style?.shape) {
-      case "circle":
-        return "rounded-full";
-      case "pill":
-        return "rounded-full";
-      case "square":
-        return "rounded-none";
-      default:
-        return "rounded-lg";
-    }
-  })();
-
   // Get border properties with defaults
   const borderWidth = data.style?.borderWidth ?? 1;
   const borderStyle = data.style?.borderStyle ?? "solid";
@@ -193,48 +134,26 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
 
   const targetHandles = data.targetHandles ?? [{ id: "target" }];
   const sourceHandles = data.sourceHandles ?? [{ id: "source" }];
-  const paddingOffset = edgePaddingToOffset(data.style?.edgePadding);
   const sizeClasses = getSizeClasses(data.style?.size);
   const iconSizeClass = getIconSizeClass(data.style?.size);
 
   return (
-    <div
-      className={`relative h-full w-full shadow-sm transition ${shapeClass} ${sizeClasses} ${
+    <BaseNode
+      selected={selected && !hasBorder}
+      shape={data.style?.shape}
+      className={`h-full w-full ${sizeClasses} ${
         selected && hasBorder ? "!border-muted-foreground" : ""
-      } ${selected && !hasBorder ? "ring-2 ring-muted-foreground ring-offset-0" : ""}`}
+      }`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}
-      tabIndex={0}
       aria-label={`Node ${stripHtml(data.label)}`}
       style={nodeStyle}
     >
-      {/* Target handles (left side) */}
-      {targetHandles.map((handle, index) => (
-        <Handle
-          key={handle.id}
-          id={handle.id}
-          type="target"
-          position={Position.Left}
-          style={{
-            top: `${((index + 1) / (targetHandles.length + 1)) * 100}%`,
-            left: -paddingOffset,
-          }}
-        />
-      ))}
-
-      {/* Source handles (right side) */}
-      {sourceHandles.map((handle, index) => (
-        <Handle
-          key={handle.id}
-          id={handle.id}
-          type="source"
-          position={Position.Right}
-          style={{
-            top: `${((index + 1) / (sourceHandles.length + 1)) * 100}%`,
-            right: -paddingOffset,
-          }}
-        />
-      ))}
+      <NodeHandles
+        sourceHandles={sourceHandles}
+        targetHandles={targetHandles}
+        edgePadding={data.style?.edgePadding}
+      />
 
       {/* Title */}
       <div className="flex items-center gap-1.5">
@@ -321,6 +240,6 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
           </div>
         </div>
       )}
-    </div>
+    </BaseNode>
   );
 }
