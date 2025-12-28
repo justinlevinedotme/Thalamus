@@ -115,11 +115,15 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
     [tracks, screenToFlowPosition]
   );
 
-  // Handle node changes - constrain X only
+  // Handle node changes - lock Y position, only allow X movement
   const handleNodesChange = useCallback(
     (changes: NodeChange<TimelineNode>[]) => {
       const processedChanges = changes.map((change) => {
         if (change.type === "position" && change.position && change.dragging) {
+          // Find the original node to get its Y position
+          const node = nodes.find((n) => n.id === change.id);
+          if (!node) return change;
+
           let newX = change.position.x;
 
           // Snap to grid if enabled
@@ -131,9 +135,10 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
           // Clamp X to canvas bounds
           newX = Math.max(0, Math.min(newX, CANVAS_WIDTH - 40));
 
+          // Lock Y to original position
           return {
             ...change,
-            position: { x: newX, y: change.position.y },
+            position: { x: newX, y: node.position.y },
           };
         }
         return change;
@@ -141,7 +146,7 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
 
       onNodesChange(processedChanges as NodeChange<TimelineNode>[]);
     },
-    [gridSettings, axisConfig, onNodesChange]
+    [nodes, gridSettings, axisConfig, onNodesChange]
   );
 
   // Handle node drag stop - update axis position
