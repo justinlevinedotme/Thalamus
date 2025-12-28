@@ -4,68 +4,98 @@ import type { TimelineEventData } from "../types";
 
 type TimelineEventNodeType = Node<TimelineEventData, "timelineEvent">;
 
-// Marker sits on the timeline, content card floats above
-const MARKER_SIZE = 12;
-const STEM_HEIGHT = 8;
+const MARKER_SIZE = 10;
+const STEM_HEIGHT = 40;
 
-// Timeline event node - marker on timeline with content card above
+// Timeline event node - marker on timeline with card above or below
 export const TimelineEventNode = memo(function TimelineEventNode({
   data,
   selected,
 }: NodeProps<TimelineEventNodeType>) {
-  const markerColor = selected ? "hsl(var(--primary))" : (data.color ?? "hsl(var(--primary))");
+  const isAbove = data.position !== "below";
+  const markerColor = data.color ?? (selected ? "hsl(var(--primary))" : "hsl(var(--foreground))");
+  const isHighlighted = !!data.color;
 
-  return (
-    <div className="relative flex flex-col items-center">
-      {/* Content card above the marker */}
-      <div
-        className={`
-          px-3 py-2 rounded-lg border bg-background shadow-md
-          transition-all duration-150 max-w-[140px]
-          ${selected ? "border-primary ring-2 ring-primary/20 shadow-lg" : "border-border"}
-        `}
-      >
-        {/* Icon if present */}
-        {data.icon && (
-          <div className="text-base mb-1 text-center">
-            {data.icon.type === "emoji" && data.icon.value}
-          </div>
-        )}
-
-        {/* Label */}
-        <div className="text-sm font-medium text-foreground text-center truncate">{data.label}</div>
-
-        {/* Description preview */}
-        {data.description && (
-          <div className="text-xs text-muted-foreground text-center truncate mt-0.5">
-            {data.description}
-          </div>
-        )}
-      </div>
-
-      {/* Stem connecting card to marker */}
-      <div
-        className="transition-colors duration-150"
-        style={{
-          width: 2,
-          height: STEM_HEIGHT,
-          backgroundColor: markerColor,
-        }}
-      />
-
-      {/* Marker dot on the timeline */}
-      <div
-        className={`
-          rounded-full border-2 transition-all duration-150
-          ${selected ? "border-primary bg-primary" : "border-primary bg-background"}
-        `}
-        style={{
-          width: MARKER_SIZE,
-          height: MARKER_SIZE,
-          borderColor: markerColor,
-          backgroundColor: selected ? markerColor : undefined,
-        }}
-      />
+  // Content card component (reused for above/below)
+  const Card = (
+    <div
+      className={`
+        px-3 py-2 rounded border border-dashed bg-background
+        transition-all duration-150 min-w-[80px]
+        ${selected ? "border-primary ring-2 ring-primary/20" : "border-border"}
+        ${isHighlighted ? "border-solid" : ""}
+      `}
+      style={{
+        borderColor: isHighlighted ? markerColor : undefined,
+      }}
+    >
+      {data.icon && (
+        <div className="text-sm mb-1 text-center">
+          {data.icon.type === "emoji" && data.icon.value}
+        </div>
+      )}
+      <div className="text-xs font-medium text-foreground text-center">{data.label}</div>
+      {data.description && (
+        <div className="text-xs text-muted-foreground text-center truncate mt-0.5">
+          {data.description}
+        </div>
+      )}
     </div>
   );
+
+  // Stem component
+  const Stem = (
+    <div
+      className="transition-colors duration-150"
+      style={{
+        width: 2,
+        height: STEM_HEIGHT,
+        backgroundColor: markerColor,
+      }}
+    />
+  );
+
+  // Marker component
+  const Marker = (
+    <div
+      className="rounded-full transition-all duration-150 flex-shrink-0"
+      style={{
+        width: MARKER_SIZE,
+        height: MARKER_SIZE,
+        backgroundColor: markerColor,
+      }}
+    />
+  );
+
+  // Date label component
+  const DateLabel = data.dateLabel ? (
+    <div
+      className="text-xs font-medium text-foreground"
+      style={{ color: isHighlighted ? markerColor : undefined }}
+    >
+      {data.dateLabel}
+    </div>
+  ) : null;
+
+  if (isAbove) {
+    // Card above: Card -> Stem -> Marker -> DateLabel
+    return (
+      <div className="relative flex flex-col items-center">
+        {Card}
+        {Stem}
+        {Marker}
+        {DateLabel && <div className="mt-1">{DateLabel}</div>}
+      </div>
+    );
+  } else {
+    // Card below: DateLabel -> Marker -> Stem -> Card
+    return (
+      <div className="relative flex flex-col items-center">
+        {DateLabel && <div className="mb-1">{DateLabel}</div>}
+        {Marker}
+        {Stem}
+        {Card}
+      </div>
+    );
+  }
 });

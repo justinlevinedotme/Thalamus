@@ -50,6 +50,9 @@ export interface TimelineEventData {
   icon?: NodeIcon;
   color?: string;
   style?: Partial<NodeStyle>;
+  // Timeline-specific
+  dateLabel?: string; // Label shown on the marker (e.g., "1921", "Jan 2024")
+  position?: "above" | "below"; // Card position relative to timeline
   [key: string]: unknown; // Index signature for React Flow v12 compatibility
 }
 

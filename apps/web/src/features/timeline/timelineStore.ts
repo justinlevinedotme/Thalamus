@@ -66,7 +66,13 @@ interface TimelineState {
   // Node actions
   setNodes: (nodes: TimelineNode[]) => void;
   onNodesChange: (changes: NodeChange<TimelineNode>[]) => void;
-  addEvent: (trackId: string, axisPosition: number, label: string) => void;
+  addEvent: (
+    trackId: string,
+    axisPosition: number,
+    label: string,
+    position?: "above" | "below",
+    dateLabel?: string
+  ) => void;
   addSpan: (trackId: string, start: number, end: number, label: string) => void;
   updateNodeData: (nodeId: string, data: Partial<TimelineNodeData>) => void;
   deleteNode: (nodeId: string) => void;
@@ -106,25 +112,28 @@ interface TimelineState {
 // Generate unique IDs
 const generateId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-// Timeline line offset from bottom of track
-const TIMELINE_OFFSET = 16;
+// Central timeline Y position (must match TimelineCanvas.TIMELINE_Y)
+const TIMELINE_Y = 200;
 
-// Calculate Y position for events - positioned so marker lands on timeline
-// Timeline line is at trackY + trackHeight - TIMELINE_OFFSET
-// Event marker is at bottom of node, so we position node above the line
-const getEventY = (tracks: TimelineTrack[], trackId: string, trackHeight = 80): number => {
-  const trackIndex = tracks.findIndex((t) => t.id === trackId);
-  if (trackIndex === -1) return 100;
-  // Position at top of track with some padding
-  return 100 + trackIndex * trackHeight + 4;
+// Heights for calculating node positions
+const EVENT_HEIGHT_ABOVE = 100; // Height of event card + stem when above
+const EVENT_HEIGHT_BELOW = 100; // Height of event card + stem when below
+
+// Calculate Y position for events - above or below the timeline
+const getEventY = (position: "above" | "below" = "above"): number => {
+  if (position === "above") {
+    // Position so marker lands on timeline (marker is at bottom of node)
+    return TIMELINE_Y - EVENT_HEIGHT_ABOVE;
+  } else {
+    // Position so marker lands on timeline (marker is at top of node for below)
+    return TIMELINE_Y;
+  }
 };
 
-// Calculate Y position for spans - centered in track
-const getSpanY = (tracks: TimelineTrack[], trackId: string, trackHeight = 80): number => {
-  const trackIndex = tracks.findIndex((t) => t.id === trackId);
-  if (trackIndex === -1) return 100;
-  // Center span vertically in track (span is 48px tall)
-  return 100 + trackIndex * trackHeight + (trackHeight - 48) / 2;
+// Calculate Y position for spans - on the timeline
+const getSpanY = (): number => {
+  // Center span vertically on the timeline
+  return TIMELINE_Y - 24; // Half of 48px span height
 };
 
 export const useTimelineStore = create<TimelineState>((set, get) => ({
@@ -159,7 +168,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       };
     }),
 
-  addEvent: (trackId, axisPosition, label) => {
+  addEvent: (trackId, axisPosition, label, position = "above", dateLabel) => {
     const state = get();
     state.pushHistory();
 
@@ -168,13 +177,15 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       type: "timelineEvent",
       position: {
         x: axisPosition * 1000, // Scale position to canvas
-        y: getEventY(state.tracks, trackId),
+        y: getEventY(position),
       },
       data: {
         type: "event",
         axisPosition,
         trackId,
         label,
+        position,
+        dateLabel,
       },
     };
 
@@ -193,7 +204,7 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
       type: "timelineSpan",
       position: {
         x: start * 1000,
-        y: getSpanY(state.tracks, trackId),
+        y: getSpanY(),
       },
       data: {
         type: "span",
@@ -316,15 +327,15 @@ export const useTimelineStore = create<TimelineState>((set, get) => ({
     const [removed] = newTracks.splice(fromIndex, 1);
     newTracks.splice(toIndex, 0, removed);
 
-    // Update node Y positions based on new track order
+    // Update node Y positions (for single-line layout, just preserve current positions)
     const updatedNodes = state.nodes.map((node) => ({
       ...node,
       position: {
         ...node.position,
         y:
           node.data.type === "span"
-            ? getSpanY(newTracks, node.data.trackId)
-            : getEventY(newTracks, node.data.trackId),
+            ? getSpanY()
+            : getEventY(node.data.type === "event" ? node.data.position : "above"),
       },
     }));
 
