@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   Panel,
@@ -45,9 +46,19 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
     addEvent,
     addSpan,
     updateNodeData,
+    setFlowInstance,
   } = useTimelineStore();
 
-  const { screenToFlowPosition } = useReactFlow();
+  const reactFlowInstance = useReactFlow();
+  const { screenToFlowPosition } = reactFlowInstance;
+
+  // Set flow instance on mount
+  const handleInit = useCallback(
+    (instance: ReactFlowInstance<TimelineNode, TimelineEdge>) => {
+      setFlowInstance(instance);
+    },
+    [setFlowInstance]
+  );
 
   // Context menu state
   const [contextMenu, setContextMenu] = useState<TimelineContextMenuState>(null);
@@ -295,6 +306,7 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
         nodes={nodes}
         edges={edges}
         nodeTypes={timelineNodeTypes}
+        onInit={handleInit}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
@@ -383,31 +395,11 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
 
 // Wrapper component that provides ReactFlowProvider context
 export default function TimelineCanvas(props: TimelineCanvasProps) {
-  const { nodes, edges, tracks, axisConfig, gridSettings, setFlowInstance } = useTimelineStore();
-
-  // Initialize flow instance
-  const handleInit = useCallback(
-    (instance: ReactFlowInstance<TimelineNode, TimelineEdge>) => {
-      setFlowInstance(instance);
-    },
-    [setFlowInstance]
-  );
-
   return (
-    <div className="h-full w-full relative">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={timelineNodeTypes}
-        onInit={handleInit}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.1}
-        maxZoom={2}
-        proOptions={{ hideAttribution: true }}
-      >
+    <ReactFlowProvider>
+      <div className="h-full w-full relative">
         <TimelineCanvasInner {...props} />
-      </ReactFlow>
-    </div>
+      </div>
+    </ReactFlowProvider>
   );
 }
