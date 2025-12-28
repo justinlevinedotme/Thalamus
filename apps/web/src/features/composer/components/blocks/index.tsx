@@ -219,7 +219,7 @@ function CodeBlockRenderer({ block, preview }: { block: CodeBlock; preview?: boo
 }
 
 // Separator block renderer
-function SeparatorBlockRenderer({ block }: { block: SeparatorBlock }) {
+function SeparatorBlockRenderer({ block }: { block: SeparatorBlock; preview?: boolean }) {
   const margin = {
     none: "0",
     sm: "0.25rem",
@@ -261,7 +261,7 @@ function IconBlockRenderer({ block, preview }: { block: IconBlock; preview?: boo
 }
 
 // Badge block renderer
-function BadgeBlockRenderer({ block }: { block: BadgeBlock }) {
+function BadgeBlockRenderer({ block }: { block: BadgeBlock; preview?: boolean }) {
   const variant = BADGE_VARIANTS[block.variant || "default"];
   const sizeClasses = {
     xs: "text-[10px] px-1.5 py-0.5",
