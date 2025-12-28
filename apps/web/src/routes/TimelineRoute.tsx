@@ -1,44 +1,83 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Clock, Layers, Plus, Settings, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  GripVertical,
+  Layers,
+  Plus,
+  Settings,
+  Trash2,
+} from "lucide-react";
 
 import { Card } from "../components/ui/card";
 import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
-import { getGraph, updateGraph, createGraph } from "../features/cloud/graphApi";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import { getGraph, updateGraph, createGraph, type GraphPayload } from "../features/cloud/graphApi";
 import { useAuthStore } from "../store/authStore";
-import { useGraphStore } from "../store/graphStore";
+import { useTimelineStore } from "../features/timeline/timelineStore";
+import { TimelineCanvas } from "../features/timeline/components";
+import type {
+  AxisType,
+  TimelineData,
+  TimelineNode,
+  TimelineEdge,
+} from "../features/timeline/types";
 
 export default function TimelineRoute() {
   const { graphId } = useParams();
   const navigate = useNavigate();
-  const { user, status } = useAuthStore();
+  const { user } = useAuthStore();
   const {
     nodes,
     edges,
-    groups,
-    graphTitle,
-    setGraphTitle,
+    tracks,
+    axisConfig,
+    gridSettings,
+    dataVersion,
     setNodes,
     setEdges,
-    setGroups,
-    dataVersion,
-    gridSettings,
+    setTracks,
+    setAxisConfig,
     setGridSettings,
-  } = useGraphStore();
+    addTrack,
+    removeTrack,
+    updateTrack,
+    reset,
+  } = useTimelineStore();
 
+  const [graphTitle, setGraphTitle] = useState("Untitled Timeline");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
+  const [newTrackLabel, setNewTrackLabel] = useState("");
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedVersionRef = useRef<number>(0);
 
   const canSave = Boolean(user);
+  // Use type assertion since timeline data structure differs from standard GraphPayload
   const payload = useMemo(
-    () => ({ nodes, edges, groups, gridSettings }),
-    [edges, groups, nodes, gridSettings]
+    () =>
+      ({
+        nodes: nodes as unknown as GraphPayload["nodes"],
+        edges: edges as unknown as GraphPayload["edges"],
+        timeline: {
+          tracks,
+          axisConfig,
+          gridSettings,
+        } as TimelineData,
+      }) as unknown as GraphPayload,
+    [nodes, edges, tracks, axisConfig, gridSettings]
   );
 
   // Save handler
@@ -53,7 +92,6 @@ export default function TimelineRoute() {
         navigate(`/timeline/${graph.id}`);
       }
       setSaveStatus("saved");
-      setLastSavedAt(new Date());
       lastSavedVersionRef.current = dataVersion;
       setTimeout(() => setSaveStatus("idle"), 1500);
     } catch (error) {
@@ -68,7 +106,6 @@ export default function TimelineRoute() {
       const isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
       const modKey = isMac ? event.metaKey : event.ctrlKey;
 
-      // Cmd/Ctrl + S - Save
       if (modKey && event.key === "s") {
         event.preventDefault();
         if (canSave) {
@@ -108,10 +145,10 @@ export default function TimelineRoute() {
   useEffect(() => {
     if (!graphId) {
       // New timeline - reset state
-      setNodes([]);
-      setEdges([]);
-      setGroups([]);
+      reset();
       setGraphTitle("Untitled Timeline");
+      // Add default track
+      addTrack("Track 1");
       return;
     }
 
@@ -120,16 +157,19 @@ export default function TimelineRoute() {
         const graph = await getGraph(graphId);
         if (graph) {
           setGraphTitle(graph.title);
-          const data = graph.data as {
-            nodes?: typeof nodes;
-            edges?: typeof edges;
-            groups?: typeof groups;
-            gridSettings?: typeof gridSettings;
+          // Cast to timeline-specific data structure
+          const data = graph.data as unknown as {
+            nodes?: TimelineNode[];
+            edges?: TimelineEdge[];
+            timeline?: TimelineData;
           };
           if (data.nodes) setNodes(data.nodes);
           if (data.edges) setEdges(data.edges);
-          if (data.groups) setGroups(data.groups);
-          if (data.gridSettings) setGridSettings(data.gridSettings);
+          if (data.timeline) {
+            if (data.timeline.tracks) setTracks(data.timeline.tracks);
+            if (data.timeline.axisConfig) setAxisConfig(data.timeline.axisConfig);
+            if (data.timeline.gridSettings) setGridSettings(data.timeline.gridSettings);
+          }
           lastSavedVersionRef.current = dataVersion;
         }
       } catch (error) {
@@ -139,7 +179,15 @@ export default function TimelineRoute() {
     };
 
     void loadGraph();
-  }, [graphId, setNodes, setEdges, setGroups, setGraphTitle, setGridSettings, dataVersion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graphId]);
+
+  // Handle add track
+  const handleAddTrack = () => {
+    const label = newTrackLabel.trim() || `Track ${tracks.length + 1}`;
+    addTrack(label);
+    setNewTrackLabel("");
+  };
 
   if (loadError) {
     return (
@@ -195,23 +243,62 @@ export default function TimelineRoute() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative">
           {/* Left Panel - Track Manager */}
           {showLeftPanel && (
-            <div className="w-64 border-r border-border bg-muted/30 flex flex-col">
+            <div className="w-64 border-r border-border bg-muted/30 flex flex-col z-10">
               <div className="p-3 border-b border-border flex items-center justify-between">
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <Layers className="h-4 w-4" />
-                  Tracks
+                  Tracks ({tracks.length})
                 </h3>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
+              </div>
+
+              {/* Add track form */}
+              <div className="p-3 border-b border-border flex gap-2">
+                <Input
+                  value={newTrackLabel}
+                  onChange={(e) => setNewTrackLabel(e.target.value)}
+                  placeholder="New track name..."
+                  className="h-8 text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAddTrack();
+                  }}
+                />
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleAddTrack}>
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="flex-1 p-3">
-                <p className="text-xs text-muted-foreground">
-                  No tracks yet. Add a track to get started.
-                </p>
+
+              {/* Track list */}
+              <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                {tracks.length === 0 ? (
+                  <p className="text-xs text-muted-foreground p-2">
+                    No tracks yet. Add a track to get started.
+                  </p>
+                ) : (
+                  tracks.map((track, index) => (
+                    <div
+                      key={track.id}
+                      className="flex items-center gap-2 p-2 rounded-md bg-background border border-border group"
+                    >
+                      <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: track.color ?? "#64748b" }}
+                      />
+                      <span className="flex-1 text-sm truncate">{track.label}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100"
+                        onClick={() => removeTrack(track.id)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -221,7 +308,7 @@ export default function TimelineRoute() {
             <TooltipTrigger asChild>
               <button
                 onClick={() => setShowLeftPanel(!showLeftPanel)}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-background border border-border rounded-r-md p-1 hover:bg-muted"
+                className="absolute top-1/2 -translate-y-1/2 z-20 bg-background border border-border rounded-r-md p-1 hover:bg-muted"
                 style={{ left: showLeftPanel ? "256px" : "0" }}
               >
                 {showLeftPanel ? (
@@ -237,18 +324,8 @@ export default function TimelineRoute() {
           </Tooltip>
 
           {/* Canvas Area */}
-          <div className="flex-1 relative bg-muted/10">
-            {/* Placeholder for TimelineCanvas */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <Clock className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-                <h2 className="text-lg font-medium text-muted-foreground mb-2">Timeline Canvas</h2>
-                <p className="text-sm text-muted-foreground/70 max-w-md">
-                  The timeline canvas will render here. Add tracks on the left, configure the axis
-                  on the right, and place events along the timeline.
-                </p>
-              </div>
-            </div>
+          <div className="flex-1 relative">
+            <TimelineCanvas />
           </div>
 
           {/* Toggle Right Panel */}
@@ -256,7 +333,7 @@ export default function TimelineRoute() {
             <TooltipTrigger asChild>
               <button
                 onClick={() => setShowRightPanel(!showRightPanel)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-background border border-border rounded-l-md p-1 hover:bg-muted"
+                className="absolute top-1/2 -translate-y-1/2 z-20 bg-background border border-border rounded-l-md p-1 hover:bg-muted"
                 style={{ right: showRightPanel ? "288px" : "0" }}
               >
                 {showRightPanel ? (
@@ -273,21 +350,108 @@ export default function TimelineRoute() {
 
           {/* Right Panel - Axis Configuration */}
           {showRightPanel && (
-            <div className="w-72 border-l border-border bg-muted/30 flex flex-col">
+            <div className="w-72 border-l border-border bg-muted/30 flex flex-col z-10">
               <div className="p-3 border-b border-border">
                 <h3 className="text-sm font-medium flex items-center gap-2">
                   <Settings className="h-4 w-4" />
                   Axis Configuration
                 </h3>
               </div>
-              <div className="flex-1 p-3 space-y-4">
-                <div>
+              <div className="flex-1 p-3 space-y-4 overflow-y-auto">
+                {/* Axis Type */}
+                <div className="space-y-2">
                   <label className="text-xs font-medium text-muted-foreground">Axis Type</label>
-                  <p className="text-sm mt-1">Time-based axis</p>
+                  <Select
+                    value={axisConfig.type}
+                    onValueChange={(value: AxisType) => setAxisConfig({ type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="time">Time-based</SelectItem>
+                      <SelectItem value="number">Number scale</SelectItem>
+                      <SelectItem value="milestone">Milestones</SelectItem>
+                      <SelectItem value="custom">Custom labels</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground">Range</label>
-                  <p className="text-sm mt-1 text-muted-foreground">Not configured</p>
+
+                {/* Tick count */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Tick Count</label>
+                  <Input
+                    type="number"
+                    min={2}
+                    max={50}
+                    value={axisConfig.tickCount ?? 10}
+                    onChange={(e) => setAxisConfig({ tickCount: parseInt(e.target.value) || 10 })}
+                    className="h-8"
+                  />
+                </div>
+
+                {/* Show grid */}
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground">Show Grid</label>
+                  <input
+                    type="checkbox"
+                    checked={axisConfig.showGrid ?? true}
+                    onChange={(e) => setAxisConfig({ showGrid: e.target.checked })}
+                    className="h-4 w-4"
+                  />
+                </div>
+
+                {/* Number-specific config */}
+                {axisConfig.type === "number" && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground">
+                        Start Value
+                      </label>
+                      <Input
+                        type="number"
+                        value={axisConfig.startValue ?? 0}
+                        onChange={(e) =>
+                          setAxisConfig({ startValue: parseFloat(e.target.value) || 0 })
+                        }
+                        className="h-8"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground">End Value</label>
+                      <Input
+                        type="number"
+                        value={axisConfig.endValue ?? 100}
+                        onChange={(e) =>
+                          setAxisConfig({ endValue: parseFloat(e.target.value) || 100 })
+                        }
+                        className="h-8"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Snap settings */}
+                <div className="pt-4 border-t border-border space-y-3">
+                  <h4 className="text-xs font-medium text-muted-foreground">Snap Settings</h4>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs text-muted-foreground">Snap to Axis</label>
+                    <input
+                      type="checkbox"
+                      checked={gridSettings.snapToAxis}
+                      onChange={(e) => setGridSettings({ snapToAxis: e.target.checked })}
+                      className="h-4 w-4"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs text-muted-foreground">Snap to Track</label>
+                    <input
+                      type="checkbox"
+                      checked={gridSettings.snapToTrack}
+                      onChange={(e) => setGridSettings({ snapToTrack: e.target.checked })}
+                      className="h-4 w-4"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
