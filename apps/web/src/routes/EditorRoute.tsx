@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   Paintbrush,
   Palette,
+  Puzzle,
   Route,
   Search,
   Settings,
@@ -21,6 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/
 import { Kbd } from "../components/ui/kbd";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
 import { SpeedDial, type SpeedDialAction } from "../components/ui/speed-dial";
+import ComposedNodeInspector from "../features/editor/ComposedNodeInspector";
 import EditorSettingsInspector from "../features/editor/EditorSettingsInspector";
 import EditorToolbar from "../features/editor/EditorToolbar";
 import GraphCanvas from "../features/editor/GraphCanvas";
@@ -31,6 +33,8 @@ import RelationshipInspector from "../features/editor/RelationshipInspector";
 import NodeSearch from "../features/search/NodeSearch";
 import { getGraph, updateGraph, createGraph } from "../features/cloud/graphApi";
 import ShareDialog from "../features/share/ShareDialog";
+import { NodeComposerModal } from "../features/composer";
+import { useComposerStore } from "../features/composer/composerStore";
 import { useAuthStore } from "../store/authStore";
 import { useGraphStore } from "../store/graphStore";
 
@@ -47,6 +51,7 @@ export default function EditorRoute() {
     setNodes,
     setEdges,
     setGroups,
+    addNode,
     addNodeAtCenter,
     selectedNodeId,
     selectedEdgeId,
@@ -64,6 +69,9 @@ export default function EditorRoute() {
     undo,
     redo,
     dataVersion,
+    updateNodeLayout,
+    gridSettings,
+    setGridSettings,
   } = useGraphStore();
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -77,11 +85,15 @@ export default function EditorRoute() {
   const [layoutOpen, setLayoutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const openComposer = useComposerStore((s) => s.openComposer);
   // Track last saved version instead of stringifying entire payload
   const lastSavedVersionRef = useRef<number>(0);
 
   const canSave = Boolean(user);
-  const payload = useMemo(() => ({ nodes, edges, groups }), [edges, groups, nodes]);
+  const payload = useMemo(
+    () => ({ nodes, edges, groups, gridSettings }),
+    [edges, groups, nodes, gridSettings]
+  );
 
   // Speed dial actions for adding different node types
   const speedDialActions: SpeedDialAction[] = useMemo(
@@ -114,8 +126,44 @@ export default function EditorRoute() {
         label: "Node Key",
         onClick: () => addNodeAtCenter("nodeKey"),
       },
+      {
+        icon: <Puzzle className="h-5 w-5" />,
+        label: "Compose Node",
+        onClick: () => openComposer("create"),
+        kbd: "⌥C",
+      },
     ],
-    [addNodeAtCenter]
+    [addNodeAtCenter, openComposer]
+  );
+
+  // Handler for composed node creation/update
+  const handleComposedNodeApply = useCallback(
+    (layout: unknown, mode: "create" | "edit" | "template", targetNodeId?: string) => {
+      if (!layout) return;
+
+      if (mode === "edit" && targetNodeId) {
+        // Update existing node
+        updateNodeLayout(targetNodeId, layout);
+      } else {
+        // Create new node
+        const canvas = document.getElementById("graph-canvas");
+        let position = { x: 0, y: 0 };
+        if (flowInstance && canvas) {
+          const bounds = canvas.getBoundingClientRect();
+          position = flowInstance.screenToFlowPosition({
+            x: bounds.left + bounds.width / 2,
+            y: bounds.top + bounds.height / 2,
+          });
+        }
+        addNode({
+          kind: "composed",
+          label: (layout as { name?: string }).name || "Composed Node",
+          layout,
+          position,
+        });
+      }
+    },
+    [addNode, flowInstance, updateNodeLayout]
   );
 
   // Define handleSave first so it can be used in handleKeyDown
@@ -281,6 +329,13 @@ export default function EditorRoute() {
         return;
       }
 
+      // Option/Alt + C - Open node composer
+      if (event.code === "KeyC" && event.altKey && !modKey) {
+        event.preventDefault();
+        openComposer("create");
+        return;
+      }
+
       // Escape - Close search
       if (event.key === "Escape" && searchOpen) {
         setSearchOpen(false);
@@ -302,6 +357,7 @@ export default function EditorRoute() {
       flowInstance,
       undo,
       redo,
+      openComposer,
     ]
   );
 
@@ -325,6 +381,9 @@ export default function EditorRoute() {
         setNodes(graph.data?.nodes ?? []);
         setEdges(graph.data?.edges ?? []);
         setGroups(graph.data?.groups ?? []);
+        if (graph.data?.gridSettings) {
+          setGridSettings(graph.data.gridSettings);
+        }
         setLoadError(null);
       } catch (error) {
         if (!ignore) {
@@ -336,7 +395,7 @@ export default function EditorRoute() {
     return () => {
       ignore = true;
     };
-  }, [graphId, setEdges, setGraphTitle, setGroups, setNodes, user]);
+  }, [graphId, setEdges, setGraphTitle, setGridSettings, setGroups, setNodes, user]);
 
   // Auto-save: debounce changes and save after 3 seconds of inactivity
   // Uses version-based dirty check instead of JSON.stringify for O(1) comparison
@@ -545,7 +604,13 @@ export default function EditorRoute() {
                 <ChevronRight className="h-4 w-4" />
               </button>
               <div className="flex-1 space-y-3">
-                {selectedNodeId ? <NodeStyleInspector /> : null}
+                {selectedNodeId ? (
+                  nodes.find((n) => n.id === selectedNodeId)?.data?.kind === "composed" ? (
+                    <ComposedNodeInspector />
+                  ) : (
+                    <NodeStyleInspector />
+                  )
+                ) : null}
                 {selectedEdgeId ? <RelationshipInspector /> : null}
               </div>
             </div>
@@ -633,6 +698,9 @@ export default function EditorRoute() {
         </div>
 
         <ShareDialog open={shareOpen} graphId={graphId} onClose={() => setShareOpen(false)} />
+
+        {/* Node Composer Modal */}
+        <NodeComposerModal onApply={handleComposedNodeApply} />
       </div>
     </TooltipProvider>
   );

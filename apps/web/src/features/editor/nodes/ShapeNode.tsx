@@ -12,8 +12,8 @@ type ShapeNodeData = {
 
 type ShapeNodeType = Node<ShapeNodeData, "shape">;
 
-const MIN_WIDTH = 100;
-const MIN_HEIGHT = 60;
+const MIN_WIDTH = 96; // 12 × 8 for grid alignment
+const MIN_HEIGHT = 60; // 12 × 5 for grid alignment
 
 export default function ShapeNode({ data, selected }: NodeProps<ShapeNodeType>) {
   const { selectGroupNodes } = useGraphStore();

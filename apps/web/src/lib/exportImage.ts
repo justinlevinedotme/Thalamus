@@ -75,7 +75,7 @@ function getClassName(element: Element): string {
 }
 
 // Check if element should be filtered out from export
-function shouldFilterElement(element: Element, transparentBackground: boolean): boolean {
+function shouldFilterElement(element: Element, _transparentBackground: boolean): boolean {
   const className = getClassName(element);
 
   // Elements to always hide during export
@@ -90,12 +90,8 @@ function shouldFilterElement(element: Element, transparentBackground: boolean): 
     "react-flow__edge-textwrapper",
     "react-flow__edge-text",
     "react-flow__edge-textbg",
+    "react-flow__background", // Always hide grid on export
   ];
-
-  // Hide background pattern when transparent
-  if (transparentBackground) {
-    hiddenClasses.push("react-flow__background");
-  }
 
   for (const hiddenClass of hiddenClasses) {
     if (className.includes(hiddenClass)) {

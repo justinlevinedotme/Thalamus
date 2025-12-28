@@ -62,7 +62,7 @@ const ToggleGroupItem = React.forwardRef<
       value={value}
       className={cn(
         buttonVariants({ variant, size }),
-        isSelected && "!bg-accent !text-accent-foreground",
+        isSelected && "!bg-primary !text-primary-foreground",
         className
       )}
       {...props}

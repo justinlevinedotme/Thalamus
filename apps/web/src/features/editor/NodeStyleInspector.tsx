@@ -15,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
-import { Smile } from "lucide-react";
+import { Plus, Smile, Trash2 } from "lucide-react";
 import {
   type EdgePadding,
   type NodeBorderStyle,
@@ -173,7 +173,14 @@ const borderWidths: Array<{ value: number; label: string }> = [
 ];
 
 export default function NodeStyleInspector() {
-  const { nodes, updateNodeStyle, updateNodeHandles, updateSelectedNodesStyle } = useGraphStore();
+  const {
+    nodes,
+    updateNodeStyle,
+    updateNodeHandles,
+    updateSelectedNodesStyle,
+    updateNodeBody,
+    startEditingNode,
+  } = useGraphStore();
 
   // Get all selected nodes from React Flow's selection state
   const selectedNodes = useMemo(() => nodes.filter((node) => node.selected), [nodes]);
@@ -270,6 +277,9 @@ export default function NodeStyleInspector() {
       ? JSON.parse(commonStyles.icon)
       : undefined
     : selectedNode?.data?.style?.icon;
+
+  // Check if node has body text
+  const hasBody = selectedNode?.data?.body && selectedNode.data.body.trim().length > 0;
 
   // Determine header text
   const getHeaderText = () => {
@@ -972,6 +982,47 @@ export default function NodeStyleInspector() {
                         </button>
                       </ColorPicker>
                     </div>
+
+                    {/* Add/Remove Body button - only for single selection */}
+                    {!isMultiSelect && selectedNode && (
+                      <div className="flex items-center justify-between gap-4 pt-1">
+                        <label className="text-xs text-muted-foreground">Body Text</label>
+                        {hasBody ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="flex h-7 items-center gap-1.5 rounded-md border border-border px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                onClick={() => {
+                                  updateNodeBody(selectedNode.id, "");
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                                Remove
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>Remove body text from node</TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                className="flex h-7 items-center gap-1.5 rounded-md border border-border px-2 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
+                                onClick={() => {
+                                  updateNodeBody(selectedNode.id, " ");
+                                  startEditingNode(selectedNode.id);
+                                }}
+                              >
+                                <Plus className="h-3 w-3" />
+                                Add Body
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>Add body text to node</TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </AccordionContent>
               </AccordionItem>

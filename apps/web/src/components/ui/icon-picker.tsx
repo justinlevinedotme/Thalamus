@@ -1,6 +1,4 @@
 import { useState, useMemo } from "react";
-import data from "@emoji-mart/data";
-import Picker from "@emoji-mart/react";
 import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import * as SimpleIcons from "@icons-pack/react-simple-icons";
@@ -14,10 +12,6 @@ type IconPickerProps = {
   value?: NodeIcon;
   onChange: (icon: NodeIcon) => void;
   children: React.ReactNode;
-};
-
-type EmojiData = {
-  native: string;
 };
 
 // Popular/common Lucide icons for quick access
@@ -307,11 +301,6 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
     return allSimpleIcons.filter((name) => name.toLowerCase().includes(query)).slice(0, 60);
   }, [simpleSearch, allSimpleIcons]);
 
-  const handleEmojiSelect = (emoji: EmojiData) => {
-    onChange({ type: "emoji", value: emoji.native });
-    setOpen(false);
-  };
-
   const handleLucideSelect = (iconName: string) => {
     onChange({ type: "lucide", value: iconName });
     setOpen(false);
@@ -326,14 +315,8 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-[352px] p-0" side="right" align="start">
-        <Tabs defaultValue="emoji" className="w-full">
+        <Tabs defaultValue="lucide" className="w-full">
           <TabsList className="w-full rounded-none border-b bg-transparent p-0">
-            <TabsTrigger
-              value="emoji"
-              className="flex-1 rounded-none border-b-2 border-transparent py-2 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
-            >
-              Emoji
-            </TabsTrigger>
             <TabsTrigger
               value="lucide"
               className="flex-1 rounded-none border-b-2 border-transparent py-2 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
@@ -347,18 +330,6 @@ export function IconPicker({ value, onChange, children }: IconPickerProps) {
               Brands
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="emoji" className="m-0">
-            <Picker
-              data={data}
-              onEmojiSelect={handleEmojiSelect}
-              theme="light"
-              previewPosition="none"
-              skinTonePosition="none"
-              maxFrequentRows={1}
-              perLine={9}
-            />
-          </TabsContent>
 
           <TabsContent value="lucide" className="m-0 p-3">
             <Input

@@ -6,8 +6,8 @@ import { ANCHORS, SNAP_THRESHOLD } from "./config";
  * Get the bounding box of a node
  */
 export function getNodeBox(node: Node): Box {
-  const width = node.width ?? 150;
-  const height = node.height ?? 50;
+  const width = node.width ?? 144; // 12 × 12 for grid alignment
+  const height = node.height ?? 48; // 12 × 4 for grid alignment
   return {
     x: node.position.x,
     y: node.position.y,

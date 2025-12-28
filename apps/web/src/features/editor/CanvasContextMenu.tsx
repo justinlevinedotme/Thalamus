@@ -18,6 +18,7 @@ import {
   Palette,
   Pencil,
   Plus,
+  Puzzle,
   Route,
   Scissors,
   Square,
@@ -29,6 +30,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Kbd } from "../../components/ui/kbd";
 import { useGraphStore } from "../../store/graphStore";
+import { useComposerStore } from "../composer/composerStore";
 
 type ContextMenuState = {
   type: "node" | "edge" | "pane" | "selection";
@@ -204,6 +206,13 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
     }
     onClose();
   }, [addNode, flowInstance, menu, onClose]);
+
+  const openComposer = useComposerStore((s) => s.openComposer);
+
+  const handleAddComposedNode = useCallback(() => {
+    openComposer("create");
+    onClose();
+  }, [openComposer, onClose]);
 
   const handleGroup = useCallback(() => {
     groupSelectedNodes();
@@ -601,6 +610,11 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
           <button className={menuItemClass} type="button" onClick={handleAddNodeKey}>
             <Palette className="h-4 w-4" />
             Add Node Key
+          </button>
+          <div className="my-1 h-px bg-border" />
+          <button className={menuItemClass} type="button" onClick={handleAddComposedNode}>
+            <Puzzle className="h-4 w-4" />
+            Add Composed Node
           </button>
         </>
       )}
