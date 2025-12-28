@@ -1,10 +1,11 @@
 import { apiFetch } from "../../lib/apiClient";
-import type { AppEdge, AppNode, NodeGroup } from "../../store/graphStore";
+import type { AppEdge, AppNode, NodeGroup, GridSettings } from "../../store/graphStore";
 
 export type GraphPayload = {
   nodes: AppNode[];
   edges: AppEdge[];
   groups?: NodeGroup[];
+  gridSettings?: GridSettings;
 };
 
 export type GraphRecord = {

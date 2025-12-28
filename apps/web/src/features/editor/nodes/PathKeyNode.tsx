@@ -15,8 +15,8 @@ const stripHtml = (html: string): string => {
   return doc.body.textContent || "";
 };
 
-const MIN_WIDTH = 150;
-const MIN_HEIGHT = 100;
+const MIN_WIDTH = 144; // 12 × 12 for grid alignment
+const MIN_HEIGHT = 96; // 12 × 8 for grid alignment
 
 type PathKeyEntry = {
   id: string;

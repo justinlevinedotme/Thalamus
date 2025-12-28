@@ -295,9 +295,22 @@ function StatusBlockRenderer({ block, preview }: { block: StatusBlock; preview?:
   return (
     <div className="flex items-center gap-1.5">
       {block.showDot !== false && (
-        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+        <span className="relative flex h-2 w-2">
+          <span
+            className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+            style={{ backgroundColor: color }}
+          />
+          <span
+            className="relative inline-flex h-2 w-2 rounded-full"
+            style={{ backgroundColor: color }}
+          />
+        </span>
       )}
-      {block.label && <span className={cn("text-sm", preview && "text-xs")}>{block.label}</span>}
+      {block.label && (
+        <span className={cn("text-sm", preview && "text-xs")} style={{ color: block.labelColor }}>
+          {block.label}
+        </span>
+      )}
     </div>
   );
 }

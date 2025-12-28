@@ -16,6 +16,7 @@ export interface ComposedHandle {
   position: HandlePosition;
   label?: string;
   labelPosition?: LabelPosition;
+  labelColor?: string;
   color?: string;
   style?: HandleStyle;
 }
@@ -135,6 +136,7 @@ export interface BadgeBlock extends ContentBlockBase {
 export interface StatusBlock extends ContentBlockBase {
   type: "status";
   label?: string;
+  labelColor?: string;
   status: StatusType;
   customColor?: string;
   showDot?: boolean;

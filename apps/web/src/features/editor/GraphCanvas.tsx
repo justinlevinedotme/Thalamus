@@ -46,8 +46,8 @@ function buildSpatialIndex(nodes: Node[]): SpatialIndex {
   const nodePositions = new Map<string, { x: number; y: number; width: number; height: number }>();
 
   for (const node of nodes) {
-    const width = node.width ?? 150;
-    const height = node.height ?? 50;
+    const width = node.width ?? 144; // 12 × 12 for grid alignment
+    const height = node.height ?? 48; // 12 × 4 for grid alignment
     nodePositions.set(node.id, { x: node.position.x, y: node.position.y, width, height });
 
     // Add node to all cells it overlaps
@@ -215,8 +215,8 @@ function GroupBackgrounds({ groups, nodes }: { groups: NodeGroup[]; nodes: AppNo
       const groupId = node.data?.groupId;
       if (!groupId || !activeGroupIds.has(groupId)) continue;
 
-      const nodeWidth = node.width ?? 150;
-      const nodeHeight = node.height ?? 50;
+      const nodeWidth = node.width ?? 144;
+      const nodeHeight = node.height ?? 48;
       const x1 = node.position.x;
       const y1 = node.position.y;
       const x2 = x1 + nodeWidth;
@@ -308,6 +308,7 @@ export default function GraphCanvas() {
     connectNodes,
     reconnectEdge,
     deleteSelectedNodes,
+    gridSettings,
   } = useGraphStore();
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance<
     AppNode,
@@ -688,7 +689,7 @@ export default function GraphCanvas() {
 
       // Fallback if no handle bounds yet (node just created)
       if (draggedTargetPositions.length === 0) {
-        const draggedHeight = draggedNode.height ?? 50;
+        const draggedHeight = draggedNode.height ?? 48;
         const draggedTargetHandles = draggedNode.data?.targetHandles ?? [{ id: "target" }];
         draggedTargetHandles.forEach((_: unknown, index: number) => {
           draggedTargetPositions.push({
@@ -741,8 +742,8 @@ export default function GraphCanvas() {
           }));
         } else {
           // Fallback to calculated positions
-          const nodeWidth = node.width ?? 150;
-          const nodeHeight = node.height ?? 50;
+          const nodeWidth = node.width ?? 144;
+          const nodeHeight = node.height ?? 48;
           const sourceHandles = node.data?.sourceHandles ?? [{ id: "source" }];
           sourcePositions = sourceHandles.map((_, index) => ({
             x: node.position.x + nodeWidth,
@@ -915,8 +916,12 @@ export default function GraphCanvas() {
         fitView
         colorMode={resolvedTheme}
         proOptions={{ hideAttribution: true }}
+        snapToGrid={gridSettings.snapEnabled}
+        snapGrid={[gridSettings.gridSize, gridSettings.gridSize]}
+        defaultEdgeOptions={{ zIndex: 0 }}
+        elevateNodesOnSelect={false}
       >
-        <Background gap={24} size={1} />
+        {gridSettings.gridVisible && <Background gap={gridSettings.gridSize} size={1} />}
         <GroupBackgrounds groups={groups} nodes={nodes} />
         <Controls showInteractive={false} />
         {helperLinesEnabled && <HelperLinesRenderer helperLines={helperLines} />}

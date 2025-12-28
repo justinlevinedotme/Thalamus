@@ -70,6 +70,8 @@ export default function EditorRoute() {
     redo,
     dataVersion,
     updateNodeLayout,
+    gridSettings,
+    setGridSettings,
   } = useGraphStore();
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
@@ -88,7 +90,10 @@ export default function EditorRoute() {
   const lastSavedVersionRef = useRef<number>(0);
 
   const canSave = Boolean(user);
-  const payload = useMemo(() => ({ nodes, edges, groups }), [edges, groups, nodes]);
+  const payload = useMemo(
+    () => ({ nodes, edges, groups, gridSettings }),
+    [edges, groups, nodes, gridSettings]
+  );
 
   // Speed dial actions for adding different node types
   const speedDialActions: SpeedDialAction[] = useMemo(
@@ -376,6 +381,9 @@ export default function EditorRoute() {
         setNodes(graph.data?.nodes ?? []);
         setEdges(graph.data?.edges ?? []);
         setGroups(graph.data?.groups ?? []);
+        if (graph.data?.gridSettings) {
+          setGridSettings(graph.data.gridSettings);
+        }
         setLoadError(null);
       } catch (error) {
         if (!ignore) {
@@ -387,7 +395,7 @@ export default function EditorRoute() {
     return () => {
       ignore = true;
     };
-  }, [graphId, setEdges, setGraphTitle, setGroups, setNodes, user]);
+  }, [graphId, setEdges, setGraphTitle, setGridSettings, setGroups, setNodes, user]);
 
   // Auto-save: debounce changes and save after 3 seconds of inactivity
   // Uses version-based dirty check instead of JSON.stringify for O(1) comparison

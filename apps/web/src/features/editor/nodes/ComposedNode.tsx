@@ -87,6 +87,8 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
   if (!layout) {
     return (
       <BaseNode selected={selected} className="p-3 min-w-[120px]">
+        {" "}
+        {/* 12 × 10 for grid alignment */}
         <div className="text-sm text-muted-foreground">No layout defined</div>
       </BaseNode>
     );
@@ -113,8 +115,8 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
         borderStyle: style.borderStyle,
         borderRadius,
         boxShadow: shadow,
-        minWidth: style.minWidth || 150,
-        maxWidth: style.maxWidth || 400,
+        minWidth: style.minWidth || 144, // 12 × 12 for grid alignment
+        maxWidth: style.maxWidth || 396, // 12 × 33 for grid alignment
       }}
     >
       {/* Header */}
@@ -230,9 +232,10 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
             elements.push(
               <span
                 key={`left-label-${row.leftHandle.id}`}
-                className="absolute text-xs text-muted-foreground pointer-events-none whitespace-nowrap"
+                className="absolute text-xs pointer-events-none whitespace-nowrap"
                 style={{
                   top: topPos,
+                  color: row.leftHandle.labelColor || "#64748b",
                   ...(isOutside
                     ? { right: "100%", marginRight: 12 + edgePaddingOffset }
                     : { left: 12 }),
@@ -270,9 +273,10 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
             elements.push(
               <span
                 key={`right-label-${row.rightHandle.id}`}
-                className="absolute text-xs text-muted-foreground pointer-events-none whitespace-nowrap"
+                className="absolute text-xs pointer-events-none whitespace-nowrap"
                 style={{
                   top: topPos,
+                  color: row.rightHandle.labelColor || "#64748b",
                   ...(isOutside
                     ? { left: "100%", marginLeft: 12 + edgePaddingOffset }
                     : { right: 12 }),

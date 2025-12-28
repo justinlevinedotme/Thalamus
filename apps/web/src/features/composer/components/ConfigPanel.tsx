@@ -113,12 +113,27 @@ function HandleConfig() {
     <div className="p-4 space-y-4">
       <div>
         <label className="text-xs font-medium text-muted-foreground">Label</label>
-        <Input
-          value={handle.label || ""}
-          onChange={(e) => updateRowHandle(selectedRow.id, position, { label: e.target.value })}
-          placeholder="Handle label"
-          className="mt-1.5"
-        />
+        <div className="flex items-center gap-2 mt-1.5">
+          <Input
+            value={handle.label || ""}
+            onChange={(e) => updateRowHandle(selectedRow.id, position, { label: e.target.value })}
+            placeholder="Handle label"
+            className="flex-1"
+          />
+          {handle.label && (
+            <ColorPicker
+              value={handle.labelColor || "#64748b"}
+              onChange={(color) => updateRowHandle(selectedRow.id, position, { labelColor: color })}
+            >
+              <button className="w-8 h-8 rounded border border-border flex-shrink-0">
+                <ColorSwatch
+                  color={handle.labelColor || "#64748b"}
+                  className="w-full h-full rounded"
+                />
+              </button>
+            </ColorPicker>
+          )}
+        </div>
       </div>
 
       {handle.label && (
@@ -810,14 +825,27 @@ function ContentConfig() {
       <div className="p-4 space-y-4">
         <div>
           <label className="text-xs font-medium text-muted-foreground">Label</label>
-          <Input
-            value={statusBlock.label || ""}
-            onChange={(e) =>
-              updateRowContent(selectedRow.id, { label: e.target.value || undefined })
-            }
-            placeholder="Status label"
-            className="mt-1.5"
-          />
+          <div className="flex items-center gap-2 mt-1.5">
+            <Input
+              value={statusBlock.label || ""}
+              onChange={(e) =>
+                updateRowContent(selectedRow.id, { label: e.target.value || undefined })
+              }
+              placeholder="Status label"
+              className="flex-1"
+            />
+            <ColorPicker
+              value={statusBlock.labelColor || "#64748b"}
+              onChange={(color) => updateRowContent(selectedRow.id, { labelColor: color })}
+            >
+              <button className="w-8 h-8 rounded border border-border flex-shrink-0">
+                <ColorSwatch
+                  color={statusBlock.labelColor || "#64748b"}
+                  className="w-full h-full rounded"
+                />
+              </button>
+            </ColorPicker>
+          </div>
         </div>
 
         <div className="flex items-center justify-between gap-4">
