@@ -33,6 +33,7 @@ interface EventComposerProps {
   editingNode?: TimelineNode;
   tracks: TimelineTrack[];
   selectedTrackId: string | null;
+  defaultIsSpan?: boolean;
 }
 
 export function EventComposer({
@@ -42,6 +43,7 @@ export function EventComposer({
   editingNode,
   tracks,
   selectedTrackId,
+  defaultIsSpan = false,
 }: EventComposerProps) {
   const [label, setLabel] = useState("");
   const [description, setDescription] = useState("");
@@ -62,11 +64,11 @@ export function EventComposer({
       } else {
         setLabel("");
         setDescription("");
-        setIsSpan(false);
+        setIsSpan(defaultIsSpan);
         setDuration(10);
       }
     }
-  }, [open, editingNode]);
+  }, [open, editingNode, defaultIsSpan]);
 
   const handleSave = () => {
     if (!label.trim()) return;

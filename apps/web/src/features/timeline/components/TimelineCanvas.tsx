@@ -19,6 +19,7 @@ import { timelineNodeTypes } from "../nodeTypes";
 import { AxisRenderer } from "./AxisRenderer";
 import { TrackLanes } from "./TrackLanes";
 import { EventComposer } from "./EventComposer";
+import { TimelineContextMenu, type TimelineContextMenuState } from "./TimelineContextMenu";
 
 // Constants for layout
 export const TRACK_HEIGHT = 80;
@@ -48,11 +49,15 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
 
   const { screenToFlowPosition } = useReactFlow();
 
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<TimelineContextMenuState>(null);
+
   // Composer state
   const [composerOpen, setComposerOpen] = useState(false);
   const [composerPosition, setComposerPosition] = useState({ x: 0, y: 0 });
   const [composerTrackId, setComposerTrackId] = useState<string | null>(null);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+  const [isCreatingSpan, setIsCreatingSpan] = useState(false);
 
   // Handle node selection
   const handleNodeClick = useCallback(
@@ -203,8 +208,85 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
 
       setComposerOpen(false);
       setEditingNodeId(null);
+      setIsCreatingSpan(false);
     },
     [composerTrackId, composerPosition, editingNodeId, addEvent, addSpan, updateNodeData]
+  );
+
+  // Context menu handlers
+  const handlePaneContextMenu = useCallback(
+    (event: React.MouseEvent) => {
+      event.preventDefault();
+      if (tracks.length === 0) return;
+
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      // Find which track was clicked
+      const trackIndex = Math.floor((position.y - TRACK_START_Y) / TRACK_HEIGHT);
+      const clampedIndex = Math.max(0, Math.min(trackIndex, tracks.length - 1));
+      const track = tracks[clampedIndex];
+
+      setContextMenu({
+        type: "pane",
+        trackId: track?.id,
+        position: { x: event.clientX, y: event.clientY },
+        flowPosition: position,
+      });
+    },
+    [tracks, screenToFlowPosition]
+  );
+
+  const handleNodeContextMenu = useCallback((event: React.MouseEvent, node: TimelineNode) => {
+    event.preventDefault();
+    setContextMenu({
+      type: "node",
+      nodeId: node.id,
+      trackId: node.data.trackId,
+      position: { x: event.clientX, y: event.clientY },
+      flowPosition: { x: node.position.x, y: node.position.y },
+    });
+  }, []);
+
+  const handleCloseContextMenu = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
+  const handleContextMenuAddEvent = useCallback(
+    (trackId: string, flowPosition: { x: number; y: number }) => {
+      setEditingNodeId(null);
+      setComposerTrackId(trackId);
+      setComposerPosition(flowPosition);
+      setIsCreatingSpan(false);
+      setComposerOpen(true);
+    },
+    []
+  );
+
+  const handleContextMenuAddSpan = useCallback(
+    (trackId: string, flowPosition: { x: number; y: number }) => {
+      setEditingNodeId(null);
+      setComposerTrackId(trackId);
+      setComposerPosition(flowPosition);
+      setIsCreatingSpan(true);
+      setComposerOpen(true);
+    },
+    []
+  );
+
+  const handleContextMenuEditNode = useCallback(
+    (nodeId: string) => {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) return;
+      setEditingNodeId(nodeId);
+      setComposerTrackId(node.data.trackId);
+      setComposerPosition({ x: node.position.x, y: node.position.y });
+      setIsCreatingSpan(false);
+      setComposerOpen(true);
+    },
+    [nodes]
   );
 
   return (
@@ -221,6 +303,8 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
         onNodeDragStop={handleNodeDragStop}
         onPaneClick={handlePaneClick}
         onDoubleClick={handlePaneDoubleClick}
+        onContextMenu={handlePaneContextMenu}
+        onNodeContextMenu={handleNodeContextMenu}
         fitView
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.1}
@@ -266,7 +350,7 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
             {tracks.length > 0 && (
               <>
                 <span className="mx-2">·</span>
-                <span className="text-muted-foreground/70">Double-click to add event</span>
+                <span className="text-muted-foreground/70">Right-click to add event</span>
               </>
             )}
           </div>
@@ -281,6 +365,17 @@ function TimelineCanvasInner({ onNodeSelect }: TimelineCanvasProps) {
         editingNode={editingNodeId ? nodes.find((n) => n.id === editingNodeId) : undefined}
         tracks={tracks}
         selectedTrackId={composerTrackId}
+        defaultIsSpan={isCreatingSpan}
+      />
+
+      {/* Context Menu */}
+      <TimelineContextMenu
+        menu={contextMenu}
+        onClose={handleCloseContextMenu}
+        onAddEvent={handleContextMenuAddEvent}
+        onAddSpan={handleContextMenuAddSpan}
+        onEditNode={handleContextMenuEditNode}
+        tracks={tracks}
       />
     </>
   );
