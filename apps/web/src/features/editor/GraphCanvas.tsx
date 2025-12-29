@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ReactFlow,
   Background,
+  BackgroundVariant,
   Controls,
   Panel,
   useViewport,
@@ -925,7 +926,17 @@ export default function GraphCanvas() {
         defaultEdgeOptions={{ zIndex: 0 }}
         elevateNodesOnSelect={false}
       >
-        {gridSettings.gridVisible && <Background gap={gridSettings.gridSize} size={1} />}
+        {gridSettings.gridVisible && (
+          <Background
+            variant={
+              gridSettings.gridStyle === "lines" ? BackgroundVariant.Lines : BackgroundVariant.Dots
+            }
+            gap={gridSettings.gridSize}
+            size={gridSettings.gridStyle === "lines" ? 0.5 : 1}
+            color={gridSettings.gridStyle === "lines" ? "rgba(255, 255, 255, 0.05)" : undefined}
+            className={gridSettings.gridStyle === "lines" ? "opacity-50" : undefined}
+          />
+        )}
         <GroupBackgrounds groups={groups} nodes={nodes} />
         <Controls showInteractive={false} />
         {helperLinesEnabled && <HelperLinesRenderer helperLines={helperLines} />}

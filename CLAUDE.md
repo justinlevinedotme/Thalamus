@@ -80,6 +80,101 @@ type: description
 
 ---
 
+## Development Workflow
+
+### Feature Development Process
+
+```bash
+# 1. Create a feature branch from main
+git checkout main && git pull
+git checkout -b feat/my-feature
+
+# 2. Make changes, run quality checks, commit at milestones
+#    (see Quality Checks and Milestone Commits below)
+
+# 3. Push and create PR
+git push -u origin feat/my-feature
+gh pr create --title "feat: add my feature" --body "Description..."
+```
+
+### Quality Checks
+
+Run these checks before committing (especially at milestones):
+
+```bash
+# All checks (recommended before pushing)
+npm run lint && npm run format:check && npm run typecheck && npm run build
+
+# Individual checks
+npm run lint          # ESLint - catch code issues
+npm run lint:fix      # ESLint with auto-fix
+npm run format:check  # Prettier - check formatting
+npm run format        # Prettier - fix formatting
+npm run typecheck     # TypeScript - type errors
+npm run build         # Full build verification
+```
+
+**Note**: The `pre-commit` hook runs `lint-staged` automatically (ESLint + Prettier on staged files), but running full checks manually before milestone commits catches more issues early.
+
+### Milestone Commits
+
+Commit at logical milestones rather than waiting until everything is done:
+
+- ✅ After completing a component or module
+- ✅ After adding/updating tests
+- ✅ After fixing a bug (even if part of larger work)
+- ✅ Before starting a risky refactor
+- ✅ At end of work session
+
+```bash
+# Stage and commit with conventional message
+git add .
+git commit -m "feat: add initial graph export component"
+
+# Continue working...
+git commit -m "feat: add PDF export option to graph export"
+git commit -m "test: add tests for graph export functionality"
+```
+
+### File Headers Requirement
+
+**When creating or modifying files, always add/update file header comments.**
+
+This is required for all source files (see [Code Style Guidelines](#file-header-comments) for format details).
+
+```typescript
+/**
+ * @file MyComponent.tsx
+ * @description Brief description of what this file does
+ */
+```
+
+**Checklist when touching files:**
+
+- [ ] New file? Add header comment
+- [ ] Significant changes to existing file? Update header if description is outdated
+- [ ] Header accurately describes current file purpose
+
+### Git Hooks Reference
+
+| Hook         | Trigger      | Action                                                 |
+| ------------ | ------------ | ------------------------------------------------------ |
+| `pre-commit` | `git commit` | Runs `lint-staged` (ESLint + Prettier on staged files) |
+| `commit-msg` | `git commit` | Validates commit message format                        |
+| `pre-push`   | `git push`   | Validates branch naming convention                     |
+
+### CI Pipeline
+
+GitHub Actions runs on push/PR to main branches:
+
+1. **Lint** - `npm run lint -- --max-warnings 50`
+2. **Format Check** - `npm run format:check`
+3. **Type Check** - `npm run typecheck`
+4. **Build** - `npm run build` (after lint/format/typecheck pass)
+5. **Security Audit** - `npm audit --audit-level=high`
+
+---
+
 ## Architecture Overview
 
 ```
