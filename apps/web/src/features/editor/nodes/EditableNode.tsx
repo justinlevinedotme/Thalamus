@@ -1,3 +1,8 @@
+/**
+ * @file EditableNode.tsx
+ * @description Base editable node component with rich text label and body editing, supporting keyboard shortcuts and inline editing
+ */
+
 import { useEffect, useState } from "react";
 import { useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react";
 

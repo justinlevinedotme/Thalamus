@@ -1,3 +1,7 @@
+/**
+ * @file alert-dialog.tsx
+ * @description Alert dialog component for confirmations and warnings (shadcn/ui component based on Radix UI)
+ */
 import * as React from "react";
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 

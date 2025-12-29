@@ -1,3 +1,10 @@
+/**
+ * @file App.tsx
+ * @description Root application component that defines all routes using React Router.
+ * Initializes authentication state on mount and provides route configuration for
+ * the landing page, editor, authentication flows, and user account pages.
+ */
+
 import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 

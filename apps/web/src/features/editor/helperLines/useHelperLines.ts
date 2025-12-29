@@ -1,3 +1,8 @@
+/**
+ * @file useHelperLines.ts
+ * @description React hook for managing helper lines state and applying snap-to-align behavior during node dragging
+ */
+
 import { useCallback, useState } from "react";
 import type { Node, NodeChange, NodePositionChange } from "@xyflow/react";
 import type { HelperLine, HelperLinesState } from "./types";

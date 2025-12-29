@@ -1,3 +1,8 @@
+/**
+ * @file NodeSearch.tsx
+ * @description Node search component with real-time filtering and selection functionality
+ */
+
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 

@@ -1,3 +1,8 @@
+/**
+ * @file types.ts
+ * @description TypeScript type definitions for the composer system including handles, content blocks, rows, layouts, templates, drag items, palette items, and factory functions
+ */
+
 import type { NodeIcon } from "../../store/graphStore";
 
 // ============================================================================

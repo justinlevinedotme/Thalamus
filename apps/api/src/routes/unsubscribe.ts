@@ -1,3 +1,10 @@
+/**
+ * @file unsubscribe.ts
+ * @description API routes for email unsubscribe functionality. Handles GET/POST /unsubscribe
+ * for one-click and form-based unsubscription, and POST /unsubscribe/resubscribe for opting
+ * back in. Supports List-Unsubscribe header for email client integration.
+ */
+
 import { Hono } from "hono";
 import {
   decodeUnsubscribeToken,

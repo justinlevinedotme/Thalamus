@@ -1,3 +1,10 @@
+/**
+ * @file styles.ts
+ * @description Shared CSS-in-JS styles for React Email templates. Provides consistent
+ * typography, spacing, and visual elements (headings, paragraphs, buttons, code boxes,
+ * warning/danger boxes) used across all email templates.
+ */
+
 import * as React from "react";
 
 export const heading = {

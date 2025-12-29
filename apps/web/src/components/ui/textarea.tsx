@@ -1,3 +1,7 @@
+/**
+ * @file textarea.tsx
+ * @description Textarea input component (shadcn/ui)
+ */
 import * as React from "react";
 import { cn } from "../../lib/utils";
 

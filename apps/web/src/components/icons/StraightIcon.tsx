@@ -1,3 +1,7 @@
+/**
+ * @file StraightIcon.tsx
+ * @description Icon component representing a straight edge type with direct linear connections between nodes
+ */
 import type { SVGProps } from "react";
 
 export function StraightIcon(props: SVGProps<SVGSVGElement>) {

@@ -1,3 +1,9 @@
+/**
+ * @file LoginRoute.tsx
+ * @description Standalone login page with email/password form, OAuth provider options,
+ * Turnstile captcha verification, and two-factor authentication support.
+ */
+
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";

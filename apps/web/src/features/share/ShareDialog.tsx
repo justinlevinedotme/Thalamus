@@ -1,3 +1,8 @@
+/**
+ * @file ShareDialog.tsx
+ * @description Dialog component for generating and managing shareable links for graphs
+ */
+
 import { useEffect, useMemo, useState } from "react";
 
 import { Input } from "../../components/ui/input";

@@ -1,3 +1,7 @@
+/**
+ * @file base-node.tsx
+ * @description Base node component for React Flow diagram nodes with shape variants and composable parts
+ */
 import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/utils";

@@ -1,3 +1,7 @@
+/**
+ * @file EditorToolbar.tsx
+ * @description Main toolbar with graph title input, menubar (File/Edit/View/Help), save status, undo/redo, and export options
+ */
 import { useState } from "react";
 import { Download, FileJson, Image, Redo2, Undo2 } from "lucide-react";
 

@@ -1,3 +1,8 @@
+/**
+ * @file ComposerLayout.tsx
+ * @description Main layout component for the node composer providing drag-and-drop functionality and coordinating the palette, drop zone, and configuration panel
+ */
+
 import {
   DndContext,
   DragOverlay,

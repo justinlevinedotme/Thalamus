@@ -1,3 +1,8 @@
+/**
+ * @file TextNode.tsx
+ * @description Text-only node component for displaying headings and labels without background or handles
+ */
+
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { type Node, type NodeProps } from "@xyflow/react";

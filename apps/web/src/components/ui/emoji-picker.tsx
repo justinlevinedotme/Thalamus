@@ -1,3 +1,7 @@
+/**
+ * @file emoji-picker.tsx
+ * @description Emoji picker input component using @emoji-mart with theme support
+ */
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 

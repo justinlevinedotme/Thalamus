@@ -1,3 +1,8 @@
+/**
+ * @file NodeComposerModal.tsx
+ * @description Main modal dialog component for the node composer providing create/edit/template modes with apply and cancel actions
+ */
+
 import { useCallback } from "react";
 import {
   Dialog,

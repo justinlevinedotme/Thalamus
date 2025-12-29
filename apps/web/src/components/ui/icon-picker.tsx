@@ -1,3 +1,7 @@
+/**
+ * @file icon-picker.tsx
+ * @description Icon picker component for selecting icons from Lucide and Simple Icons libraries
+ */
 import { useState, useMemo } from "react";
 import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";

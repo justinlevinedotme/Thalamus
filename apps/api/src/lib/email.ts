@@ -1,3 +1,10 @@
+/**
+ * @file email.ts
+ * @description Email service using Resend for transactional and marketing emails.
+ * Handles email sending with proper unsubscribe headers, user preference management,
+ * and category-based opt-out functionality for GDPR/CAN-SPAM compliance.
+ */
+
 import { Resend } from "resend";
 import { eq } from "drizzle-orm";
 import { getDb, schema } from "./db";

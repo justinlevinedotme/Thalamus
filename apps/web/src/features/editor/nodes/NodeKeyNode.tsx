@@ -1,3 +1,8 @@
+/**
+ * @file NodeKeyNode.tsx
+ * @description Node key/legend node component for displaying and managing a list of node type definitions with colors, shapes, and labels
+ */
+
 import { Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";

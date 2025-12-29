@@ -1,3 +1,10 @@
+/**
+ * @file authClient.ts
+ * @description BetterAuth React client configuration. Creates and exports the auth client
+ * instance with two-factor plugin support, providing hooks and functions for authentication
+ * operations throughout the application.
+ */
+
 import { createAuthClient } from "better-auth/react";
 import { twoFactorClient } from "better-auth/client/plugins";
 

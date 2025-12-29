@@ -1,3 +1,7 @@
+/**
+ * @file popover.tsx
+ * @description Popover floating panel component (shadcn/ui)
+ */
 import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 

@@ -1,3 +1,7 @@
+/**
+ * @file nodeTypes.ts
+ * @description React Flow node type registry mapping type strings to component implementations
+ */
 import type { NodeTypes } from "@xyflow/react";
 
 import ComposedNode from "./nodes/ComposedNode";

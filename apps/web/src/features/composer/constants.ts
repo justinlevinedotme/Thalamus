@@ -1,3 +1,8 @@
+/**
+ * @file constants.ts
+ * @description Configuration constants for the node composer including palette definitions, default styles, badge variants, status colors, size mappings, color presets, and built-in templates
+ */
+
 import type {
   PaletteCategory,
   ComposedNodeStyle,

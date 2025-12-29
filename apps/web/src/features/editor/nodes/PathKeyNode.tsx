@@ -1,3 +1,8 @@
+/**
+ * @file PathKeyNode.tsx
+ * @description Path key/legend node component for displaying and managing a list of edge/path type definitions with colors, styles, and labels
+ */
+
 import { Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";

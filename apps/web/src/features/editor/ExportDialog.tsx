@@ -1,3 +1,7 @@
+/**
+ * @file ExportDialog.tsx
+ * @description Dialog for exporting graphs as PNG or PDF with configurable format, margin, quality, theme, and transparency options
+ */
 import { useCallback, useEffect, useState } from "react";
 import { Download, Loader2, Moon, Sun } from "lucide-react";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";

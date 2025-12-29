@@ -1,3 +1,8 @@
+/**
+ * @file ConfigPanel.tsx
+ * @description Configuration panel with tabbed interface for editing row properties, handle settings, content block configurations, and global node styles
+ */
+
 import React from "react";
 import { useComposerStore } from "../composerStore";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";

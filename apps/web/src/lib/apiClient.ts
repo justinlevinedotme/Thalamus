@@ -1,3 +1,10 @@
+/**
+ * @file apiClient.ts
+ * @description Generic fetch wrapper for API communication. Provides apiFetch function
+ * with automatic JSON parsing, credential handling, and standardized error responses
+ * via ApiError class.
+ */
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export class ApiError extends Error {

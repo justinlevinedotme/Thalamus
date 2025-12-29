@@ -1,3 +1,9 @@
+/**
+ * @file BillingRoute.tsx
+ * @description Billing page component for subscription management. Displays current plan
+ * information and upgrade options via the UpgradeCard component.
+ */
+
 import Footer from "../components/Footer";
 import UpgradeCard from "../features/billing/UpgradeCard";
 

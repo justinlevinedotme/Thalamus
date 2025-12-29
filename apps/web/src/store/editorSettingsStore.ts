@@ -1,3 +1,10 @@
+/**
+ * @file editorSettingsStore.ts
+ * @description Zustand store for editor preferences with localStorage persistence.
+ * Manages user settings like helper lines visibility and connection suggestions
+ * that persist across browser sessions.
+ */
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 

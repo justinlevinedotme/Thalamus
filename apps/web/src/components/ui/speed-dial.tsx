@@ -1,3 +1,7 @@
+/**
+ * @file speed-dial.tsx
+ * @description Speed dial floating action button component
+ */
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import { Plus, X } from "lucide-react";
 import { cn } from "../../lib/utils";

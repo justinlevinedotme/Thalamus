@@ -1,3 +1,10 @@
+/**
+ * @file session.ts
+ * @description Hono middleware for session authentication. Provides sessionMiddleware
+ * for protected routes that require authentication, and optionalSessionMiddleware for
+ * routes that work with or without a session. Extends Hono context with user and session.
+ */
+
 import { Context, Next } from "hono";
 import { auth, Session } from "../lib/auth";
 

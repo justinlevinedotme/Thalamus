@@ -1,3 +1,10 @@
+/**
+ * @file profile.ts
+ * @description API routes for user profile management. Handles GET/PATCH /profile for
+ * viewing and updating user info (name, image), and GET/PATCH /profile/email-preferences
+ * for managing email subscription settings. All routes require authentication.
+ */
+
 import { Hono } from "hono";
 import { eq } from "drizzle-orm";
 import { getDb, schema } from "../lib/db";

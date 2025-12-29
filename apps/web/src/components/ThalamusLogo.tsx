@@ -1,3 +1,9 @@
+/**
+ * @file ThalamusLogo.tsx
+ * @description Thalamus brand logo component with theme-aware rendering. Displays the
+ * appropriate logo variant (light/dark) based on the current theme.
+ */
+
 import { useTheme } from "../lib/theme";
 
 type ThalamusLogoProps = {

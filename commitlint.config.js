@@ -1,6 +1,9 @@
-// commitlint.config.js
-// adapted from https://dev.to/amankrsahu/tired-of-confusing-commits-heres-how-to-fix-them-with-commitlint-3lfj
-// good format example: feat: add new button component
+/**
+ * @file commitlint.config.js
+ * @description Commitlint configuration enforcing conventional commit format.
+ * Defines allowed commit types (feat, fix, docs, etc.) and formatting rules
+ * for consistent commit messages across the project.
+ */
 
 module.exports = {
   extends: ["@commitlint/config-conventional"],

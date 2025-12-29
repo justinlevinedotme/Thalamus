@@ -1,3 +1,9 @@
+/**
+ * @file logo.tsx
+ * @description Generic logo display component with context menu for downloading.
+ * Renders logo images with optional download functionality via right-click menu.
+ */
+
 "use client";
 
 import { Download } from "lucide-react";

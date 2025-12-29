@@ -1,3 +1,8 @@
+/**
+ * @file NodeHandles.tsx
+ * @description Handle components for node connections with automatic vertical distribution and edge padding support
+ */
+
 import { Handle, Position } from "@xyflow/react";
 import type { NodeHandle, EdgePadding } from "../../../store/graphStore";
 import { edgePaddingToOffset } from "./utils";

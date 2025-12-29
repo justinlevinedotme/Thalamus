@@ -1,3 +1,10 @@
+/**
+ * @file auth.ts
+ * @description BetterAuth configuration for user authentication. Configures email/password
+ * auth, OAuth providers (GitHub, Google, Apple, GitLab, Atlassian), two-factor authentication,
+ * email verification, and password reset flows. Supports both D1 and SQLite databases.
+ */
+
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { genericOAuth, twoFactor, haveIBeenPwned, captcha } from "better-auth/plugins";

@@ -1,3 +1,9 @@
+/**
+ * @file Footer.tsx
+ * @description Application footer component with license information and theme toggle
+ * button for switching between light and dark modes.
+ */
+
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../lib/theme";
 

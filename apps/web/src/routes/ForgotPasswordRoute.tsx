@@ -1,3 +1,9 @@
+/**
+ * @file ForgotPasswordRoute.tsx
+ * @description Password reset request page. Allows users to enter their email to receive
+ * a password reset link. Shows confirmation message on successful submission.
+ */
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Loader2, Mail, CheckCircle2 } from "lucide-react";

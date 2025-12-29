@@ -1,3 +1,9 @@
+/**
+ * @file LandingRoute.tsx
+ * @description Public landing page with hero section, feature highlights, and call-to-action
+ * buttons. Showcases the application's capabilities with theme-aware styling.
+ */
+
 import { Link } from "react-router-dom";
 import { ArrowRight, GitBranch } from "lucide-react";
 

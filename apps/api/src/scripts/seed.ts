@@ -1,11 +1,11 @@
 /**
- * Seed Data Script
+ * @file seed.ts
+ * @description Database seeding script for local development. Creates a test user
+ * (admin@admin.com / root123) and sample graphs with various node types for testing
+ * the application without manual data entry.
  *
- * Creates test data in local.db for development:
- * - Test user: admin@admin.com / root123
- * - Sample graphs with various node types
- *
- * Usage: npm run db:seed
+ * @example
+ * npm run db:seed
  */
 
 import Database from "better-sqlite3";

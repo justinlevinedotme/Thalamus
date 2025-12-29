@@ -1,3 +1,8 @@
+/**
+ * @file ComponentPalette.tsx
+ * @description Draggable component palette displaying available blocks, handles, and templates that can be added to the node composer
+ */
+
 import { useDraggable } from "@dnd-kit/core";
 import {
   Accordion,

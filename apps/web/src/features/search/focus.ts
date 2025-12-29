@@ -1,3 +1,8 @@
+/**
+ * @file focus.ts
+ * @description Focus utilities for filtering graph data to show a node and its direct connections
+ */
+
 import type { AppEdge, AppNode } from "../../store/graphStore";
 
 export type FocusResult = {

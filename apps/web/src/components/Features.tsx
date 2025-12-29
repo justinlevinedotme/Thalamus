@@ -1,3 +1,10 @@
+/**
+ * @file Features.tsx
+ * @description Feature showcase section for the landing page. Displays animated feature
+ * cards highlighting key application capabilities with intersection observer for
+ * scroll-triggered animations.
+ */
+
 import { useEffect, useRef, useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";

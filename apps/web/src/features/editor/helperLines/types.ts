@@ -1,3 +1,8 @@
+/**
+ * @file types.ts
+ * @description TypeScript type definitions for helper lines system including orientations, boxes, anchors, and line matches
+ */
+
 import type { Node } from "@xyflow/react";
 
 export type Orientation = "horizontal" | "vertical";

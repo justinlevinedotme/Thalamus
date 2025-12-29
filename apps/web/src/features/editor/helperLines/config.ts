@@ -1,3 +1,8 @@
+/**
+ * @file config.ts
+ * @description Configuration constants for helper lines including snap threshold and anchor point definitions
+ */
+
 import type { Anchor } from "./types";
 
 // Distance threshold for snapping (in pixels)

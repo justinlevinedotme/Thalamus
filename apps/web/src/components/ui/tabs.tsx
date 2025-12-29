@@ -1,3 +1,7 @@
+/**
+ * @file tabs.tsx
+ * @description Tabs container and tab panel components (shadcn/ui)
+ */
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 

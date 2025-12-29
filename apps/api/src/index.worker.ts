@@ -1,3 +1,10 @@
+/**
+ * @file index.worker.ts
+ * @description Main entry point for the Cloudflare Workers API. Sets up the Hono
+ * application with middleware for database injection, CORS, logging, and routes.
+ * Handles both D1 (production) and SQLite (local dev) database connections.
+ */
+
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";

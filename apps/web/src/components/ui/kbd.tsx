@@ -1,3 +1,7 @@
+/**
+ * @file kbd.tsx
+ * @description Keyboard key display component for rendering keyboard shortcuts
+ */
 import { cn } from "@/lib/utils";
 
 function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {

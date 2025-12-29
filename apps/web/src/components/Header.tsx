@@ -1,3 +1,9 @@
+/**
+ * @file Header.tsx
+ * @description Application header component with logo, navigation, and user menu dropdown.
+ * Shows authentication state and provides quick access to profile, documents, and logout.
+ */
+
 import { Link } from "react-router-dom";
 import { FolderOpen, LogOut, Settings, Share2, User } from "lucide-react";
 

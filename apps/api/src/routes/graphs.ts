@@ -1,3 +1,10 @@
+/**
+ * @file graphs.ts
+ * @description API routes for graph CRUD operations. Handles GET/POST /graphs for listing
+ * and creating graphs, GET/PUT/DELETE /graphs/:id for individual graph operations, and
+ * POST /graphs/:id/share for generating share links. All routes require authentication.
+ */
+
 import { Hono } from "hono";
 import { eq, and, count, sql } from "drizzle-orm";
 import { getDb, schema } from "../lib/db";
