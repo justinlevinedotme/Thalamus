@@ -1,3 +1,7 @@
+/**
+ * @file NodeLibrary.tsx
+ * @description Library panel with available node types and an Add Node button for creating new nodes via drag-and-drop or click
+ */
 import { Plus } from "lucide-react";
 import { type DragEvent } from "react";
 

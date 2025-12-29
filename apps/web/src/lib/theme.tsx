@@ -1,3 +1,10 @@
+/**
+ * @file theme.tsx
+ * @description Theme provider and hook for light/dark mode support. Manages theme state
+ * with localStorage persistence and system preference detection. Provides ThemeProvider
+ * context and useTheme hook for theme switching throughout the app.
+ */
+
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark" | "system";

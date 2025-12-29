@@ -1,3 +1,10 @@
+/**
+ * @file tailwind.config.ts
+ * @description Tailwind CSS configuration with custom theme extending shadcn/ui
+ * design tokens. Includes dark mode support, custom colors, animations, and
+ * component-specific utilities.
+ */
+
 import type { Config } from "tailwindcss";
 
 const config: Config = {

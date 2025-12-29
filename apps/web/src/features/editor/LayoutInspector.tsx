@@ -1,3 +1,7 @@
+/**
+ * @file LayoutInspector.tsx
+ * @description Inspector for auto-layout settings with controls for direction, algorithm, node spacing, and layer spacing
+ */
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, LayoutGrid, Loader2 } from "lucide-react";

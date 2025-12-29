@@ -1,3 +1,9 @@
+/**
+ * @file SignupRoute.tsx
+ * @description User registration page with email/password form, OAuth provider options,
+ * password strength validation, and Turnstile captcha integration.
+ */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";

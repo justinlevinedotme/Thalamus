@@ -1,3 +1,10 @@
+/**
+ * @file AuthRoute.tsx
+ * @description Unified authentication route component handling both login and signup flows.
+ * Includes form validation, OAuth provider buttons, Turnstile captcha, two-factor
+ * authentication dialog, and password strength requirements.
+ */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";

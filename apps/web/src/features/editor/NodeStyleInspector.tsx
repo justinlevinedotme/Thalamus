@@ -1,3 +1,7 @@
+/**
+ * @file NodeStyleInspector.tsx
+ * @description Inspector for node styling with support for single and multi-selection, handling different node types (regular, text, shape, key) with appropriate controls
+ */
 import { useMemo, type ReactNode } from "react";
 
 import {

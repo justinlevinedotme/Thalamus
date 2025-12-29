@@ -1,3 +1,7 @@
+/**
+ * @file EditorSettingsInspector.tsx
+ * @description Inspector for editor settings including helper lines, connection suggestions, grid snapping, and grid visibility
+ */
 import { Grid3X3 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Switch } from "../../components/ui/switch";

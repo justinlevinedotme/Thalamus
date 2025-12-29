@@ -1,3 +1,8 @@
+/**
+ * @file ComposedNode.tsx
+ * @description Node component for user-composed custom nodes with configurable layouts, headers, footers, rows, and dynamic handles
+ */
+
 import { memo, useRef, useLayoutEffect, useState } from "react";
 import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 import { BaseNode } from "../../../components/ui/base-node";

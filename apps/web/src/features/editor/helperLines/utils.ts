@@ -1,3 +1,8 @@
+/**
+ * @file utils.ts
+ * @description Utility functions for helper line calculations including node box resolution, line building, snap detection, and rendering extent
+ */
+
 import type { Node } from "@xyflow/react";
 import type { Box, HelperLine, HelperLineMatch, Orientation } from "./types";
 import { ANCHORS, SNAP_THRESHOLD } from "./config";

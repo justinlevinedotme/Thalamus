@@ -1,3 +1,7 @@
+/**
+ * @file tooltip.tsx
+ * @description Tooltip hover component (shadcn/ui)
+ */
 import * as React from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 

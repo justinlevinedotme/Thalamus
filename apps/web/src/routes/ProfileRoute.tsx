@@ -1,3 +1,10 @@
+/**
+ * @file ProfileRoute.tsx
+ * @description User profile management page. Allows editing display name, managing profile
+ * picture, viewing linked OAuth accounts, configuring two-factor authentication,
+ * and updating email preferences.
+ */
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {

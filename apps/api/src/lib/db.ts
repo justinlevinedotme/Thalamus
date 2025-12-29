@@ -1,3 +1,10 @@
+/**
+ * @file db.ts
+ * @description Database connection factory for Drizzle ORM. Provides a unified interface
+ * that auto-detects the environment and uses Cloudflare D1 in production or better-sqlite3
+ * for local development. Handles database initialization and migration for local dev.
+ */
+
 import { drizzle as drizzleD1, DrizzleD1Database } from "drizzle-orm/d1";
 import { drizzle as drizzleSqlite, BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";

@@ -1,3 +1,8 @@
+/**
+ * @file index.ts
+ * @description Export barrel for the composer module, providing centralized access to all components, store, types, factory functions, and constants
+ */
+
 // Components
 export { NodeComposerModal } from "./components/NodeComposerModal";
 export { ComposerLayout } from "./components/ComposerLayout";

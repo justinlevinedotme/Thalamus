@@ -1,3 +1,10 @@
+/**
+ * @file share.ts
+ * @description API route for accessing shared graphs via token. Handles GET /share/:token
+ * to retrieve graph data for valid, non-expired share links. Public endpoint that does
+ * not require authentication.
+ */
+
 import { Hono } from "hono";
 import { eq, and, gt } from "drizzle-orm";
 import { getDb, schema } from "../lib/db";

@@ -1,3 +1,9 @@
+/**
+ * @file UnsubscribeRoute.tsx
+ * @description Email unsubscribe page. Processes unsubscribe tokens from email links,
+ * shows confirmation UI, and handles the unsubscription API request.
+ */
+
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Check, Loader2, X, Mail } from "lucide-react";

@@ -1,3 +1,7 @@
+/**
+ * @file GraphCanvas.tsx
+ * @description Main React Flow canvas component with nodes, edges, backgrounds, controls, spatial indexing, group management, and interaction handlers
+ */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ReactFlow,

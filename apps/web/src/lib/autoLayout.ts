@@ -1,3 +1,10 @@
+/**
+ * @file autoLayout.ts
+ * @description Auto-layout utilities for graph nodes using ELK.js. Provides functions
+ * to automatically arrange nodes using various algorithms (layered, force, radial, stress)
+ * with configurable direction and spacing options.
+ */
+
 import type { Edge, Node } from "@xyflow/react";
 
 import type { NodeHandle } from "../store/graphStore";

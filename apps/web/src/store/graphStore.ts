@@ -1,3 +1,10 @@
+/**
+ * @file graphStore.ts
+ * @description Central Zustand store for the graph editor. Manages all graph state including
+ * nodes, edges, selection, node groups, and undo/redo history. Provides actions for node
+ * manipulation, edge connections, layout operations, and persistence.
+ */
+
 import { create } from "zustand";
 import {
   addEdge,

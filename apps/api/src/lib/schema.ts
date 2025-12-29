@@ -1,3 +1,10 @@
+/**
+ * @file schema.ts
+ * @description Drizzle ORM schema definitions for all database tables. Includes BetterAuth
+ * tables (ba_user, ba_session, ba_account, ba_verification, ba_two_factor) and application
+ * tables (graphs, share_links, profiles, email_preferences) with their relations.
+ */
+
 import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
 import { relations, sql } from "drizzle-orm";
 

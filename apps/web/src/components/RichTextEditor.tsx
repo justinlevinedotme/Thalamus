@@ -1,3 +1,9 @@
+/**
+ * @file RichTextEditor.tsx
+ * @description Rich text editor component using TipTap for WYSIWYG editing of node
+ * descriptions. Supports bold, italic, underline formatting with a floating toolbar.
+ */
+
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useEditor, EditorContent } from "@tiptap/react";

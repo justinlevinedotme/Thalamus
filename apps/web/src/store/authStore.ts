@@ -1,3 +1,10 @@
+/**
+ * @file authStore.ts
+ * @description Zustand store for authentication state management. Wraps BetterAuth client
+ * to provide user session state, sign in/out actions, OAuth provider support, password
+ * reset, and two-factor authentication flows.
+ */
+
 import { create } from "zustand";
 import { authClient } from "../lib/authClient";
 

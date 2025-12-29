@@ -1,3 +1,9 @@
+/**
+ * @file VerifyEmailRoute.tsx
+ * @description Email verification pending page. Displays instructions for users who need
+ * to verify their email address, with option to resend the verification email.
+ */
+
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 

@@ -1,3 +1,7 @@
+/**
+ * @file CanvasContextMenu.tsx
+ * @description Context menu for canvas right-click actions including node operations, clipboard actions, alignment, grouping, and distribution
+ */
 import {
   AlignCenterHorizontal,
   AlignCenterVertical,

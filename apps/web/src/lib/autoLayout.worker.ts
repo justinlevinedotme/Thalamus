@@ -1,3 +1,10 @@
+/**
+ * @file autoLayout.worker.ts
+ * @description Web Worker for computing graph layouts using ELK.js. Offloads expensive
+ * layout calculations to a background thread to keep the UI responsive during
+ * auto-layout operations.
+ */
+
 import ELK, { type ElkNode, type ElkPort } from "elkjs/lib/elk.bundled.js";
 
 const elk = new ELK();

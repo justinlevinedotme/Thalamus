@@ -1,3 +1,8 @@
+/**
+ * @file graphApi.ts
+ * @description API client for graph CRUD operations including list, create, update, and delete
+ */
+
 import { apiFetch } from "../../lib/apiClient";
 import type { AppEdge, AppNode, NodeGroup, GridSettings } from "../../store/graphStore";
 

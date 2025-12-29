@@ -1,3 +1,7 @@
+/**
+ * @file MapStyleInspector.tsx
+ * @description Inspector for canvas/map styling with bulk update controls for all nodes and edges including colors, shapes, borders, and line styles
+ */
 import type { ReactNode } from "react";
 
 import { BezierIcon } from "../../components/icons/BezierIcon";

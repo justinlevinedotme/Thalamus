@@ -1,3 +1,9 @@
+/**
+ * @file ResetPasswordRoute.tsx
+ * @description Password reset form page. Validates reset token from URL, allows users to
+ * set a new password with strength requirements, and shows success/error states.
+ */
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, Eye, EyeOff, CheckCircle2, XCircle, Check, X } from "lucide-react";

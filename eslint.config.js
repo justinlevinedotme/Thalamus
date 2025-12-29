@@ -1,3 +1,9 @@
+/**
+ * @file eslint.config.js
+ * @description ESLint flat configuration for the monorepo. Configures TypeScript,
+ * React hooks, and React Refresh rules with appropriate ignores for build artifacts.
+ */
+
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";

@@ -1,3 +1,10 @@
+/**
+ * @file index.ts
+ * @description Email template registry and rendering utilities. Exports React Email
+ * components (PasswordReset, ConfirmEmail, Welcome, AccountDeletion) and provides
+ * pre-built render functions for generating HTML email content.
+ */
+
 import { render } from "@react-email/components";
 import * as React from "react";
 

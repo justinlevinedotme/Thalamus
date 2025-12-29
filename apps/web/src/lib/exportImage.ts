@@ -1,5 +1,10 @@
-// lib/exportImage.ts
-// exporting with edge labels doesn't work for some reason, we need to hide them during export
+/**
+ * @file exportImage.ts
+ * @description Image export utilities for the graph canvas. Supports exporting graphs
+ * as PNG images or PDF documents using html-to-image and jsPDF. Handles viewport
+ * calculation and proper scaling for exports.
+ */
+
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
 import {

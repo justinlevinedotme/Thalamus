@@ -1,3 +1,7 @@
+/**
+ * @file switch.tsx
+ * @description Toggle switch component (shadcn/ui)
+ */
 import * as React from "react";
 import * as SwitchPrimitives from "@radix-ui/react-switch";
 

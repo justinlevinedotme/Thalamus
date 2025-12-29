@@ -1,3 +1,8 @@
+/**
+ * @file utils.ts
+ * @description Utility functions for node operations including HTML stripping, size mappings, edge padding calculations, and group selection handling
+ */
+
 import { flushSync } from "react-dom";
 import type { EdgePadding, NodeSize } from "../../../store/graphStore";
 

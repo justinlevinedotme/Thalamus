@@ -1,3 +1,10 @@
+/**
+ * @file exportJson.ts
+ * @description JSON export and import utilities for graphs. Enables exporting graph data
+ * (nodes, edges) to JSON files for backup or sharing, and importing graphs from
+ * JSON files or clipboard data.
+ */
+
 import type { Edge, Node } from "@xyflow/react";
 
 import type { RelationshipData } from "../store/graphStore";

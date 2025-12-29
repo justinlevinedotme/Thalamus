@@ -1,3 +1,7 @@
+/**
+ * @file ComposedNodeInspector.tsx
+ * @description Inspector for composed node properties with layout information, edge padding controls, and node composer edit button
+ */
 import { Puzzle } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";

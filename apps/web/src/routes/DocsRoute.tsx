@@ -1,3 +1,10 @@
+/**
+ * @file DocsRoute.tsx
+ * @description User's documents dashboard showing all saved graphs. Provides graph listing,
+ * creation, deletion, and navigation to the editor. Includes quota display and cloud
+ * sync functionality.
+ */
+
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Calendar, Clock, Trash2 } from "lucide-react";

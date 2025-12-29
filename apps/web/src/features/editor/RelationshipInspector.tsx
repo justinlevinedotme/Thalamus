@@ -1,3 +1,7 @@
+/**
+ * @file RelationshipInspector.tsx
+ * @description Inspector for edge/relationship properties including label, line styling, arrow markers, curvature, and label appearance
+ */
 import { Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 

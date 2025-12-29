@@ -1,3 +1,8 @@
+/**
+ * @file ShapeNode.tsx
+ * @description Basic shape node component for rendering non-interactive background shapes with customizable colors, borders, and shapes
+ */
+
 import { NodeResizer, type Node, type NodeProps } from "@xyflow/react";
 import { flushSync } from "react-dom";
 

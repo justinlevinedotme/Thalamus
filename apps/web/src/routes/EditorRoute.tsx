@@ -1,3 +1,10 @@
+/**
+ * @file EditorRoute.tsx
+ * @description Main graph editor page containing the React Flow canvas, toolbar, inspector
+ * panels, and node library. Handles graph loading, saving, auto-save, and provides
+ * the complete editing experience.
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {

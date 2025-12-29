@@ -1,3 +1,7 @@
+/**
+ * @file card.tsx
+ * @description Card container component with header, content, and footer sections (shadcn/ui component)
+ */
 import * as React from "react";
 
 import { cn } from "@/lib/utils";

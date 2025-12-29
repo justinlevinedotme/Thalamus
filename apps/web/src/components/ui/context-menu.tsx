@@ -1,3 +1,7 @@
+/**
+ * @file context-menu.tsx
+ * @description Context menu component for right-click actions with submenus and checkboxes (shadcn/ui component based on Radix UI)
+ */
 import * as React from "react";
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";

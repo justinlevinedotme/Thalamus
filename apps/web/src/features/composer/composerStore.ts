@@ -1,3 +1,8 @@
+/**
+ * @file composerStore.ts
+ * @description Zustand store for node composer state management, handling layout editing, row operations, handle management, content blocks, and template functionality
+ */
+
 import { create } from "zustand";
 import {
   type ComposedNodeLayout,

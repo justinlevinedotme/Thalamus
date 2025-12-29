@@ -1,3 +1,8 @@
+/**
+ * @file shareApi.ts
+ * @description API client for share link operations including creation and retrieval of shared graphs
+ */
+
 import { apiFetch, ApiError } from "../../lib/apiClient";
 
 export type ShareLinkRecord = {

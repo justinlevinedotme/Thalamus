@@ -1,3 +1,7 @@
+/**
+ * @file dialog.tsx
+ * @description Modal dialog component (shadcn/ui component built with Radix UI)
+ */
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";

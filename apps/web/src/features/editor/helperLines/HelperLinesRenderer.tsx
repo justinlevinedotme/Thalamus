@@ -1,3 +1,8 @@
+/**
+ * @file HelperLinesRenderer.tsx
+ * @description React component that renders alignment helper lines on canvas during node dragging
+ */
+
 import { useReactFlow, useViewport } from "@xyflow/react";
 import type { HelperLinesState } from "./types";
 import { getLineExtent } from "./utils";

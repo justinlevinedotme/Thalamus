@@ -1,10 +1,11 @@
 /**
- * Local Migration Runner
+ * @file migrate-local.ts
+ * @description Local database migration runner script. Applies SQL migrations from the
+ * migrations/ directory to local.db, tracking applied migrations in a _migrations table
+ * to prevent re-running. Used for local development with better-sqlite3.
  *
- * Applies SQL migrations from the migrations/ directory to local.db
- * Tracks applied migrations in a _migrations table to prevent re-running.
- *
- * Usage: npm run db:migrate:local
+ * @example
+ * npm run db:migrate:local
  */
 
 import Database from "better-sqlite3";

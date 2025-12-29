@@ -1,3 +1,8 @@
+/**
+ * @file DropZone.tsx
+ * @description Interactive drop zone for building node layouts with sortable rows, handle slots, content slots, and live preview
+ */
+
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";

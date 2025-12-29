@@ -1,3 +1,7 @@
+/**
+ * @file SmoothStepIcon.tsx
+ * @description Icon component representing a smooth step edge type with orthogonal stepped connections between nodes
+ */
 import type { SVGProps } from "react";
 
 export function SmoothStepIcon(props: SVGProps<SVGSVGElement>) {

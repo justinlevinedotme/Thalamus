@@ -1,3 +1,8 @@
+/**
+ * @file index.tsx
+ * @description Block renderer component for displaying various content block types (header, text, code, badges, etc.) with support for preview and full rendering modes
+ */
+
 import { useEffect, useState } from "react";
 import type {
   ContentBlock,

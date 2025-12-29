@@ -1,3 +1,7 @@
+/**
+ * @file BezierIcon.tsx
+ * @description Icon component representing a bezier curve edge type with smooth curved connections between nodes
+ */
 import type { SVGProps } from "react";
 
 export function BezierIcon(props: SVGProps<SVGSVGElement>) {

@@ -1,3 +1,7 @@
+/**
+ * @file color-picker.tsx
+ * @description Color picker input component with HSV picker, presets, recent colors, and eyedropper support
+ */
 import { Pipette } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 

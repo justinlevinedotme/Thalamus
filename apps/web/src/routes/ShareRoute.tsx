@@ -1,3 +1,9 @@
+/**
+ * @file ShareRoute.tsx
+ * @description Public page for viewing shared graphs via token. Displays a read-only React
+ * Flow canvas with the shared graph content. Handles loading states and invalid/expired links.
+ */
+
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ReactFlow, Background, Controls, type ReactFlowInstance } from "@xyflow/react";

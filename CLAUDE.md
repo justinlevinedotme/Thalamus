@@ -322,6 +322,87 @@ npm run deploy    # Production
 
 ## Code Style Guidelines
 
+### File Header Comments
+
+**Every source file MUST include a header comment** at the top explaining its purpose. This is required for all new files and should be present in existing files.
+
+**Format for TypeScript/JavaScript files:**
+
+```typescript
+/**
+ * @file filename.ts
+ * @description Brief description of what this file does and its purpose
+ *
+ * @example (optional - for utilities/hooks)
+ * // Example usage of the main export
+ */
+```
+
+**Format for React components (.tsx):**
+
+```typescript
+/**
+ * @file ComponentName.tsx
+ * @description Brief description of the component's purpose and functionality
+ *
+ * @example (optional)
+ * <ComponentName prop="value" />
+ */
+```
+
+**Format for configuration files (JSON/JS):**
+
+```javascript
+/**
+ * @file config-name.ts
+ * @description Configuration for [what it configures]
+ */
+```
+
+**Guidelines:**
+
+- Keep descriptions concise but informative (1-3 sentences)
+- Explain the "why" not just the "what" when relevant
+- Include `@example` for utilities, hooks, and reusable components
+- For UI components, briefly describe what the component renders/does
+- For API routes, mention the endpoints handled
+- For stores, describe the state being managed
+
+**Examples:**
+
+```typescript
+// Store file
+/**
+ * @file graphStore.ts
+ * @description Central Zustand store managing graph editor state including nodes,
+ * edges, selection, history (undo/redo), and node groups. Provides actions for
+ * all graph manipulation operations.
+ */
+
+// API route
+/**
+ * @file graphs.ts
+ * @description API routes for graph CRUD operations. Handles GET/POST /graphs
+ * and GET/PUT/DELETE /graphs/:id endpoints with user authentication.
+ */
+
+// React component
+/**
+ * @file NodeStyleInspector.tsx
+ * @description Inspector panel component for editing visual properties of selected
+ * nodes including colors, borders, fonts, and icons.
+ */
+
+// Utility
+/**
+ * @file utils.ts
+ * @description Shared utility functions including className merging (cn) and
+ * common formatting helpers used across the application.
+ */
+```
+
+---
+
 ### Naming Conventions
 
 | Type               | Convention      | Example                            |
