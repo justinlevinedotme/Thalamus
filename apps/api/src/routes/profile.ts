@@ -194,29 +194,42 @@ profile.patch("/email-preferences", async (c) => {
   }
 
   try {
-    const marketing = marketingEmails ?? true;
-    const updates = productUpdates ?? true;
     const now = new Date();
 
-    // Upsert email preferences
-    await db
-      .insert(schema.emailPreferences)
-      .values({
+    // Get existing preferences first
+    const existing = await db
+      .select({
+        marketingEmails: schema.emailPreferences.marketingEmails,
+        productUpdates: schema.emailPreferences.productUpdates,
+      })
+      .from(schema.emailPreferences)
+      .where(eq(schema.emailPreferences.userId, user.id));
+
+    // Use provided values or fall back to existing values or defaults
+    const marketing = marketingEmails ?? existing[0]?.marketingEmails ?? true;
+    const updates = productUpdates ?? existing[0]?.productUpdates ?? true;
+
+    if (existing.length > 0) {
+      // Update existing preferences
+      await db
+        .update(schema.emailPreferences)
+        .set({
+          marketingEmails: marketing,
+          productUpdates: updates,
+          updatedAt: now,
+        })
+        .where(eq(schema.emailPreferences.userId, user.id));
+    } else {
+      // Insert new preferences
+      await db.insert(schema.emailPreferences).values({
         userId: user.id,
         email: user.email,
         marketingEmails: marketing,
         productUpdates: updates,
         createdAt: now,
         updatedAt: now,
-      })
-      .onConflictDoUpdate({
-        target: schema.emailPreferences.userId,
-        set: {
-          marketingEmails: marketing,
-          productUpdates: updates,
-          updatedAt: now,
-        },
       });
+    }
 
     // Return updated preferences
     const prefs = await db

@@ -17,6 +17,14 @@ import * as schema from "./schema";
 // Helper to get frontend URL (lazy for Workers compatibility)
 const getFrontendUrl = () => process.env.FRONTEND_URL || "http://localhost:5173";
 
+// Check if we're in dev mode (skip email verification)
+const isDevMode = () => {
+  const frontendUrl = getFrontendUrl();
+  const isDev = frontendUrl.includes("localhost") || frontendUrl.includes("127.0.0.1");
+  console.log(`[Auth] isDevMode check: FRONTEND_URL=${frontendUrl}, isDev=${isDev}`);
+  return isDev;
+};
+
 // Generate unsubscribe token from email
 function generateUnsubscribeToken(email: string): string {
   return Buffer.from(email).toString("base64url");
@@ -133,7 +141,7 @@ function createAuth(): ReturnType<typeof betterAuth> {
 
     // Email verification event hook
     emailVerification: {
-      sendOnSignUp: true,
+      sendOnSignUp: !isDevMode(),
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
         const html = await emails.confirmEmail({
@@ -236,7 +244,8 @@ function createAuth(): ReturnType<typeof betterAuth> {
     // Email/password authentication
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: true,
+      // Skip email verification in dev mode for easier testing
+      requireEmailVerification: !isDevMode(),
       sendResetPassword: async ({ user, url }) => {
         const html = await emails.passwordReset({
           userName: user.name || undefined,
