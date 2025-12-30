@@ -148,7 +148,7 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
       shape={data.style?.shape}
       className={`h-full w-full ${sizeClasses} ${
         selected && hasBorder ? "!border-muted-foreground" : ""
-      }`}
+      } ${!hasBody ? "flex flex-col justify-center" : ""}`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}
       aria-label={`Node ${stripHtml(data.label)}`}
