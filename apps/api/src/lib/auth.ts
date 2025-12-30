@@ -2,27 +2,24 @@
  * @file auth.ts
  * @description BetterAuth configuration for user authentication. Configures email/password
  * auth, OAuth providers (GitHub, Google, Apple, GitLab, Atlassian), two-factor authentication,
- * email verification, and password reset flows. Supports both D1 and SQLite databases.
+ * email verification, and password reset flows. Uses Cloudflare D1 for database.
  */
 
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { genericOAuth, twoFactor, haveIBeenPwned, captcha } from "better-auth/plugins";
-import { drizzle as drizzleD1 } from "drizzle-orm/d1";
-import { drizzle as drizzleSqlite } from "drizzle-orm/better-sqlite3";
+import { drizzle } from "drizzle-orm/d1";
 import { emails } from "../emails";
 import { sendEmail } from "./email";
 import * as schema from "./schema";
 
-// Helper to get frontend URL (lazy for Workers compatibility)
+// Helper to get frontend URL
 const getFrontendUrl = () => process.env.FRONTEND_URL || "http://localhost:5173";
 
-// Check if we're in dev mode (skip email verification)
+// Check if we're in dev mode (don't send emails locally)
 const isDevMode = () => {
   const frontendUrl = getFrontendUrl();
-  const isDev = frontendUrl.includes("localhost") || frontendUrl.includes("127.0.0.1");
-  console.log(`[Auth] isDevMode check: FRONTEND_URL=${frontendUrl}, isDev=${isDev}`);
-  return isDev;
+  return frontendUrl.includes("localhost") || frontendUrl.includes("127.0.0.1");
 };
 
 // Generate unsubscribe token from email
@@ -53,66 +50,29 @@ const sendWelcomeEmail = async (user: { email: string; name?: string | null }) =
   }
 };
 
-// Store D1 binding for the current request (production only)
+// Store D1 binding for the current request
 let _d1: D1Database | null = null;
 
-// Store local SQLite instance (local dev only)
-let _localSqlite: ReturnType<typeof drizzleSqlite<typeof schema>> | null = null;
-
-// Check if we're in local development mode
-function isLocalDev(): boolean {
-  return typeof globalThis.process !== "undefined" && !_d1;
-}
+// Lazily create auth instance
+let _auth: ReturnType<typeof betterAuth> | null = null;
 
 export function setAuthD1(d1: D1Database) {
   _d1 = d1;
   _auth = null; // Reset auth instance when D1 changes
 }
 
-// Initialize local SQLite for auth (called in local dev)
-export function initAuthLocalDb(): ReturnType<typeof drizzleSqlite<typeof schema>> {
-  if (_localSqlite) return _localSqlite;
-
-  // Dynamic import to avoid bundling better-sqlite3 in production
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const Database = require("better-sqlite3");
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const path = require("path");
-
-  const dbPath = path.resolve(process.cwd(), "local.db");
-  const sqlite = new Database(dbPath);
-  sqlite.pragma("journal_mode = WAL");
-
-  _localSqlite = drizzleSqlite(sqlite, { schema });
-  return _localSqlite;
-}
-
-// Lazily create auth instance - required for Cloudflare Workers where
-// env vars are set per-request via middleware
-let _auth: ReturnType<typeof betterAuth> | null = null;
-
 function createAuth(): ReturnType<typeof betterAuth> {
-  // Get the appropriate database based on environment
-  let db:
-    | ReturnType<typeof drizzleD1<typeof schema>>
-    | ReturnType<typeof drizzleSqlite<typeof schema>>;
-
-  if (_d1) {
-    // Production: use D1
-    db = drizzleD1(_d1, { schema });
-  } else if (isLocalDev()) {
-    // Local dev: use better-sqlite3
-    db = initAuthLocalDb();
-  } else {
-    throw new Error("No database available. In production, call setAuthD1() first.");
+  if (!_d1) {
+    throw new Error("D1 database not initialized. Make sure setAuthD1() is called in middleware.");
   }
+
+  const db = drizzle(_d1, { schema });
 
   return betterAuth({
     database: drizzleAdapter(db, {
       provider: "sqlite",
       usePlural: false,
       schema: {
-        // Use the custom modelName as keys to match BetterAuth's internal lookup
         ba_user: schema.baUser,
         ba_session: schema.baSession,
         ba_account: schema.baAccount,
@@ -139,7 +99,7 @@ function createAuth(): ReturnType<typeof betterAuth> {
       },
     },
 
-    // Email verification event hook
+    // Email verification config
     emailVerification: {
       sendOnSignUp: !isDevMode(),
       autoSignInAfterVerification: true,
@@ -156,13 +116,11 @@ function createAuth(): ReturnType<typeof betterAuth> {
         });
       },
       onVerify: async (user: { email: string; name?: string | null }) => {
-        // Send welcome email after email is verified
         await sendWelcomeEmail(user);
       },
     },
 
     // Custom table names with explicit field mappings for D1/SQLite
-    // D1 uses camelCase column names, so we map BetterAuth's internal names to match
     user: {
       modelName: "ba_user",
       fields: {
@@ -244,8 +202,7 @@ function createAuth(): ReturnType<typeof betterAuth> {
     // Email/password authentication
     emailAndPassword: {
       enabled: true,
-      // Skip email verification in dev mode for easier testing
-      requireEmailVerification: !isDevMode(),
+      requireEmailVerification: true,
       sendResetPassword: async ({ user, url }) => {
         const html = await emails.passwordReset({
           userName: user.name || undefined,
