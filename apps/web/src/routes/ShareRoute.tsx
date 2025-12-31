@@ -71,8 +71,11 @@ export default function ShareRoute() {
           <h1 className="text-lg font-semibold text-foreground">{graphTitle}</h1>
           <p className="text-xs text-muted-foreground">Read-only shared view</p>
         </div>
-        <Link className="text-sm text-muted-foreground underline hover:text-foreground" to="/docs">
-          Back to docs
+        <Link
+          className="text-sm text-muted-foreground underline hover:text-foreground"
+          to="/me/files"
+        >
+          Back to files
         </Link>
       </header>
 

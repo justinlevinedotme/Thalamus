@@ -87,13 +87,13 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/docs">
+                  <Link to="/me/files">
                     <FolderOpen className="mr-2 h-4 w-4" />
                     My Graphs
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/profile">
+                  <Link to="/me/account/general">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>

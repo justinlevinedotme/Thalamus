@@ -1,16 +1,14 @@
 /**
- * @file DocsRoute.tsx
- * @description User's documents dashboard showing all saved graphs. Provides graph listing,
- * creation, deletion, and navigation to the editor. Includes quota display and cloud
- * sync functionality.
+ * @file DocsDashboard.tsx
+ * @description Reusable dashboard component for displaying user's saved graphs.
+ * Provides graph listing, creation, deletion, and navigation. Extracted from
+ * DocsRoute to be embedded in the /me layout.
  */
 
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, Trash2 } from "lucide-react";
 
-import Footer from "../components/Footer";
-import Header from "../components/Header";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,7 +18,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../components/ui/alert-dialog";
+} from "../../components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -28,16 +26,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
-import { Input } from "../components/ui/input";
+} from "../../components/ui/dialog";
+import { Input } from "../../components/ui/input";
 import {
   createGraph,
   deleteGraph,
   emptyGraphPayload,
   listGraphs,
   type GraphRecord,
-} from "../features/cloud/graphApi";
-import { useAuthStore } from "../store/authStore";
+} from "../cloud/graphApi";
 
 function formatRelativeDate(value: string): string {
   const date = new Date(value);
@@ -137,9 +134,8 @@ function GraphPreview({ graph }: { graph: GraphRecord }) {
   );
 }
 
-export default function DocsRoute() {
+export default function DocsDashboard() {
   const navigate = useNavigate();
-  const { user, status } = useAuthStore();
   const [graphs, setGraphs] = useState<GraphRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,7 +143,6 @@ export default function DocsRoute() {
   const [createOpen, setCreateOpen] = useState(false);
   const [newGraphName, setNewGraphName] = useState("");
   const [creating, setCreating] = useState(false);
-  const isAuthenticated = status === "authenticated";
 
   const refresh = async () => {
     try {
@@ -163,12 +158,8 @@ export default function DocsRoute() {
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      void refresh();
-      return;
-    }
-    setLoading(false);
-  }, [isAuthenticated]);
+    void refresh();
+  }, []);
 
   const handleOpenCreate = () => {
     setNewGraphName("");
@@ -182,7 +173,7 @@ export default function DocsRoute() {
       const title = newGraphName.trim() || "Untitled Graph";
       const graph = await createGraph(title, emptyGraphPayload());
       setCreateOpen(false);
-      navigate(`/docs/${graph.id}`);
+      navigate(`/editor/${graph.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to create graph");
     } finally {
@@ -202,118 +193,85 @@ export default function DocsRoute() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-card">
-      <Header />
-      <div className="flex-1 px-6 py-8">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground">
-                {isAuthenticated ? "Your graphs" : "Thalamus workspace"}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {isAuthenticated
-                  ? `${graphs.length}/20 saved. Each graph keeps a one-year retention window.`
-                  : "Start a graph in the browser. Saving and sharing require an account."}
-              </p>
-            </div>
-            {isAuthenticated ? (
-              <button
-                className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
-                type="button"
-                onClick={handleOpenCreate}
-                disabled={graphs.length >= 20}
-              >
-                New graph
-              </button>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  className="rounded-lg border border-border px-4 py-2 text-sm text-foreground"
-                  to="/editor"
-                >
-                  Start a graph
-                </Link>
-                <Link
-                  className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground"
-                  to="/login"
-                >
-                  Sign in
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-          {isAuthenticated ? (
-            loading ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
-            ) : graphs.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border bg-background p-8 text-center text-sm text-muted-foreground">
-                No graphs yet. Create one to get started.
-              </div>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {graphs.map((graph) => (
-                  <div
-                    key={graph.id}
-                    className="group relative overflow-hidden rounded-xl border border-border bg-background shadow-sm transition hover:border-muted-foreground/30 hover:shadow-[0_0_40px_-10px_rgba(0,212,255,0.25)]"
-                  >
-                    {/* Preview area */}
-                    <button
-                      type="button"
-                      className="block h-24 w-full cursor-pointer border-b border-border bg-secondary p-2"
-                      onClick={() => navigate(`/docs/${graph.id}`)}
-                    >
-                      <GraphPreview graph={graph} />
-                    </button>
-
-                    {/* Delete button - top right corner */}
-                    <button
-                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 backdrop-blur-sm transition hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
-                      type="button"
-                      onClick={() => setDeleteTarget(graph)}
-                      aria-label="Delete graph"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-
-                    {/* Card content */}
-                    <div className="p-3">
-                      <button
-                        type="button"
-                        className="block w-full cursor-pointer text-left"
-                        onClick={() => navigate(`/docs/${graph.id}`)}
-                      >
-                        <h3 className="truncate text-sm font-semibold text-foreground">
-                          {graph.title || "Untitled Graph"}
-                        </h3>
-                      </button>
-
-                      <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {formatRelativeDate(graph.updated_at)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {formatExpiryDate(graph.expires_at)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-          ) : (
-            <div className="rounded-lg border border-dashed border-border bg-background p-8 text-center text-sm text-muted-foreground">
-              You can sketch ideas immediately, then export when you are ready.
-            </div>
-          )}
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Your graphs</h1>
+          <p className="text-sm text-muted-foreground">
+            {graphs.length}/20 saved. Each graph keeps a one-year retention window.
+          </p>
         </div>
+        <button
+          className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground disabled:opacity-50"
+          type="button"
+          onClick={handleOpenCreate}
+          disabled={graphs.length >= 20}
+        >
+          New graph
+        </button>
       </div>
-      <Footer />
+
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      ) : graphs.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border bg-background p-8 text-center text-sm text-muted-foreground">
+          No graphs yet. Create one to get started.
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {graphs.map((graph) => (
+            <div
+              key={graph.id}
+              className="group relative overflow-hidden rounded-xl border border-border bg-background shadow-sm transition hover:border-muted-foreground/30 hover:shadow-[0_0_40px_-10px_rgba(0,212,255,0.25)]"
+            >
+              {/* Preview area */}
+              <button
+                type="button"
+                className="block h-24 w-full cursor-pointer border-b border-border bg-secondary p-2"
+                onClick={() => navigate(`/editor/${graph.id}`)}
+              >
+                <GraphPreview graph={graph} />
+              </button>
+
+              {/* Delete button - top right corner */}
+              <button
+                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 backdrop-blur-sm transition hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                type="button"
+                onClick={() => setDeleteTarget(graph)}
+                aria-label="Delete graph"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+
+              {/* Card content */}
+              <div className="p-3">
+                <button
+                  type="button"
+                  className="block w-full cursor-pointer text-left"
+                  onClick={() => navigate(`/editor/${graph.id}`)}
+                >
+                  <h3 className="truncate text-sm font-semibold text-foreground">
+                    {graph.title || "Untitled Graph"}
+                  </h3>
+                </button>
+
+                <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {formatRelativeDate(graph.updated_at)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {formatExpiryDate(graph.expires_at)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Create graph dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>

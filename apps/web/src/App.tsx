@@ -13,9 +13,17 @@ import BillingRoute from "./routes/BillingRoute";
 import EditorRoute from "./routes/EditorRoute";
 import ForgotPasswordRoute from "./routes/ForgotPasswordRoute";
 import LandingRoute from "./routes/LandingRoute";
+import MeAccountBillingRoute from "./routes/MeAccountBillingRoute";
+import MeAccountConnectionsRoute from "./routes/MeAccountConnectionsRoute";
+import MeAccountGeneralRoute from "./routes/MeAccountGeneralRoute";
+import MeAccountPrivacyRoute from "./routes/MeAccountPrivacyRoute";
+import MeAccountSecurityRoute from "./routes/MeAccountSecurityRoute";
+import MeFilesRoute from "./routes/MeFilesRoute";
 import MeLayoutRoute from "./routes/MeLayoutRoute";
+import MeSavedNodesRoute from "./routes/MeSavedNodesRoute";
+import MeSharedLinksRoute from "./routes/MeSharedLinksRoute";
+import MeTemplatesRoute from "./routes/MeTemplatesRoute";
 import NotFoundRoute from "./routes/NotFoundRoute";
-import ProfileRoute from "./routes/ProfileRoute";
 import ResetPasswordRoute from "./routes/ResetPasswordRoute";
 import ShareRoute from "./routes/ShareRoute";
 import UnsubscribeRoute from "./routes/UnsubscribeRoute";
@@ -37,17 +45,17 @@ export default function App() {
       <Route path="/me" element={<MeLayoutRoute />}>
         {/* Default /me to /me/files */}
         <Route index element={<Navigate to="/me/files" replace />} />
-        {/* Workspace routes - to be implemented */}
-        <Route path="files" element={<div>Files (coming soon)</div>} />
-        <Route path="saved-nodes" element={<div>Saved Nodes (coming soon)</div>} />
-        <Route path="templates" element={<div>Templates (coming soon)</div>} />
-        <Route path="shared-links" element={<div>Shared Links (coming soon)</div>} />
-        {/* Account routes - to be implemented */}
-        <Route path="account/general" element={<div>General (coming soon)</div>} />
-        <Route path="account/billing" element={<div>Billing (coming soon)</div>} />
-        <Route path="account/security" element={<div>Security (coming soon)</div>} />
-        <Route path="account/connections" element={<div>Connections (coming soon)</div>} />
-        <Route path="account/privacy" element={<div>Data & Privacy (coming soon)</div>} />
+        {/* Workspace routes */}
+        <Route path="files" element={<MeFilesRoute />} />
+        <Route path="saved-nodes" element={<MeSavedNodesRoute />} />
+        <Route path="templates" element={<MeTemplatesRoute />} />
+        <Route path="shared-links" element={<MeSharedLinksRoute />} />
+        {/* Account routes */}
+        <Route path="account/general" element={<MeAccountGeneralRoute />} />
+        <Route path="account/billing" element={<MeAccountBillingRoute />} />
+        <Route path="account/security" element={<MeAccountSecurityRoute />} />
+        <Route path="account/connections" element={<MeAccountConnectionsRoute />} />
+        <Route path="account/privacy" element={<MeAccountPrivacyRoute />} />
       </Route>
 
       {/* Editor routes */}
@@ -59,7 +67,7 @@ export default function App() {
 
       {/* Legacy routes - redirect to /me */}
       <Route path="/billing" element={<BillingRoute />} />
-      <Route path="/profile" element={<ProfileRoute />} />
+      <Route path="/profile" element={<Navigate to="/me/account/general" replace />} />
 
       {/* /docs is now 404 (reserved for future documentation) */}
       <Route path="/docs" element={<NotFoundRoute />} />

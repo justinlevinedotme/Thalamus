@@ -34,8 +34,10 @@ export type Bindings = {
 
 // Import routes
 import graphs from "./routes/graphs";
-import share from "./routes/share";
 import profile from "./routes/profile";
+import sessions from "./routes/sessions";
+import share from "./routes/share";
+import shareLinks from "./routes/share-links";
 import unsubscribe from "./routes/unsubscribe";
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -77,8 +79,10 @@ app.all("/auth/*", async (c) => {
 
 // Register routes
 app.route("/graphs", graphs);
-app.route("/share", share);
 app.route("/profile", profile);
+app.route("/sessions", sessions);
+app.route("/share", share);
+app.route("/share-links", shareLinks);
 app.route("/unsubscribe", unsubscribe);
 
 export default app;

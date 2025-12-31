@@ -397,4 +397,56 @@ profile.delete("/deletion-request", async (c) => {
   }
 });
 
+// Unlink an OAuth account
+profile.post("/unlink-account", async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json();
+  const db = getDb();
+
+  const { provider } = body as { provider?: string };
+
+  if (!provider) {
+    return c.json({ error: "Provider is required" }, 400);
+  }
+
+  // Can't unlink credential (password) - use password reset instead
+  if (provider === "credential") {
+    return c.json({ error: "Cannot unlink password authentication" }, 400);
+  }
+
+  try {
+    // Get all linked accounts for this user
+    const accounts = await db
+      .select({
+        id: schema.baAccount.id,
+        provider: schema.baAccount.providerId,
+      })
+      .from(schema.baAccount)
+      .where(eq(schema.baAccount.userId, user.id));
+
+    // Check if user has at least 2 auth methods before unlinking
+    if (accounts.length <= 1) {
+      return c.json({ error: "Cannot unlink your only authentication method" }, 400);
+    }
+
+    // Find the account to unlink
+    const accountToUnlink = accounts.find((a) => a.provider === provider);
+    if (!accountToUnlink) {
+      return c.json({ error: "Account not found" }, 404);
+    }
+
+    // Delete the account
+    await db
+      .delete(schema.baAccount)
+      .where(
+        and(eq(schema.baAccount.id, accountToUnlink.id), eq(schema.baAccount.userId, user.id))
+      );
+
+    return c.json({ success: true, message: "Account unlinked" });
+  } catch (error) {
+    console.error("Error unlinking account:", error);
+    return c.json({ error: "Failed to unlink account" }, 500);
+  }
+});
+
 export default profile;

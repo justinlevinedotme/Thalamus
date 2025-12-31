@@ -131,7 +131,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   signInWithProvider: async (provider) => {
     set({ status: "loading", error: undefined });
     try {
-      const callbackURL = `${window.location.origin}/docs`;
+      const callbackURL = `${window.location.origin}/me/files`;
       await authClient.signIn.social({
         provider,
         callbackURL,
@@ -151,7 +151,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         email,
         password,
         name: email.split("@")[0],
-        callbackURL: `${window.location.origin}/docs`,
+        callbackURL: `${window.location.origin}/me/files`,
         fetchOptions: captchaToken
           ? { headers: { "x-captcha-response": captchaToken } }
           : undefined,
