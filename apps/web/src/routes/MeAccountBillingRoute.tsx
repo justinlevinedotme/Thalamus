@@ -58,6 +58,12 @@ export default function MeAccountBillingRoute() {
                 graphs allowed
               </p>
               <p>
+                <span className="font-medium text-foreground">
+                  {profile?.plan === "plus" ? 50 : 20}
+                </span>{" "}
+                saved nodes allowed
+              </p>
+              <p>
                 <span className="font-medium text-foreground">{profile?.retentionDays || 365}</span>{" "}
                 days retention
               </p>
@@ -67,14 +73,21 @@ export default function MeAccountBillingRoute() {
       </section>
 
       {/* Upgrade Placeholder */}
-      <section className="rounded-lg border border-dashed border-border bg-secondary/50 p-6 text-center">
-        <CreditCard className="mx-auto h-8 w-8 text-muted-foreground" />
-        <h3 className="mt-3 font-medium text-foreground">Upgrade to PLUS</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Get more graphs, longer retention, and access to templates.
-        </p>
-        <p className="mt-4 text-xs text-muted-foreground">Coming soon</p>
-      </section>
+      {profile?.plan !== "plus" && (
+        <section className="rounded-lg border border-dashed border-border bg-secondary/50 p-6 text-center">
+          <CreditCard className="mx-auto h-8 w-8 text-muted-foreground" />
+          <h3 className="mt-3 font-medium text-foreground">Upgrade to PLUS</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Get more graphs, more saved nodes, longer retention, and priority support.
+          </p>
+          <ul className="mt-4 space-y-1 text-sm text-muted-foreground">
+            <li>50 graphs (vs 20)</li>
+            <li>50 saved nodes (vs 20)</li>
+            <li>Unlimited retention</li>
+          </ul>
+          <p className="mt-4 text-xs text-muted-foreground">Coming soon</p>
+        </section>
+      )}
     </div>
   );
 }

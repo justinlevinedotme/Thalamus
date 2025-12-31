@@ -1,7 +1,7 @@
 /**
  * @file MeSavedNodesRoute.tsx
- * @description Saved Nodes page within the /me hub. Mirrors the My Templates page,
- * showing the same saved node templates with full CRUD operations.
+ * @description Saved Nodes page within the /me hub. Shows user's saved composed node
+ * layouts that can be reused across graphs. Uses the Node Composer for create/edit.
  */
 
 import { useCallback, useEffect, useState } from "react";

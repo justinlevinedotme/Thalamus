@@ -146,11 +146,11 @@ export function ComponentPalette() {
         ))}
       </Accordion>
 
-      {/* User saved templates section */}
+      {/* User saved nodes section */}
       {(savedTemplates.length > 0 || isLoadingSavedTemplates) && (
         <div className="mt-6 pt-4 border-t border-border">
           <h3 className="text-xs font-semibold uppercase text-muted-foreground px-1 mb-3">
-            My Templates
+            My Saved Nodes
           </h3>
           {isLoadingSavedTemplates ? (
             <div className="text-xs text-muted-foreground px-3 py-2">Loading...</div>
