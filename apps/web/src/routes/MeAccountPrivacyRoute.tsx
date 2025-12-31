@@ -5,7 +5,7 @@
  */
 
 import { useState } from "react";
-import { AlertTriangle, Loader2, Shield, Trash2 } from "lucide-react";
+import { AlertTriangle, Download, Loader2, Shield, Trash2 } from "lucide-react";
 
 import { Button } from "../components/ui/button";
 import {
@@ -43,6 +43,11 @@ const DELETION_REASONS = [
 export default function MeAccountPrivacyRoute() {
   const { profile, loading, hasPendingDeletion, setHasPendingDeletion } = useProfileData();
 
+  // Data export states
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [exportSuccess, setExportSuccess] = useState(false);
+
   // Account deletion states
   const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
   const [deletionReason, setDeletionReason] = useState("");
@@ -52,6 +57,36 @@ export default function MeAccountPrivacyRoute() {
   const [deletionLoading, setDeletionLoading] = useState(false);
   const [deletionError, setDeletionError] = useState<string | null>(null);
   const [deletionSubmitted, setDeletionSubmitted] = useState(false);
+
+  const handleExportData = async () => {
+    try {
+      setExportLoading(true);
+      setExportError(null);
+      setExportSuccess(false);
+
+      const response = await apiFetch<Record<string, unknown>>("/profile/data-export");
+
+      // Create blob and trigger download
+      const blob = new Blob([JSON.stringify(response, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const dateStr = new Date().toISOString().split("T")[0];
+      a.download = `thalamus-data-export-${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setExportSuccess(true);
+      // Clear success message after 5 seconds
+      setTimeout(() => setExportSuccess(false), 5000);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : "Failed to export data");
+    } finally {
+      setExportLoading(false);
+    }
+  };
 
   const handleRequestDeletion = async () => {
     try {
@@ -118,16 +153,47 @@ export default function MeAccountPrivacyRoute() {
         <p className="text-sm text-muted-foreground">Manage your data and account deletion</p>
       </div>
 
-      {/* Data Export Section (placeholder) */}
+      {/* Data Export Section */}
       <section className="rounded-lg border border-border bg-card p-6">
-        <h2 className="text-lg font-medium text-foreground">Export Your Data</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Request a copy of your data including all graphs and account information.
-        </p>
-        <div className="mt-4">
-          <Button variant="outline" disabled>
-            Request Data Export (Coming Soon)
-          </Button>
+        <div className="flex items-start gap-3">
+          <Download className="mt-0.5 h-5 w-5 text-muted-foreground" />
+          <div className="flex-1">
+            <h2 className="text-lg font-medium text-foreground">Export Your Data</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Download a copy of all your data in JSON format.
+            </p>
+            <div className="mt-3 rounded-md bg-muted/50 p-3">
+              <p className="text-xs font-medium text-muted-foreground">Export includes:</p>
+              <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs text-muted-foreground">
+                <li>Profile information (name, email, plan)</li>
+                <li>Email preferences</li>
+                <li>All graphs with full diagram data</li>
+                <li>Share links and tokens</li>
+                <li>Linked OAuth accounts</li>
+              </ul>
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              <Button variant="outline" onClick={handleExportData} disabled={exportLoading}>
+                {exportLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Preparing export...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Data Export
+                  </>
+                )}
+              </Button>
+              {exportSuccess && (
+                <span className="text-sm text-green-600 dark:text-green-400">
+                  Export downloaded successfully
+                </span>
+              )}
+            </div>
+            {exportError && <p className="mt-2 text-sm text-destructive">{exportError}</p>}
+          </div>
         </div>
       </section>
 

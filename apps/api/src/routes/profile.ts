@@ -449,4 +449,175 @@ profile.post("/unlink-account", async (c) => {
   }
 });
 
+// Export user data (GDPR-style data export)
+profile.get("/data-export", async (c) => {
+  const user = c.get("user");
+  const db = getDb();
+
+  try {
+    // Get profile data
+    let profileData: {
+      plan?: string | null;
+      maxGraphs?: number | null;
+      retentionDays?: number | null;
+    } = {};
+    try {
+      const profiles = await db
+        .select({
+          plan: schema.profiles.plan,
+          maxGraphs: schema.profiles.maxGraphs,
+          retentionDays: schema.profiles.retentionDays,
+        })
+        .from(schema.profiles)
+        .where(eq(schema.profiles.id, user.id));
+
+      if (profiles.length > 0) {
+        profileData = profiles[0];
+      }
+    } catch {
+      // Continue with defaults if profiles table doesn't exist
+    }
+
+    // Get email preferences
+    let emailPrefs: {
+      marketingEmails?: boolean | null;
+      productUpdates?: boolean | null;
+    } = {};
+    try {
+      const prefs = await db
+        .select({
+          marketingEmails: schema.emailPreferences.marketingEmails,
+          productUpdates: schema.emailPreferences.productUpdates,
+        })
+        .from(schema.emailPreferences)
+        .where(eq(schema.emailPreferences.userId, user.id));
+
+      if (prefs.length > 0) {
+        emailPrefs = prefs[0];
+      }
+    } catch {
+      // Continue with defaults
+    }
+
+    // Get linked accounts (exclude sensitive data like tokens)
+    let linkedAccounts: Array<{ provider: string; linkedAt: string | null }> = [];
+    try {
+      const accounts = await db
+        .select({
+          provider: schema.baAccount.providerId,
+          createdAt: schema.baAccount.createdAt,
+        })
+        .from(schema.baAccount)
+        .where(eq(schema.baAccount.userId, user.id));
+
+      linkedAccounts = accounts.map((a) => ({
+        provider: a.provider,
+        linkedAt: a.createdAt?.toISOString() ?? null,
+      }));
+    } catch {
+      // Continue without linked accounts
+    }
+
+    // Get all graphs with full data
+    let graphs: Array<{
+      id: string;
+      title: string;
+      data: unknown;
+      createdAt: string | null;
+      updatedAt: string | null;
+      expiresAt: string | null;
+    }> = [];
+    try {
+      const userGraphs = await db
+        .select({
+          id: schema.graphs.id,
+          title: schema.graphs.title,
+          data: schema.graphs.data,
+          createdAt: schema.graphs.createdAt,
+          updatedAt: schema.graphs.updatedAt,
+          expiresAt: schema.graphs.expiresAt,
+        })
+        .from(schema.graphs)
+        .where(eq(schema.graphs.ownerId, user.id))
+        .orderBy(desc(schema.graphs.updatedAt));
+
+      graphs = userGraphs.map((g) => ({
+        id: g.id,
+        title: g.title,
+        data: g.data,
+        createdAt: g.createdAt?.toISOString() ?? null,
+        updatedAt: g.updatedAt?.toISOString() ?? null,
+        expiresAt: g.expiresAt?.toISOString() ?? null,
+      }));
+    } catch {
+      // Continue without graphs
+    }
+
+    // Get share links
+    let shareLinks: Array<{
+      id: string;
+      token: string;
+      graphId: string;
+      createdAt: string | null;
+      expiresAt: string | null;
+    }> = [];
+    try {
+      const links = await db
+        .select({
+          id: schema.shareLinks.id,
+          token: schema.shareLinks.token,
+          graphId: schema.shareLinks.graphId,
+          createdAt: schema.shareLinks.createdAt,
+          expiresAt: schema.shareLinks.expiresAt,
+        })
+        .from(schema.shareLinks)
+        .where(eq(schema.shareLinks.createdBy, user.id))
+        .orderBy(desc(schema.shareLinks.createdAt));
+
+      shareLinks = links.map((l) => ({
+        id: l.id,
+        token: l.token,
+        graphId: l.graphId,
+        createdAt: l.createdAt?.toISOString() ?? null,
+        expiresAt: l.expiresAt?.toISOString() ?? null,
+      }));
+    } catch {
+      // Continue without share links
+    }
+
+    // Build export payload
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      profile: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
+        emailVerified: user.emailVerified,
+        plan: profileData.plan || "free",
+        maxGraphs: profileData.maxGraphs || 20,
+        retentionDays: profileData.retentionDays || 365,
+      },
+      emailPreferences: {
+        marketingEmails: emailPrefs.marketingEmails ?? true,
+        productUpdates: emailPrefs.productUpdates ?? true,
+      },
+      linkedAccounts,
+      graphs,
+      shareLinks,
+    };
+
+    // Generate filename with current date
+    const dateStr = new Date().toISOString().split("T")[0];
+    const filename = `thalamus-data-export-${dateStr}.json`;
+
+    return c.json(exportData, 200, {
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    });
+  } catch (error) {
+    console.error("Error exporting data:", error);
+    return c.json({ error: "Failed to export data" }, 500);
+  }
+});
+
 export default profile;
