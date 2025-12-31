@@ -180,3 +180,17 @@ export const accountDeletionRequests = sqliteTable("account_deletion_requests", 
   createdAt: timestamp("created_at").notNull(),
   processedAt: integer("processed_at", { mode: "timestamp" }),
 });
+
+export const savedNodes = sqliteTable("saved_nodes", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => baUser.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  layout: text("layout", { mode: "json" }).$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").notNull(),
+  updatedAt: timestamp("updated_at").notNull(),
+});

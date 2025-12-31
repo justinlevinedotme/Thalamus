@@ -1,117 +1,226 @@
 /**
  * @file MeTemplatesRoute.tsx
- * @description Templates page within the /me hub. Shows user's saved templates
- * with PLUS gating - non-PLUS users see upsell content.
+ * @description Templates page within the /me hub. Shows user's saved node templates
+ * with quota display. All users can save templates (free: 20, PLUS: 50).
+ * Opens the full Node Composer modal for create/edit.
  */
 
-import { AlertTriangle, Crown, Layout, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Edit2, Loader2, Plus, Puzzle, Trash2 } from "lucide-react";
 
-import { Badge } from "../components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
-import { useProfileData } from "../features/account/useProfileData";
-import { Loader2 } from "lucide-react";
+import { useComposerStore } from "../features/composer/composerStore";
+import { NodeComposerModal } from "../features/composer/components/NodeComposerModal";
+import type { SavedNode } from "../features/composer/composerApi";
 
 export default function MeTemplatesRoute() {
-  const { profile, loading } = useProfileData();
-  const isPlusUser = profile?.plan === "plus";
+  const {
+    savedTemplates,
+    savedTemplatesQuota,
+    isLoadingSavedTemplates,
+    savedTemplatesError,
+    loadSavedTemplates,
+    openTemplateEditor,
+    createSavedTemplate,
+    updateSavedTemplate,
+    deleteSavedTemplate,
+    currentLayout,
+    mode,
+    targetTemplateId,
+    closeComposer,
+  } = useComposerStore();
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  const [deleteTarget, setDeleteTarget] = useState<SavedNode | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Load templates on mount
+  useEffect(() => {
+    void loadSavedTemplates();
+  }, [loadSavedTemplates]);
+
+  // Handle save from composer modal
+  const handleComposerApply = useCallback(async () => {
+    if (!currentLayout) return;
+
+    if (mode === "template") {
+      if (targetTemplateId) {
+        // Update existing template
+        await updateSavedTemplate(targetTemplateId, {
+          name: currentLayout.name,
+          description: currentLayout.description,
+          layout: currentLayout,
+        });
+      } else {
+        // Create new template
+        await createSavedTemplate(currentLayout.name, currentLayout.description);
+      }
+    }
+
+    closeComposer();
+  }, [
+    currentLayout,
+    mode,
+    targetTemplateId,
+    updateSavedTemplate,
+    createSavedTemplate,
+    closeComposer,
+  ]);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    await deleteSavedTemplate(deleteTarget.id);
+    setIsDeleting(false);
+    setDeleteTarget(null);
+  };
+
+  const canCreateMore = savedTemplatesQuota
+    ? savedTemplatesQuota.used < savedTemplatesQuota.max
+    : true;
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-semibold text-foreground">My Templates</h1>
-        <Badge variant="plus">PLUS</Badge>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">My Templates</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Create and manage your saved node templates for reuse across graphs
+          </p>
+        </div>
+        <Button onClick={() => openTemplateEditor()} disabled={!canCreateMore}>
+          <Plus className="mr-2 h-4 w-4" />
+          New Template
+        </Button>
       </div>
-      <p className="text-sm text-muted-foreground">
-        {isPlusUser
-          ? "Create and manage your custom graph templates"
-          : "Save and reuse your graph structures as templates"}
-      </p>
 
-      {isPlusUser ? (
-        <>
-          {/* Not Functional Notice (for PLUS users) */}
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
-              <div className="text-sm text-amber-800 dark:text-amber-200">
-                <p className="font-medium">Templates is not yet available</p>
-                <p className="mt-1 text-amber-700 dark:text-amber-300">
-                  This feature is coming soon. As a PLUS member, you'll have access to save and
-                  manage your own templates.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Placeholder Content */}
-          <section className="rounded-lg border border-dashed border-border bg-secondary/50 p-8 text-center">
-            <Layout className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 font-medium text-foreground">No templates yet</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              When this feature launches, you'll be able to save graphs as templates and quickly
-              start new projects from them.
-            </p>
-          </section>
-        </>
-      ) : (
-        /* Upsell Content (for non-PLUS users) */
-        <section className="overflow-hidden rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-50 dark:border-amber-800 dark:from-amber-950/30 dark:to-yellow-950/30">
-          <div className="p-8">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-yellow-400">
-                <Crown className="h-6 w-6 text-amber-950" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">
-                  Unlock Templates with PLUS
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Save time by creating reusable graph templates
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="flex items-start gap-3 rounded-lg bg-white/50 p-4 dark:bg-black/20">
-                <Sparkles className="mt-0.5 h-5 w-5 text-amber-600" />
-                <div>
-                  <p className="font-medium text-foreground">Save any graph as a template</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Turn your best work into reusable starting points
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 rounded-lg bg-white/50 p-4 dark:bg-black/20">
-                <Layout className="mt-0.5 h-5 w-5 text-amber-600" />
-                <div>
-                  <p className="font-medium text-foreground">Organize your templates</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Keep your templates organized and accessible
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Button
-                className="bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 hover:from-amber-600 hover:to-yellow-500"
-                disabled
-              >
-                <Crown className="mr-2 h-4 w-4" />
-                Upgrade to PLUS (Coming Soon)
-              </Button>
-            </div>
-          </div>
-        </section>
+      {/* Quota display */}
+      {savedTemplatesQuota && (
+        <div className="text-sm text-muted-foreground">
+          {savedTemplatesQuota.used}/{savedTemplatesQuota.max} templates used
+          {savedTemplatesQuota.plan === "plus" && (
+            <span className="ml-2 text-xs text-amber-600">(PLUS)</span>
+          )}
+        </div>
       )}
+
+      {/* Error display */}
+      {savedTemplatesError && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+          {savedTemplatesError}
+        </div>
+      )}
+
+      {/* Loading state */}
+      {isLoadingSavedTemplates ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : savedTemplates.length === 0 ? (
+        /* Empty state */
+        <section className="rounded-lg border border-dashed border-border bg-secondary/50 p-8 text-center">
+          <Puzzle className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h3 className="mt-4 font-medium text-foreground">No templates yet</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Create your first template to save time when building graphs.
+          </p>
+          <Button className="mt-4" onClick={() => openTemplateEditor()}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Template
+          </Button>
+        </section>
+      ) : (
+        /* Templates grid */
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {savedTemplates.map((template) => (
+            <div
+              key={template.id}
+              className="group relative rounded-lg border border-border bg-card p-4 transition hover:border-muted-foreground/30 hover:shadow-sm"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary">
+                    <Puzzle className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-medium text-foreground">{template.name}</h3>
+                    {template.description && (
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {template.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="mt-4 flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => openTemplateEditor(template.id)}
+                >
+                  <Edit2 className="mr-2 h-3 w-3" />
+                  Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  onClick={() => setDeleteTarget(template)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+
+              {/* Metadata */}
+              <div className="mt-3 text-xs text-muted-foreground">
+                {template.updatedAt
+                  ? `Updated ${new Date(template.updatedAt).toLocaleDateString()}`
+                  : template.createdAt
+                    ? `Created ${new Date(template.createdAt).toLocaleDateString()}`
+                    : ""}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Node Composer Modal (reused) */}
+      <NodeComposerModal onApply={handleComposerApply} />
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Template</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

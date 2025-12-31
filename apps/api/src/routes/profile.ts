@@ -585,6 +585,41 @@ profile.get("/data-export", async (c) => {
       // Continue without share links
     }
 
+    // Get saved nodes (user templates)
+    let savedNodes: Array<{
+      id: string;
+      name: string;
+      description: string | null;
+      layout: unknown;
+      createdAt: string | null;
+      updatedAt: string | null;
+    }> = [];
+    try {
+      const nodes = await db
+        .select({
+          id: schema.savedNodes.id,
+          name: schema.savedNodes.name,
+          description: schema.savedNodes.description,
+          layout: schema.savedNodes.layout,
+          createdAt: schema.savedNodes.createdAt,
+          updatedAt: schema.savedNodes.updatedAt,
+        })
+        .from(schema.savedNodes)
+        .where(eq(schema.savedNodes.userId, user.id))
+        .orderBy(desc(schema.savedNodes.updatedAt));
+
+      savedNodes = nodes.map((n) => ({
+        id: n.id,
+        name: n.name,
+        description: n.description,
+        layout: n.layout,
+        createdAt: n.createdAt?.toISOString() ?? null,
+        updatedAt: n.updatedAt?.toISOString() ?? null,
+      }));
+    } catch {
+      // Continue without saved nodes
+    }
+
     // Build export payload
     const exportData = {
       exportedAt: new Date().toISOString(),
@@ -605,6 +640,7 @@ profile.get("/data-export", async (c) => {
       linkedAccounts,
       graphs,
       shareLinks,
+      savedNodes,
     };
 
     // Generate filename with current date

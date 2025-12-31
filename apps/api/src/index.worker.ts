@@ -35,6 +35,7 @@ export type Bindings = {
 // Import routes
 import graphs from "./routes/graphs";
 import profile from "./routes/profile";
+import savedNodes from "./routes/saved-nodes";
 import sessions from "./routes/sessions";
 import share from "./routes/share";
 import shareLinks from "./routes/share-links";
@@ -80,6 +81,7 @@ app.all("/auth/*", async (c) => {
 // Register routes
 app.route("/graphs", graphs);
 app.route("/profile", profile);
+app.route("/saved-nodes", savedNodes);
 app.route("/sessions", sessions);
 app.route("/share", share);
 app.route("/share-links", shareLinks);

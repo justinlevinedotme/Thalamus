@@ -25,14 +25,24 @@ interface NodeComposerModalProps {
 }
 
 export function NodeComposerModal({ onApply }: NodeComposerModalProps) {
-  const { isOpen, mode, targetNodeId, currentLayout, closeComposer, resetLayout } =
-    useComposerStore();
+  const {
+    isOpen,
+    mode,
+    targetNodeId,
+    targetTemplateId,
+    currentLayout,
+    closeComposer,
+    resetLayout,
+  } = useComposerStore();
 
   const handleApply = useCallback(() => {
     if (currentLayout && onApply) {
       onApply(currentLayout, mode, targetNodeId);
     }
-    closeComposer();
+    // Don't close here for template mode - let the parent handle it
+    if (mode !== "template") {
+      closeComposer();
+    }
   }, [currentLayout, mode, targetNodeId, onApply, closeComposer]);
 
   const handleCancel = useCallback(() => {
@@ -50,7 +60,7 @@ export function NodeComposerModal({ onApply }: NodeComposerModalProps) {
       case "edit":
         return "Edit Node Layout";
       case "template":
-        return "Manage Templates";
+        return targetTemplateId ? "Edit Template" : "Create Template";
       default:
         return "Node Composer";
     }
@@ -63,9 +73,20 @@ export function NodeComposerModal({ onApply }: NodeComposerModalProps) {
       case "edit":
         return "Modify the layout of this node";
       case "template":
-        return "Browse and manage your node templates";
+        return targetTemplateId ? "Modify your saved template" : "Design a reusable node template";
       default:
         return "";
+    }
+  };
+
+  const getApplyButtonText = () => {
+    switch (mode) {
+      case "edit":
+        return "Save Changes";
+      case "template":
+        return targetTemplateId ? "Update Template" : "Save Template";
+      default:
+        return "Create Node";
     }
   };
 
@@ -91,7 +112,7 @@ export function NodeComposerModal({ onApply }: NodeComposerModalProps) {
                 Cancel
               </Button>
               <Button onClick={handleApply} disabled={!currentLayout}>
-                {mode === "edit" ? "Save Changes" : "Create Node"}
+                {getApplyButtonText()}
               </Button>
             </div>
           </div>
