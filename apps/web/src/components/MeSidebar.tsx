@@ -116,9 +116,9 @@ function NavSection({ title, items }: { title: string; items: NavItem[] }) {
 
 export default function MeSidebar() {
   return (
-    <aside className="flex w-64 flex-col gap-6 py-4">
+    <div className="flex flex-col gap-6 py-4">
       <NavSection title="Workspace" items={workspaceItems} />
       <NavSection title="My Account" items={accountItems} />
-    </aside>
+    </div>
   );
 }

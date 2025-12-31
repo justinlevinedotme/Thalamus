@@ -38,12 +38,12 @@ export default function MeLayoutRoute() {
 
   return (
     <div className="flex min-h-screen flex-col bg-card">
-      <Header />
+      <Header fullWidth />
       <div className="flex flex-1">
         {/* Desktop sidebar - hidden on mobile */}
-        <div className="hidden border-r border-border px-4 md:block">
+        <aside className="hidden w-64 shrink-0 border-r border-border px-4 md:block">
           <MeSidebar />
-        </div>
+        </aside>
 
         {/* Mobile drawer trigger + Sheet */}
         <div className="border-b border-border px-4 py-2 md:hidden">
