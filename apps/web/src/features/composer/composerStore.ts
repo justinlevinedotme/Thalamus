@@ -17,6 +17,14 @@ import {
   createDefaultLayout,
   createDefaultRow,
 } from "./types";
+import {
+  listSavedNodes,
+  createSavedNode,
+  updateSavedNode,
+  deleteSavedNode,
+  type SavedNode,
+  type SavedNodesQuota,
+} from "./composerApi";
 
 // Generate unique IDs
 const generateId = () => crypto.randomUUID();
@@ -25,7 +33,8 @@ interface ComposerState {
   // Modal state
   isOpen: boolean;
   mode: ComposerMode;
-  targetNodeId?: string; // For editing existing node
+  targetNodeId?: string; // For editing existing node in graph
+  targetTemplateId?: string; // For editing existing saved template
 
   // Current layout being edited
   currentLayout: ComposedNodeLayout | null;
@@ -34,12 +43,19 @@ interface ComposerState {
   selectedRowId: string | null;
   selectedElementType: "row" | "leftHandle" | "rightHandle" | "content" | null;
 
-  // Template management (for future use)
+  // Saved templates (user's saved nodes from backend)
+  savedTemplates: SavedNode[];
+  savedTemplatesQuota: SavedNodesQuota | null;
+  isLoadingSavedTemplates: boolean;
+  savedTemplatesError: string | null;
+
+  // Built-in templates (legacy, kept for backwards compat)
   templates: NodeTemplate[];
   isLoadingTemplates: boolean;
 
   // Modal actions
   openComposer: (mode: ComposerMode, nodeId?: string, layout?: ComposedNodeLayout) => void;
+  openTemplateEditor: (templateId?: string) => void; // Open composer for template create/edit
   closeComposer: () => void;
 
   // Layout actions
@@ -90,11 +106,21 @@ interface ComposerState {
   ) => void;
   clearSelection: () => void;
 
-  // Template actions (placeholder for future)
+  // Template actions (legacy built-in templates)
   loadTemplates: () => Promise<void>;
   saveAsTemplate: (name: string, description?: string) => Promise<NodeTemplate | null>;
   deleteTemplate: (templateId: string) => Promise<void>;
   applyTemplate: (template: NodeTemplate) => void;
+
+  // Saved template actions (backend-stored user templates)
+  loadSavedTemplates: () => Promise<void>;
+  createSavedTemplate: (name: string, description?: string) => Promise<SavedNode | null>;
+  updateSavedTemplate: (
+    templateId: string,
+    data: { name?: string; description?: string; layout?: ComposedNodeLayout }
+  ) => Promise<SavedNode | null>;
+  deleteSavedTemplate: (templateId: string) => Promise<void>;
+  applySavedTemplate: (template: SavedNode) => void;
 }
 
 export const useComposerStore = create<ComposerState>((set, get) => ({
@@ -102,11 +128,16 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
   isOpen: false,
   mode: "create",
   targetNodeId: undefined,
+  targetTemplateId: undefined,
   currentLayout: null,
   selectedRowId: null,
   selectedElementType: null,
   templates: [],
   isLoadingTemplates: false,
+  savedTemplates: [],
+  savedTemplatesQuota: null,
+  isLoadingSavedTemplates: false,
+  savedTemplatesError: null,
 
   // Modal actions
   openComposer: (mode, nodeId, layout) => {
@@ -129,10 +160,41 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
       isOpen: false,
       mode: "create",
       targetNodeId: undefined,
+      targetTemplateId: undefined,
       currentLayout: null,
       selectedRowId: null,
       selectedElementType: null,
     });
+  },
+
+  // Open composer for template create/edit (used from My Templates page)
+  openTemplateEditor: async (templateId) => {
+    if (templateId) {
+      // Find template to edit
+      const { savedTemplates } = get();
+      const template = savedTemplates.find((t) => t.id === templateId);
+      if (template && template.layout) {
+        const layout = JSON.parse(JSON.stringify(template.layout)) as ComposedNodeLayout;
+        set({
+          isOpen: true,
+          mode: "template",
+          targetTemplateId: templateId,
+          currentLayout: layout,
+          selectedRowId: null,
+          selectedElementType: null,
+        });
+      }
+    } else {
+      // Create new template
+      set({
+        isOpen: true,
+        mode: "template",
+        targetTemplateId: undefined,
+        currentLayout: createDefaultLayout(generateId(), "New Template"),
+        selectedRowId: null,
+        selectedElementType: null,
+      });
+    }
   },
 
   // Layout actions
@@ -446,6 +508,110 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
   applyTemplate: (template) => {
     const newLayout: ComposedNodeLayout = {
       ...JSON.parse(JSON.stringify(template)), // Deep clone
+      id: generateId(),
+      isTemplate: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Regenerate all IDs
+    newLayout.rows = newLayout.rows.map((row) => ({
+      ...row,
+      id: generateId(),
+      leftHandle: row.leftHandle ? { ...row.leftHandle, id: generateId() } : undefined,
+      rightHandle: row.rightHandle ? { ...row.rightHandle, id: generateId() } : undefined,
+      content: row.content ? { ...row.content, id: generateId() } : undefined,
+    }));
+
+    set({
+      currentLayout: newLayout,
+      selectedRowId: null,
+      selectedElementType: null,
+    });
+  },
+
+  // Saved template actions (backend-stored user templates)
+  loadSavedTemplates: async () => {
+    set({ isLoadingSavedTemplates: true, savedTemplatesError: null });
+    try {
+      const response = await listSavedNodes({ limit: 100 });
+      set({
+        savedTemplates: response.items,
+        savedTemplatesQuota: response.quota,
+        isLoadingSavedTemplates: false,
+      });
+    } catch (err) {
+      set({
+        savedTemplatesError: err instanceof Error ? err.message : "Failed to load templates",
+        isLoadingSavedTemplates: false,
+      });
+    }
+  },
+
+  createSavedTemplate: async (name, description) => {
+    const { currentLayout } = get();
+    if (!currentLayout) return null;
+
+    try {
+      const saved = await createSavedNode({
+        name,
+        description,
+        layout: currentLayout,
+      });
+
+      // Refresh the list to get updated quota
+      await get().loadSavedTemplates();
+
+      return saved;
+    } catch (err) {
+      set({
+        savedTemplatesError: err instanceof Error ? err.message : "Failed to create template",
+      });
+      return null;
+    }
+  },
+
+  updateSavedTemplate: async (templateId, data) => {
+    try {
+      const updated = await updateSavedNode(templateId, data);
+
+      // Update local state
+      set((state) => ({
+        savedTemplates: state.savedTemplates.map((t) => (t.id === templateId ? updated : t)),
+      }));
+
+      return updated;
+    } catch (err) {
+      set({
+        savedTemplatesError: err instanceof Error ? err.message : "Failed to update template",
+      });
+      return null;
+    }
+  },
+
+  deleteSavedTemplate: async (templateId) => {
+    try {
+      await deleteSavedNode(templateId);
+
+      // Update local state
+      set((state) => ({
+        savedTemplates: state.savedTemplates.filter((t) => t.id !== templateId),
+        savedTemplatesQuota: state.savedTemplatesQuota
+          ? { ...state.savedTemplatesQuota, used: state.savedTemplatesQuota.used - 1 }
+          : null,
+      }));
+    } catch (err) {
+      set({
+        savedTemplatesError: err instanceof Error ? err.message : "Failed to delete template",
+      });
+    }
+  },
+
+  applySavedTemplate: (template) => {
+    if (!template.layout) return;
+
+    const newLayout: ComposedNodeLayout = {
+      ...JSON.parse(JSON.stringify(template.layout)), // Deep clone
       id: generateId(),
       isTemplate: false,
       createdAt: new Date().toISOString(),

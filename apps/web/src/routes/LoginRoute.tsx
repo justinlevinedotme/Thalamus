@@ -146,7 +146,7 @@ export default function LoginRoute() {
     }
     const result = await signIn(email, password, captchaToken || undefined);
     if (result.success) {
-      navigate("/docs");
+      navigate("/me/files");
     } else if (result.emailNotVerified) {
       navigate("/verify-email", { state: { email } });
     } else if (result.twoFactorRequired) {
@@ -185,7 +185,7 @@ export default function LoginRoute() {
           image: session.data.user.image ?? null,
         });
         setTwoFactorOpen(false);
-        navigate("/docs");
+        navigate("/me/files");
       } else {
         setTwoFactorError("Failed to get session after verification");
       }

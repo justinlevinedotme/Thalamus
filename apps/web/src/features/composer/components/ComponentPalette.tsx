@@ -3,6 +3,7 @@
  * @description Draggable component palette displaying available blocks, handles, and templates that can be added to the node composer
  */
 
+import { useEffect } from "react";
 import { useDraggable } from "@dnd-kit/core";
 import {
   Accordion,
@@ -13,6 +14,7 @@ import {
 import { PALETTE_CATEGORIES, BUILT_IN_TEMPLATES } from "../constants";
 import type { PaletteItemDefinition, DragItem, NodeTemplate } from "../types";
 import { useComposerStore } from "../composerStore";
+import type { SavedNode } from "../composerApi";
 import {
   Type,
   FileText,
@@ -109,6 +111,13 @@ function PaletteItem({ item }: PaletteItemProps) {
 }
 
 export function ComponentPalette() {
+  const { savedTemplates, isLoadingSavedTemplates, loadSavedTemplates } = useComposerStore();
+
+  // Load user templates on mount
+  useEffect(() => {
+    void loadSavedTemplates();
+  }, [loadSavedTemplates]);
+
   return (
     <div className="p-3">
       <div className="mb-3">
@@ -137,10 +146,28 @@ export function ComponentPalette() {
         ))}
       </Accordion>
 
-      {/* Templates section */}
+      {/* User saved nodes section */}
+      {(savedTemplates.length > 0 || isLoadingSavedTemplates) && (
+        <div className="mt-6 pt-4 border-t border-border">
+          <h3 className="text-xs font-semibold uppercase text-muted-foreground px-1 mb-3">
+            My Saved Nodes
+          </h3>
+          {isLoadingSavedTemplates ? (
+            <div className="text-xs text-muted-foreground px-3 py-2">Loading...</div>
+          ) : (
+            <div className="space-y-1">
+              {savedTemplates.map((template) => (
+                <SavedTemplateItem key={template.id} template={template} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Built-in templates section */}
       <div className="mt-6 pt-4 border-t border-border">
         <h3 className="text-xs font-semibold uppercase text-muted-foreground px-1 mb-3">
-          Templates
+          Built-in Templates
         </h3>
         <div className="space-y-1">
           {BUILT_IN_TEMPLATES.map((template) => (
@@ -181,6 +208,36 @@ function TemplateItem({ template }: { template: NodeTemplate }) {
       <div className="flex-1 min-w-0">
         <div className="text-sm font-medium truncate">{template.name}</div>
         <div className="text-xs text-muted-foreground truncate">{template.description}</div>
+      </div>
+    </button>
+  );
+}
+
+function SavedTemplateItem({ template }: { template: SavedNode }) {
+  const { applySavedTemplate } = useComposerStore();
+
+  // Get border color from layout if available
+  const color = template.layout?.style?.borderColor || "#64748b";
+
+  return (
+    <button
+      onClick={() => applySavedTemplate(template)}
+      className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left
+        border border-transparent
+        hover:bg-accent hover:border-border
+        transition-colors"
+    >
+      <div
+        className="flex items-center justify-center w-7 h-7 rounded"
+        style={{ backgroundColor: `${color}20`, color }}
+      >
+        <Circle className="h-4 w-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium truncate">{template.name}</div>
+        {template.description && (
+          <div className="text-xs text-muted-foreground truncate">{template.description}</div>
+        )}
       </div>
     </button>
   );

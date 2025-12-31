@@ -215,7 +215,7 @@ export default function EditorRoute() {
         await updateGraph(graphId, graphTitle, payload);
       } else {
         const graph = await createGraph(graphTitle, payload);
-        navigate(`/docs/${graph.id}`);
+        navigate(`/editor/${graph.id}`);
       }
       setSaveStatus("saved");
       setLastSavedAt(new Date());

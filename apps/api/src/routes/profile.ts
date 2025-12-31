@@ -397,4 +397,263 @@ profile.delete("/deletion-request", async (c) => {
   }
 });
 
+// Unlink an OAuth account
+profile.post("/unlink-account", async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json();
+  const db = getDb();
+
+  const { provider } = body as { provider?: string };
+
+  if (!provider) {
+    return c.json({ error: "Provider is required" }, 400);
+  }
+
+  // Can't unlink credential (password) - use password reset instead
+  if (provider === "credential") {
+    return c.json({ error: "Cannot unlink password authentication" }, 400);
+  }
+
+  try {
+    // Get all linked accounts for this user
+    const accounts = await db
+      .select({
+        id: schema.baAccount.id,
+        provider: schema.baAccount.providerId,
+      })
+      .from(schema.baAccount)
+      .where(eq(schema.baAccount.userId, user.id));
+
+    // Check if user has at least 2 auth methods before unlinking
+    if (accounts.length <= 1) {
+      return c.json({ error: "Cannot unlink your only authentication method" }, 400);
+    }
+
+    // Find the account to unlink
+    const accountToUnlink = accounts.find((a) => a.provider === provider);
+    if (!accountToUnlink) {
+      return c.json({ error: "Account not found" }, 404);
+    }
+
+    // Delete the account
+    await db
+      .delete(schema.baAccount)
+      .where(
+        and(eq(schema.baAccount.id, accountToUnlink.id), eq(schema.baAccount.userId, user.id))
+      );
+
+    return c.json({ success: true, message: "Account unlinked" });
+  } catch (error) {
+    console.error("Error unlinking account:", error);
+    return c.json({ error: "Failed to unlink account" }, 500);
+  }
+});
+
+// Export user data (GDPR-style data export)
+profile.get("/data-export", async (c) => {
+  const user = c.get("user");
+  const db = getDb();
+
+  try {
+    // Get profile data
+    let profileData: {
+      plan?: string | null;
+      maxGraphs?: number | null;
+      retentionDays?: number | null;
+    } = {};
+    try {
+      const profiles = await db
+        .select({
+          plan: schema.profiles.plan,
+          maxGraphs: schema.profiles.maxGraphs,
+          retentionDays: schema.profiles.retentionDays,
+        })
+        .from(schema.profiles)
+        .where(eq(schema.profiles.id, user.id));
+
+      if (profiles.length > 0) {
+        profileData = profiles[0];
+      }
+    } catch {
+      // Continue with defaults if profiles table doesn't exist
+    }
+
+    // Get email preferences
+    let emailPrefs: {
+      marketingEmails?: boolean | null;
+      productUpdates?: boolean | null;
+    } = {};
+    try {
+      const prefs = await db
+        .select({
+          marketingEmails: schema.emailPreferences.marketingEmails,
+          productUpdates: schema.emailPreferences.productUpdates,
+        })
+        .from(schema.emailPreferences)
+        .where(eq(schema.emailPreferences.userId, user.id));
+
+      if (prefs.length > 0) {
+        emailPrefs = prefs[0];
+      }
+    } catch {
+      // Continue with defaults
+    }
+
+    // Get linked accounts (exclude sensitive data like tokens)
+    let linkedAccounts: Array<{ provider: string; linkedAt: string | null }> = [];
+    try {
+      const accounts = await db
+        .select({
+          provider: schema.baAccount.providerId,
+          createdAt: schema.baAccount.createdAt,
+        })
+        .from(schema.baAccount)
+        .where(eq(schema.baAccount.userId, user.id));
+
+      linkedAccounts = accounts.map((a) => ({
+        provider: a.provider,
+        linkedAt: a.createdAt?.toISOString() ?? null,
+      }));
+    } catch {
+      // Continue without linked accounts
+    }
+
+    // Get all graphs with full data
+    let graphs: Array<{
+      id: string;
+      title: string;
+      data: unknown;
+      createdAt: string | null;
+      updatedAt: string | null;
+      expiresAt: string | null;
+    }> = [];
+    try {
+      const userGraphs = await db
+        .select({
+          id: schema.graphs.id,
+          title: schema.graphs.title,
+          data: schema.graphs.data,
+          createdAt: schema.graphs.createdAt,
+          updatedAt: schema.graphs.updatedAt,
+          expiresAt: schema.graphs.expiresAt,
+        })
+        .from(schema.graphs)
+        .where(eq(schema.graphs.ownerId, user.id))
+        .orderBy(desc(schema.graphs.updatedAt));
+
+      graphs = userGraphs.map((g) => ({
+        id: g.id,
+        title: g.title,
+        data: g.data,
+        createdAt: g.createdAt?.toISOString() ?? null,
+        updatedAt: g.updatedAt?.toISOString() ?? null,
+        expiresAt: g.expiresAt?.toISOString() ?? null,
+      }));
+    } catch {
+      // Continue without graphs
+    }
+
+    // Get share links
+    let shareLinks: Array<{
+      id: string;
+      token: string;
+      graphId: string;
+      createdAt: string | null;
+      expiresAt: string | null;
+    }> = [];
+    try {
+      const links = await db
+        .select({
+          id: schema.shareLinks.id,
+          token: schema.shareLinks.token,
+          graphId: schema.shareLinks.graphId,
+          createdAt: schema.shareLinks.createdAt,
+          expiresAt: schema.shareLinks.expiresAt,
+        })
+        .from(schema.shareLinks)
+        .where(eq(schema.shareLinks.createdBy, user.id))
+        .orderBy(desc(schema.shareLinks.createdAt));
+
+      shareLinks = links.map((l) => ({
+        id: l.id,
+        token: l.token,
+        graphId: l.graphId,
+        createdAt: l.createdAt?.toISOString() ?? null,
+        expiresAt: l.expiresAt?.toISOString() ?? null,
+      }));
+    } catch {
+      // Continue without share links
+    }
+
+    // Get saved nodes (user templates)
+    let savedNodes: Array<{
+      id: string;
+      name: string;
+      description: string | null;
+      layout: unknown;
+      createdAt: string | null;
+      updatedAt: string | null;
+    }> = [];
+    try {
+      const nodes = await db
+        .select({
+          id: schema.savedNodes.id,
+          name: schema.savedNodes.name,
+          description: schema.savedNodes.description,
+          layout: schema.savedNodes.layout,
+          createdAt: schema.savedNodes.createdAt,
+          updatedAt: schema.savedNodes.updatedAt,
+        })
+        .from(schema.savedNodes)
+        .where(eq(schema.savedNodes.userId, user.id))
+        .orderBy(desc(schema.savedNodes.updatedAt));
+
+      savedNodes = nodes.map((n) => ({
+        id: n.id,
+        name: n.name,
+        description: n.description,
+        layout: n.layout,
+        createdAt: n.createdAt?.toISOString() ?? null,
+        updatedAt: n.updatedAt?.toISOString() ?? null,
+      }));
+    } catch {
+      // Continue without saved nodes
+    }
+
+    // Build export payload
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      profile: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
+        emailVerified: user.emailVerified,
+        plan: profileData.plan || "free",
+        maxGraphs: profileData.maxGraphs || 20,
+        retentionDays: profileData.retentionDays || 365,
+      },
+      emailPreferences: {
+        marketingEmails: emailPrefs.marketingEmails ?? true,
+        productUpdates: emailPrefs.productUpdates ?? true,
+      },
+      linkedAccounts,
+      graphs,
+      shareLinks,
+      savedNodes,
+    };
+
+    // Generate filename with current date
+    const dateStr = new Date().toISOString().split("T")[0];
+    const filename = `thalamus-data-export-${dateStr}.json`;
+
+    return c.json(exportData, 200, {
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    });
+  } catch (error) {
+    console.error("Error exporting data:", error);
+    return c.json({ error: "Failed to export data" }, 500);
+  }
+});
+
 export default profile;

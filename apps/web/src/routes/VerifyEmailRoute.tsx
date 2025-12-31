@@ -40,7 +40,7 @@ export default function VerifyEmailRoute() {
     try {
       const result = await authClient.sendVerificationEmail({
         email,
-        callbackURL: `${window.location.origin}/docs`,
+        callbackURL: `${window.location.origin}/me/files`,
       });
       if (result.error) {
         setError(result.error.message || "Failed to resend verification email");

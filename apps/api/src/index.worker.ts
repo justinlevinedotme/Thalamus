@@ -30,12 +30,17 @@ export type Bindings = {
   ATLASSIAN_CLIENT_ID: string;
   ATLASSIAN_CLIENT_SECRET: string;
   TURNSTILE_SECRET_KEY: string;
+  ADMIN_API_KEY: string;
 };
 
 // Import routes
+import admin from "./routes/admin";
 import graphs from "./routes/graphs";
-import share from "./routes/share";
 import profile from "./routes/profile";
+import savedNodes from "./routes/saved-nodes";
+import sessions from "./routes/sessions";
+import share from "./routes/share";
+import shareLinks from "./routes/share-links";
 import unsubscribe from "./routes/unsubscribe";
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -76,9 +81,13 @@ app.all("/auth/*", async (c) => {
 });
 
 // Register routes
+app.route("/admin", admin);
 app.route("/graphs", graphs);
-app.route("/share", share);
 app.route("/profile", profile);
+app.route("/saved-nodes", savedNodes);
+app.route("/sessions", sessions);
+app.route("/share", share);
+app.route("/share-links", shareLinks);
 app.route("/unsubscribe", unsubscribe);
 
 export default app;
