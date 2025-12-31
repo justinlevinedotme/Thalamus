@@ -3,38 +3,25 @@ main = "src/index.worker.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Environment variables (set via wrangler secret or dashboard)
-# DATABASE_URL, BETTER_AUTH_SECRET, RESEND_API_KEY, etc.
-
-# D1 database
+# D1 database binding
 [[d1_databases]]
 binding = "DB"
 database_name = "thalamus-auth"
 database_id = "39238f0a-6bd1-493f-8cf1-4b55b67dbeca"
 migrations_dir = "migrations"
 
+# Default vars (local dev)
 [vars]
 FRONTEND_URL = "http://localhost:5173"
 
-# Development settings
-# Local dev uses Miniflare's D1 simulation (SQLite under the hood)
-[env.dev]
-name = "thalamus-api-dev"
-vars = { FRONTEND_URL = "http://localhost:5173" }
-
-[[env.dev.d1_databases]]
-binding = "DB"
-database_name = "thalamus-auth"
-database_id = "39238f0a-6bd1-493f-8cf1-4b55b67dbeca"
-migrations_dir = "migrations"
-
-# Production
+# Production environment
 [env.production]
 name = "thalamus-api"
 vars = { FRONTEND_URL = "https://thalamus.sh" }
 routes = [
   { pattern = "api.thalamus.sh", custom_domain = true }
 ]
+
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "thalamus-auth"

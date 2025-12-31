@@ -45,11 +45,13 @@ export type EdgePadding = "none" | "sm" | "md" | "lg";
 
 // Grid settings for snap-to-grid and grid visibility
 export type GridSize = 12 | 24 | 36 | 48;
+export type GridStyle = "dots" | "lines";
 
 export type GridSettings = {
   snapEnabled: boolean;
   gridVisible: boolean;
   gridSize: GridSize;
+  gridStyle: GridStyle;
 };
 
 export type NodeIcon =
@@ -291,6 +293,7 @@ const defaultGridSettings: GridSettings = {
   snapEnabled: false,
   gridVisible: true,
   gridSize: 24,
+  gridStyle: "lines",
 };
 
 // Shallow clone for performance - avoid structuredClone overhead

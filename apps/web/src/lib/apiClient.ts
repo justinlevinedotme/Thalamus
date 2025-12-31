@@ -8,12 +8,16 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export class ApiError extends Error {
+  public requires2FA?: boolean;
+
   constructor(
     message: string,
-    public status: number
+    public status: number,
+    options?: { requires2FA?: boolean }
   ) {
     super(message);
     this.name = "ApiError";
+    this.requires2FA = options?.requires2FA;
   }
 }
 
@@ -28,10 +32,14 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    const errorData = (await response.json().catch(() => ({}))) as {
+      error?: string;
+      requires2FA?: boolean;
+    };
     throw new ApiError(
       errorData.error || `Request failed with status ${response.status}`,
-      response.status
+      response.status,
+      { requires2FA: errorData.requires2FA }
     );
   }
 

@@ -6,8 +6,21 @@
 
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Mail } from "lucide-react";
 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { authClient } from "../lib/authClient";
+import { useTheme } from "../lib/theme";
 
 export default function VerifyEmailRoute() {
   const location = useLocation();
@@ -15,6 +28,8 @@ export default function VerifyEmailRoute() {
   const [resending, setResending] = useState(false);
   const [resent, setResent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   const handleResend = async () => {
     if (!email || resending) return;
@@ -40,61 +55,85 @@ export default function VerifyEmailRoute() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary px-4">
-      <div className="w-full max-w-md space-y-4 rounded-lg border border-border bg-card p-6 text-center">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
-          <svg
-            className="h-6 w-6 text-muted-foreground"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-            />
-          </svg>
-        </div>
-        <div>
-          <h1 className="text-xl font-semibold text-foreground">Verify your email</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {email ? (
-              <>
-                We've sent a verification link to{" "}
-                <span className="font-medium text-foreground">{email}</span>
-              </>
-            ) : (
-              "We've sent a verification link to your email address."
-            )}
-          </p>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Click the link in the email to verify your account. If you don't see the email, check your
-          spam folder.
-        </p>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        {resent && (
-          <p className="text-sm text-emerald-600">Verification email sent! Check your inbox.</p>
-        )}
-        {email && (
-          <button
-            className="w-full rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition hover:bg-secondary disabled:opacity-50"
-            onClick={handleResend}
-            disabled={resending}
-          >
-            {resending ? "Sending..." : "Resend verification email"}
-          </button>
-        )}
-        <div className="border-t border-border pt-4">
-          <p className="text-sm text-muted-foreground">
-            Already verified?{" "}
-            <Link className="text-foreground underline" to="/login">
-              Sign in
-            </Link>
-          </p>
-        </div>
+    <div className="relative min-h-screen w-full">
+      {/* Horizon Glow */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background: isDark
+            ? "radial-gradient(125% 125% at 50% 90%, #000000 40%, #1a0a00 100%)"
+            : "radial-gradient(125% 125% at 50% 90%, #ffffff 40%, #fff5f0 100%)",
+        }}
+      />
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <Header />
+
+        <main className="flex flex-1 items-center justify-center px-4 py-12">
+          <Card className="relative w-full max-w-md border-border shadow-xl">
+            <CardHeader className="space-y-1 pb-4">
+              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+                <Mail className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <CardTitle className="text-center text-2xl font-semibold tracking-tight">
+                Verify your email
+              </CardTitle>
+              <CardDescription className="text-center">
+                {email ? (
+                  <>
+                    We've sent a verification link to{" "}
+                    <span className="font-medium text-foreground">{email}</span>
+                  </>
+                ) : (
+                  "We've sent a verification link to your email address."
+                )}
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <p className="text-center text-sm text-muted-foreground">
+                Click the link in the email to verify your account. If you don't see the email,
+                check your spam folder.
+              </p>
+
+              {error && (
+                <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {error}
+                </div>
+              )}
+
+              {resent && (
+                <div className="rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-600">
+                  Verification email sent! Check your inbox.
+                </div>
+              )}
+
+              {email && (
+                <Button
+                  variant="outline"
+                  className="h-10 w-full"
+                  onClick={handleResend}
+                  disabled={resending}
+                >
+                  {resending ? "Sending..." : "Resend verification email"}
+                </Button>
+              )}
+            </CardContent>
+
+            <CardFooter className="flex justify-center border-t border-border pt-6">
+              <p className="text-sm text-muted-foreground">
+                Already verified?{" "}
+                <Link
+                  to="/login"
+                  className="font-medium text-foreground underline-offset-4 hover:underline"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </CardFooter>
+          </Card>
+        </main>
+
+        <Footer />
       </div>
     </div>
   );

@@ -19,16 +19,17 @@ export const stripHtml = (html: string): string => {
 
 /**
  * Size class mappings for node padding and text size
+ * Minimum dimensions are multiples of 12px for grid alignment
  */
 export const getSizeClasses = (size: NodeSize | undefined): string => {
   switch (size) {
     case "sm":
-      return "text-xs px-2 py-1";
+      return "text-xs px-2 py-1 min-w-[120px] min-h-[36px]";
     case "lg":
-      return "text-base px-4 py-3";
+      return "text-base px-4 py-3 min-w-[168px] min-h-[60px]";
     case "md":
     default:
-      return "text-sm px-3 py-2";
+      return "text-sm px-3 py-2 min-w-[144px] min-h-[48px]";
   }
 };
 

@@ -91,6 +91,37 @@ export default function EditorRoute() {
   const [mapStyleOpen, setMapStyleOpen] = useState(false);
   const [layoutOpen, setLayoutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // Helper to toggle inspector panels (mutually exclusive)
+  const toggleMapStyle = useCallback(() => {
+    setMapStyleOpen((prev) => {
+      if (!prev) {
+        setLayoutOpen(false);
+        setSettingsOpen(false);
+      }
+      return !prev;
+    });
+  }, []);
+
+  const toggleLayout = useCallback(() => {
+    setLayoutOpen((prev) => {
+      if (!prev) {
+        setMapStyleOpen(false);
+        setSettingsOpen(false);
+      }
+      return !prev;
+    });
+  }, []);
+
+  const toggleSettings = useCallback(() => {
+    setSettingsOpen((prev) => {
+      if (!prev) {
+        setMapStyleOpen(false);
+        setLayoutOpen(false);
+      }
+      return !prev;
+    });
+  }, []);
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const openComposer = useComposerStore((s) => s.openComposer);
   // Track last saved version instead of stringifying entire payload
@@ -513,7 +544,7 @@ export default function EditorRoute() {
                           : "text-muted-foreground hover:bg-secondary"
                       }`}
                       type="button"
-                      onClick={() => setMapStyleOpen(!mapStyleOpen)}
+                      onClick={toggleMapStyle}
                       aria-label="Map style"
                     >
                       <Paintbrush className="h-5 w-5" />
@@ -530,7 +561,7 @@ export default function EditorRoute() {
                           : "text-muted-foreground hover:bg-secondary"
                       }`}
                       type="button"
-                      onClick={() => setLayoutOpen(!layoutOpen)}
+                      onClick={toggleLayout}
                       aria-label="Auto layout"
                     >
                       <LayoutGrid className="h-5 w-5" />
@@ -547,7 +578,7 @@ export default function EditorRoute() {
                           : "text-muted-foreground hover:bg-secondary"
                       }`}
                       type="button"
-                      onClick={() => setSettingsOpen(!settingsOpen)}
+                      onClick={toggleSettings}
                       aria-label="Editor settings"
                     >
                       <Settings className="h-5 w-5" />

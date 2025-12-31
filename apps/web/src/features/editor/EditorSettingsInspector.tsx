@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { useEditorSettingsStore } from "../../store/editorSettingsStore";
-import { useGraphStore, type GridSize } from "../../store/graphStore";
+import { useGraphStore, type GridSize, type GridStyle } from "../../store/graphStore";
 
 export default function EditorSettingsInspector() {
   const {
@@ -110,6 +110,29 @@ export default function EditorSettingsInspector() {
                 </SelectContent>
               </Select>
             </div>
+
+            {gridSettings.gridVisible && (
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <label htmlFor="grid-style" className="text-sm font-medium text-foreground">
+                    Grid Style
+                  </label>
+                  <p className="text-xs text-muted-foreground">Visual style of grid</p>
+                </div>
+                <Select
+                  value={gridSettings.gridStyle}
+                  onValueChange={(value) => setGridSettings({ gridStyle: value as GridStyle })}
+                >
+                  <SelectTrigger className="w-36" id="grid-style">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="dots">Dots</SelectItem>
+                    <SelectItem value="lines">Lines</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <Button variant="outline" size="sm" className="w-full" onClick={snapAllNodesToGrid}>
               <Grid3X3 className="mr-2 h-4 w-4" />

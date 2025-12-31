@@ -36,6 +36,7 @@ export type ExportOptions = {
   margin?: ExportMargin;
   backgroundColor?: string;
   quality?: ExportQuality;
+  hideGrid?: boolean;
 };
 
 const qualityToPixelRatio = (quality: ExportQuality): number => {
@@ -80,7 +81,7 @@ function getClassName(element: Element): string {
 }
 
 // Check if element should be filtered out from export
-function shouldFilterElement(element: Element, _transparentBackground: boolean): boolean {
+function shouldFilterElement(element: Element, hideGrid: boolean): boolean {
   const className = getClassName(element);
 
   // Elements to always hide during export
@@ -95,8 +96,12 @@ function shouldFilterElement(element: Element, _transparentBackground: boolean):
     "react-flow__edge-textwrapper",
     "react-flow__edge-text",
     "react-flow__edge-textbg",
-    "react-flow__background", // Always hide grid on export
   ];
+
+  // Conditionally hide grid based on setting
+  if (hideGrid) {
+    hiddenClasses.push("react-flow__background");
+  }
 
   for (const hiddenClass of hiddenClasses) {
     if (className.includes(hiddenClass)) {
@@ -148,28 +153,46 @@ async function captureGraphImage(
   // Apply the calculated transform to position content for capture
   viewport.style.transform = `translate(${x}px, ${y}px) scale(${zoom})`;
 
-  // Hide edge labels by setting inline styles directly on elements
-  const edgeLabelElements: HTMLElement[] = [];
+  // Track elements we modify so we can restore them
+  const hiddenElements: { el: HTMLElement; originalDisplay: string }[] = [];
+  const modifiedBgElements: { el: HTMLElement; originalBg: string }[] = [];
 
-  // Find all text elements inside edges (SVG text elements for labels)
-  reactFlow
-    .querySelectorAll(
-      ".react-flow__edge text, .react-flow__edge-text, .react-flow__edge-textwrapper"
-    )
-    .forEach((el) => {
+  // Helper to hide elements and track for restoration
+  const hideElements = (selector: string) => {
+    reactFlow.querySelectorAll(selector).forEach((el) => {
       const htmlEl = el as HTMLElement;
-      edgeLabelElements.push(htmlEl);
-      htmlEl.dataset.originalDisplay = htmlEl.style.display;
+      hiddenElements.push({ el: htmlEl, originalDisplay: htmlEl.style.display });
       htmlEl.style.display = "none";
     });
+  };
 
-  // Also hide the edge label background rectangles
-  reactFlow.querySelectorAll(".react-flow__edge rect").forEach((el) => {
-    const htmlEl = el as HTMLElement;
-    edgeLabelElements.push(htmlEl);
-    htmlEl.dataset.originalDisplay = htmlEl.style.display;
-    htmlEl.style.display = "none";
-  });
+  // Hide edge labels
+  hideElements(".react-flow__edge text");
+  hideElements(".react-flow__edge-text");
+  hideElements(".react-flow__edge-textwrapper");
+  hideElements(".react-flow__edge rect");
+
+  // Conditionally hide grid background
+  if (options.hideGrid !== false) {
+    hideElements(".react-flow__background");
+  }
+
+  // If transparent, we need to make backgrounds transparent
+  let originalReactFlowBg: string | null = null;
+  if (options.transparentBackground) {
+    // Make the main react-flow container transparent
+    originalReactFlowBg = reactFlow.style.backgroundColor;
+    reactFlow.style.backgroundColor = "transparent";
+
+    // Also make the background pattern transparent if it's visible (not hidden)
+    if (options.hideGrid === false) {
+      reactFlow.querySelectorAll(".react-flow__background").forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        modifiedBgElements.push({ el: htmlEl, originalBg: htmlEl.style.backgroundColor });
+        htmlEl.style.backgroundColor = "transparent";
+      });
+    }
+  }
 
   try {
     // Capture using html-to-image
@@ -180,13 +203,13 @@ async function captureGraphImage(
       width: exportWidth,
       height: exportHeight,
       backgroundColor: options.transparentBackground
-        ? undefined
+        ? "transparent"
         : (options.backgroundColor ?? "#ffffff"),
       filter: (domNode) => {
         if (domNode.nodeType !== 1) {
           return true;
         }
-        return !shouldFilterElement(domNode as Element, options.transparentBackground ?? false);
+        return !shouldFilterElement(domNode as Element, options.hideGrid !== false);
       },
     });
 
@@ -199,10 +222,19 @@ async function captureGraphImage(
     // Restore viewport transform
     viewport.style.transform = originalTransform;
 
-    // Restore edge label elements
-    edgeLabelElements.forEach((el) => {
-      el.style.display = el.dataset.originalDisplay || "";
-      delete el.dataset.originalDisplay;
+    // Restore react-flow background color if we changed it
+    if (originalReactFlowBg !== null) {
+      reactFlow.style.backgroundColor = originalReactFlowBg;
+    }
+
+    // Restore all hidden elements
+    hiddenElements.forEach(({ el, originalDisplay }) => {
+      el.style.display = originalDisplay;
+    });
+
+    // Restore background colors
+    modifiedBgElements.forEach(({ el, originalBg }) => {
+      el.style.backgroundColor = originalBg;
     });
   }
 }

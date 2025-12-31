@@ -6,7 +6,8 @@
  */
 
 import { Hono } from "hono";
-import { eq } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
+import * as OTPAuth from "otpauth";
 import { getDb, schema } from "../lib/db";
 import { sessionMiddleware } from "../middleware/session";
 
@@ -194,29 +195,42 @@ profile.patch("/email-preferences", async (c) => {
   }
 
   try {
-    const marketing = marketingEmails ?? true;
-    const updates = productUpdates ?? true;
     const now = new Date();
 
-    // Upsert email preferences
-    await db
-      .insert(schema.emailPreferences)
-      .values({
+    // Get existing preferences first
+    const existing = await db
+      .select({
+        marketingEmails: schema.emailPreferences.marketingEmails,
+        productUpdates: schema.emailPreferences.productUpdates,
+      })
+      .from(schema.emailPreferences)
+      .where(eq(schema.emailPreferences.userId, user.id));
+
+    // Use provided values or fall back to existing values or defaults
+    const marketing = marketingEmails ?? existing[0]?.marketingEmails ?? true;
+    const updates = productUpdates ?? existing[0]?.productUpdates ?? true;
+
+    if (existing.length > 0) {
+      // Update existing preferences
+      await db
+        .update(schema.emailPreferences)
+        .set({
+          marketingEmails: marketing,
+          productUpdates: updates,
+          updatedAt: now,
+        })
+        .where(eq(schema.emailPreferences.userId, user.id));
+    } else {
+      // Insert new preferences
+      await db.insert(schema.emailPreferences).values({
         userId: user.id,
         email: user.email,
         marketingEmails: marketing,
         productUpdates: updates,
         createdAt: now,
         updatedAt: now,
-      })
-      .onConflictDoUpdate({
-        target: schema.emailPreferences.userId,
-        set: {
-          marketingEmails: marketing,
-          productUpdates: updates,
-          updatedAt: now,
-        },
       });
+    }
 
     // Return updated preferences
     const prefs = await db
@@ -234,6 +248,152 @@ profile.patch("/email-preferences", async (c) => {
   } catch (error) {
     console.error("Error updating email preferences:", error);
     return c.json({ error: "Failed to update email preferences" }, 500);
+  }
+});
+
+// Get existing deletion request (if any)
+profile.get("/deletion-request", async (c) => {
+  const user = c.get("user");
+  const db = getDb();
+
+  try {
+    const requests = await db
+      .select({
+        id: schema.accountDeletionRequests.id,
+        reason: schema.accountDeletionRequests.reason,
+        status: schema.accountDeletionRequests.status,
+        createdAt: schema.accountDeletionRequests.createdAt,
+      })
+      .from(schema.accountDeletionRequests)
+      .where(eq(schema.accountDeletionRequests.userId, user.id))
+      .orderBy(desc(schema.accountDeletionRequests.createdAt));
+
+    // Return the most recent pending request if exists
+    const pendingRequest = requests.find((r) => r.status === "pending");
+
+    if (pendingRequest) {
+      return c.json({
+        hasPendingRequest: true,
+        request: pendingRequest,
+      });
+    }
+
+    return c.json({ hasPendingRequest: false });
+  } catch (error) {
+    console.error("Error fetching deletion request:", error);
+    return c.json({ error: "Failed to fetch deletion request" }, 500);
+  }
+});
+
+// Submit account deletion request and delete user content immediately
+profile.post("/deletion-request", async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json();
+  const db = getDb();
+
+  const { reason, additionalFeedback, totpCode } = body as {
+    reason?: string;
+    additionalFeedback?: string;
+    totpCode?: string;
+  };
+
+  try {
+    // Check if user has 2FA enabled
+    if (user.twoFactorEnabled) {
+      if (!totpCode) {
+        return c.json({ error: "2FA code required", requires2FA: true }, 400);
+      }
+
+      // Get the user's TOTP secret from ba_two_factor table
+      const twoFactorRecords = await db
+        .select({ secret: schema.baTwoFactor.secret })
+        .from(schema.baTwoFactor)
+        .where(eq(schema.baTwoFactor.userId, user.id));
+
+      if (twoFactorRecords.length === 0) {
+        return c.json({ error: "2FA not configured properly" }, 400);
+      }
+
+      // Verify the TOTP code
+      const totp = new OTPAuth.TOTP({
+        issuer: "Thalamus",
+        label: user.email,
+        algorithm: "SHA1",
+        digits: 6,
+        period: 30,
+        secret: twoFactorRecords[0].secret,
+      });
+
+      const isValid = totp.validate({ token: totpCode, window: 1 }) !== null;
+      if (!isValid) {
+        return c.json({ error: "Invalid 2FA code" }, 400);
+      }
+    }
+
+    // Combine reason and additional feedback
+    const fullReason = [reason, additionalFeedback].filter(Boolean).join(" - ");
+
+    // Check if there's already a pending request
+    const existing = await db
+      .select({ id: schema.accountDeletionRequests.id })
+      .from(schema.accountDeletionRequests)
+      .where(
+        and(
+          eq(schema.accountDeletionRequests.userId, user.id),
+          eq(schema.accountDeletionRequests.status, "pending")
+        )
+      );
+
+    if (existing.length > 0) {
+      return c.json({ error: "You already have a pending deletion request" }, 400);
+    }
+
+    // Delete user's graphs immediately (share_links will cascade delete)
+    await db.delete(schema.graphs).where(eq(schema.graphs.ownerId, user.id));
+
+    // Delete email preferences
+    await db.delete(schema.emailPreferences).where(eq(schema.emailPreferences.userId, user.id));
+
+    // Create deletion request record (for audit trail and account deletion processing)
+    const now = new Date();
+    await db.insert(schema.accountDeletionRequests).values({
+      userId: user.id,
+      email: user.email,
+      reason: fullReason?.trim() || null,
+      status: "pending",
+      createdAt: now,
+    });
+
+    return c.json({
+      success: true,
+      message: "Your content has been deleted. Your account will be fully removed within 30 days.",
+    });
+  } catch (error) {
+    console.error("Error submitting deletion request:", error);
+    return c.json({ error: "Failed to submit deletion request" }, 500);
+  }
+});
+
+// Cancel account deletion request
+profile.delete("/deletion-request", async (c) => {
+  const user = c.get("user");
+  const db = getDb();
+
+  try {
+    await db
+      .update(schema.accountDeletionRequests)
+      .set({ status: "cancelled" })
+      .where(
+        and(
+          eq(schema.accountDeletionRequests.userId, user.id),
+          eq(schema.accountDeletionRequests.status, "pending")
+        )
+      );
+
+    return c.json({ success: true, message: "Deletion request cancelled" });
+  } catch (error) {
+    console.error("Error cancelling deletion request:", error);
+    return c.json({ error: "Failed to cancel deletion request" }, 500);
   }
 });
 

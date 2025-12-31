@@ -1,6 +1,6 @@
 /**
  * @file ExportDialog.tsx
- * @description Dialog for exporting graphs as PNG or PDF with configurable format, margin, quality, theme, and transparency options
+ * @description Dialog for exporting graphs as PNG or PDF with configurable format, margin, quality, theme, transparency, and grid visibility options
  */
 import { useCallback, useEffect, useState } from "react";
 import { Download, Loader2, Moon, Sun } from "lucide-react";
@@ -73,6 +73,7 @@ export default function ExportDialog({
   const [margin, setMargin] = useState<ExportMargin>("small");
   const [quality, setQuality] = useState<ExportQuality>("high");
   const [transparentBackground, setTransparentBackground] = useState(false);
+  const [hideGrid, setHideGrid] = useState(true);
   const [exportTheme, setExportTheme] = useState<ExportTheme>(() =>
     resolvedTheme === "dark" ? "dark" : "light"
   );
@@ -83,15 +84,16 @@ export default function ExportDialog({
   // Derive background color from export theme
   const backgroundColor = themeBackgrounds[exportTheme];
 
-  const options: ExportOptions = {
-    margin,
-    transparentBackground,
-    backgroundColor,
-    quality,
-  };
-
   const generatePreview = useCallback(async () => {
     if (!open || nodes.length === 0) return;
+
+    const options: ExportOptions = {
+      margin,
+      transparentBackground,
+      backgroundColor,
+      quality,
+      hideGrid,
+    };
 
     setIsGeneratingPreview(true);
     try {
@@ -102,7 +104,7 @@ export default function ExportDialog({
     } finally {
       setIsGeneratingPreview(false);
     }
-  }, [open, nodes, edges, margin, transparentBackground, exportTheme]);
+  }, [open, nodes, edges, margin, transparentBackground, backgroundColor, quality, hideGrid]);
 
   // Generate preview when dialog opens or options change
   useEffect(() => {
@@ -113,6 +115,14 @@ export default function ExportDialog({
   }, [open, generatePreview]);
 
   const handleExport = async () => {
+    const options: ExportOptions = {
+      margin,
+      transparentBackground,
+      backgroundColor,
+      quality,
+      hideGrid,
+    };
+
     setIsExporting(true);
     try {
       if (format === "png") {
@@ -139,7 +149,7 @@ export default function ExportDialog({
           <div className="space-y-4 flex-1 min-h-0 flex flex-col">
             {/* Preview - Large */}
             <div
-              className="relative flex-1 min-h-0 overflow-hidden rounded-lg border border-border"
+              className="relative flex-1 min-h-[200px] flex items-center justify-center rounded-lg border border-border overflow-hidden"
               style={{
                 backgroundColor: transparentBackground ? undefined : backgroundColor,
                 backgroundImage: transparentBackground
@@ -148,15 +158,15 @@ export default function ExportDialog({
               }}
             >
               {isGeneratingPreview ? (
-                <div className="flex h-full items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                </div>
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               ) : preview ? (
-                <img src={preview} alt="Export preview" className="h-full w-full object-contain" />
+                <img
+                  src={preview}
+                  alt="Export preview"
+                  className="max-w-full max-h-full object-contain"
+                />
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                  No preview available
-                </div>
+                <span className="text-sm text-muted-foreground">No preview available</span>
               )}
             </div>
 
@@ -311,6 +321,18 @@ export default function ExportDialog({
                   </label>
                 </div>
               )}
+
+              {/* Hide Grid */}
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="hide-grid"
+                  checked={hideGrid}
+                  onCheckedChange={(checked) => setHideGrid(Boolean(checked))}
+                />
+                <label htmlFor="hide-grid" className="cursor-pointer text-xs text-muted-foreground">
+                  Hide grid
+                </label>
+              </div>
             </div>
           </div>
         </TooltipProvider>

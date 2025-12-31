@@ -2,13 +2,13 @@
  * @file index.worker.ts
  * @description Main entry point for the Cloudflare Workers API. Sets up the Hono
  * application with middleware for database injection, CORS, logging, and routes.
- * Handles both D1 (production) and SQLite (local dev) database connections.
+ * Uses Cloudflare D1 for database (wrangler handles local simulation).
  */
 
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { setD1, resetDb, initLocalDb } from "./lib/db";
+import { setD1, resetDb } from "./lib/db";
 import { setAuthD1 } from "./lib/auth";
 
 // Define env bindings type
@@ -32,7 +32,7 @@ export type Bindings = {
   TURNSTILE_SECRET_KEY: string;
 };
 
-// Import routes synchronously - bundler will handle code splitting
+// Import routes
 import graphs from "./routes/graphs";
 import share from "./routes/share";
 import profile from "./routes/profile";
@@ -45,22 +45,14 @@ app.use("*", async (c, next) => {
   // Reset DB cache for each request
   resetDb();
 
-  // Check if D1 binding is available (production/wrangler)
-  if (c.env?.DB) {
-    // Production or wrangler dev: use D1 binding
-    setD1(c.env.DB);
-    setAuthD1(c.env.DB);
+  // Set D1 binding
+  setD1(c.env.DB);
+  setAuthD1(c.env.DB);
 
-    // Polyfill process.env for libraries that expect it
-    (globalThis as { process?: { env: Record<string, string> } }).process = {
-      env: c.env as unknown as Record<string, string>,
-    };
-  } else {
-    // Local dev without wrangler: use better-sqlite3
-    // Database will be initialized on first getDb() call
-    console.log("Running in local dev mode (no D1 binding)");
-    initLocalDb();
-  }
+  // Polyfill process.env for libraries that expect it
+  (globalThis as { process?: { env: Record<string, string> } }).process = {
+    env: c.env as unknown as Record<string, string>,
+  };
 
   await next();
 });
@@ -68,7 +60,7 @@ app.use("*", async (c, next) => {
 app.use("*", logger());
 app.use("*", async (c, next) => {
   const corsMiddleware = cors({
-    origin: c.env?.FRONTEND_URL || process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: c.env?.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   });
   return corsMiddleware(c, next);
@@ -77,7 +69,7 @@ app.use("*", async (c, next) => {
 // Health check
 app.get("/health", (c) => c.json({ status: "ok" }));
 
-// Auth routes - use all() to catch any method on /auth/**
+// Auth routes
 app.all("/auth/*", async (c) => {
   const { auth } = await import("./lib/auth");
   return auth.handler(c.req.raw);
