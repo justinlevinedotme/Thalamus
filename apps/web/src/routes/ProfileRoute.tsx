@@ -8,6 +8,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  AlertTriangle,
   Camera,
   Check,
   Copy,
@@ -17,6 +18,7 @@ import {
   Loader2,
   Mail,
   Shield,
+  Trash2,
   User,
 } from "lucide-react";
 
@@ -32,8 +34,18 @@ import {
   DialogTitle,
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { Label } from "../components/ui/label";
+import { Textarea } from "../components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import { useAuthStore } from "../store/authStore";
-import { apiFetch } from "../lib/apiClient";
+import { apiFetch, ApiError } from "../lib/apiClient";
 import { twoFactor, authClient, requestPasswordReset, changeEmail } from "../lib/authClient";
 
 type LinkedAccount = {
@@ -111,6 +123,29 @@ export default function ProfileRoute() {
   const [emailPrefs, setEmailPrefs] = useState({ marketingEmails: true, productUpdates: true });
   const [emailPrefsLoading, setEmailPrefsLoading] = useState(false);
 
+  // Account deletion states
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [deletionReason, setDeletionReason] = useState("");
+  const [deletionFeedback, setDeletionFeedback] = useState("");
+  const [deletionTotpCode, setDeletionTotpCode] = useState("");
+  const [deletionRequires2FA, setDeletionRequires2FA] = useState(false);
+  const [deletionLoading, setDeletionLoading] = useState(false);
+  const [deletionError, setDeletionError] = useState<string | null>(null);
+  const [deletionSubmitted, setDeletionSubmitted] = useState(false);
+  const [hasPendingDeletion, setHasPendingDeletion] = useState(false);
+
+  // Predefined deletion reasons
+  const DELETION_REASONS = [
+    { value: "no-longer-needed", label: "I no longer need the service" },
+    { value: "found-alternative", label: "I found a better alternative" },
+    { value: "too-expensive", label: "It's too expensive" },
+    { value: "missing-features", label: "Missing features I need" },
+    { value: "too-complicated", label: "Too complicated to use" },
+    { value: "privacy-concerns", label: "Privacy concerns" },
+    { value: "temporary-account", label: "This was a temporary account" },
+    { value: "other", label: "Other reason" },
+  ];
+
   useEffect(() => {
     if (status === "unauthenticated") {
       navigate("/login");
@@ -140,6 +175,16 @@ export default function ProfileRoute() {
         setEmailPrefs(prefs);
       } catch {
         // Ignore errors, use defaults
+      }
+
+      // Check for pending deletion request
+      try {
+        const deletionStatus = await apiFetch<{ hasPendingRequest: boolean }>(
+          "/profile/deletion-request"
+        );
+        setHasPendingDeletion(deletionStatus.hasPendingRequest);
+      } catch {
+        // Ignore errors
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load profile");
@@ -334,6 +379,53 @@ export default function ProfileRoute() {
     }
   };
 
+  const handleRequestDeletion = async () => {
+    try {
+      setDeletionLoading(true);
+      setDeletionError(null);
+
+      // Get the label for the selected reason
+      const reasonLabel = DELETION_REASONS.find((r) => r.value === deletionReason)?.label;
+
+      await apiFetch("/profile/deletion-request", {
+        method: "POST",
+        body: JSON.stringify({
+          reason: reasonLabel || null,
+          additionalFeedback: deletionFeedback.trim() || null,
+          totpCode: deletionTotpCode || undefined,
+        }),
+      });
+
+      setDeletionSubmitted(true);
+      setHasPendingDeletion(true);
+    } catch (err) {
+      if (err instanceof ApiError && err.requires2FA) {
+        setDeletionRequires2FA(true);
+        setDeletionError(null); // Clear error, show 2FA input instead
+      } else {
+        setDeletionError(err instanceof Error ? err.message : "Failed to submit deletion request");
+      }
+    } finally {
+      setDeletionLoading(false);
+    }
+  };
+
+  const handleCancelDeletion = async () => {
+    try {
+      setDeletionLoading(true);
+      setDeletionError(null);
+      await apiFetch("/profile/deletion-request", {
+        method: "DELETE",
+      });
+      setHasPendingDeletion(false);
+      setDeleteAccountOpen(false);
+    } catch (err) {
+      setDeletionError(err instanceof Error ? err.message : "Failed to cancel deletion request");
+    } finally {
+      setDeletionLoading(false);
+    }
+  };
+
   if (status === "loading" || loading) {
     return (
       <div className="relative min-h-screen w-full">
@@ -505,16 +597,18 @@ export default function ProfileRoute() {
                       <Check className="h-4 w-4" />
                       Enabled
                     </span>
-                    <button
-                      className="rounded-md border border-red-200 px-3 py-1.5 text-sm text-red-600 transition hover:bg-red-50"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
                       onClick={() => setDisable2FAOpen(true)}
                     >
                       Disable
-                    </button>
+                    </Button>
                   </div>
                 ) : hasPassword ? (
-                  <button
-                    className="rounded-md bg-foreground px-3 py-1.5 text-sm text-background transition hover:bg-foreground/90"
+                  <Button
+                    size="sm"
                     onClick={() => {
                       setTwoFactorPassword("");
                       setTwoFactorError(null);
@@ -523,14 +617,11 @@ export default function ProfileRoute() {
                     }}
                   >
                     Enable
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    className="rounded-md bg-foreground px-3 py-1.5 text-sm text-background transition hover:bg-foreground/90"
-                    onClick={() => setSetPasswordOpen(true)}
-                  >
+                  <Button size="sm" onClick={() => setSetPasswordOpen(true)}>
                     Set Password First
-                  </button>
+                  </Button>
                 )}
               </div>
               {!hasPassword && !twoFactorEnabled && (
@@ -637,6 +728,57 @@ export default function ProfileRoute() {
                 </label>
               </div>
             </section>
+
+            {/* Delete Account Section */}
+            <section className="rounded-lg border border-red-200 bg-card p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <Trash2 className="mt-0.5 h-5 w-5 text-red-500" />
+                  <div>
+                    <h2 className="text-lg font-medium text-foreground">Delete Account</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Permanently delete your account and all associated data. This action cannot be
+                      undone.
+                    </p>
+                  </div>
+                </div>
+                {hasPendingDeletion ? (
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1 text-sm text-amber-600">
+                      <AlertTriangle className="h-4 w-4" />
+                      Pending
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setDeletionError(null);
+                        setDeleteAccountOpen(true);
+                      }}
+                    >
+                      View Request
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-600"
+                    onClick={() => {
+                      setDeletionReason("");
+                      setDeletionFeedback("");
+                      setDeletionTotpCode("");
+                      setDeletionRequires2FA(false);
+                      setDeletionError(null);
+                      setDeletionSubmitted(false);
+                      setDeleteAccountOpen(true);
+                    }}
+                  >
+                    Delete Account
+                  </Button>
+                )}
+              </div>
+            </section>
           </div>
         </div>
         <Footer />
@@ -662,20 +804,13 @@ export default function ProfileRoute() {
                 autoFocus
               />
               <DialogFooter className="mt-4">
-                <button
-                  type="button"
-                  className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
-                  onClick={() => setEditNameOpen(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => setEditNameOpen(false)}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
-                  disabled={saving}
-                >
+                </Button>
+                <Button type="submit" disabled={saving}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {saving ? "Saving..." : "Save"}
-                </button>
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -714,20 +849,13 @@ export default function ProfileRoute() {
                 </div>
               )}
               <DialogFooter className="mt-4">
-                <button
-                  type="button"
-                  className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
-                  onClick={() => setEditImageOpen(false)}
-                >
+                <Button type="button" variant="outline" onClick={() => setEditImageOpen(false)}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
-                  disabled={saving || !newImage.trim()}
-                >
+                </Button>
+                <Button type="submit" disabled={saving || !newImage.trim()}>
+                  {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {saving ? "Saving..." : "Save"}
-                </button>
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -841,31 +969,27 @@ export default function ProfileRoute() {
               )}
             </div>
             <DialogFooter>
-              <button
-                type="button"
-                className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
-                onClick={() => setSetup2FAOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setSetup2FAOpen(false)}>
                 Cancel
-              </button>
+              </Button>
               {totpUri ? (
-                <button
+                <Button
                   type="button"
-                  className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                   disabled={twoFactorLoading || verifyCode.length !== 6}
                   onClick={handleVerify2FA}
                 >
+                  {twoFactorLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {twoFactorLoading ? "Verifying..." : "Verify & Enable"}
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
                   type="button"
-                  className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                   disabled={twoFactorLoading || !twoFactorPassword.trim()}
                   onClick={handleEnable2FA}
                 >
+                  {twoFactorLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {twoFactorLoading ? "Setting up..." : "Continue"}
-                </button>
+                </Button>
               )}
             </DialogFooter>
           </DialogContent>
@@ -905,21 +1029,18 @@ export default function ProfileRoute() {
               {twoFactorError && <p className="text-sm text-red-600">{twoFactorError}</p>}
             </div>
             <DialogFooter>
-              <button
-                type="button"
-                className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
-                onClick={() => setDisable2FAOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setDisable2FAOpen(false)}>
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="rounded-md bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
+                variant="destructive"
                 disabled={twoFactorLoading || !twoFactorPassword.trim()}
                 onClick={handleDisable2FA}
               >
+                {twoFactorLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {twoFactorLoading ? "Disabling..." : "Disable 2FA"}
-              </button>
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -966,22 +1087,14 @@ export default function ProfileRoute() {
               )}
             </div>
             <DialogFooter>
-              <button
-                type="button"
-                className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
-                onClick={() => setSetPasswordOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setSetPasswordOpen(false)}>
                 {passwordResetSent ? "Close" : "Cancel"}
-              </button>
+              </Button>
               {!passwordResetSent && (
-                <button
-                  type="button"
-                  className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
-                  disabled={passwordLoading}
-                  onClick={handleSendPasswordReset}
-                >
+                <Button type="button" disabled={passwordLoading} onClick={handleSendPasswordReset}>
+                  {passwordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {passwordLoading ? "Sending..." : "Send Password Link"}
-                </button>
+                </Button>
               )}
             </DialogFooter>
           </DialogContent>
@@ -1043,22 +1156,196 @@ export default function ProfileRoute() {
               )}
             </div>
             <DialogFooter>
-              <button
-                type="button"
-                className="rounded-md border border-border px-4 py-2 text-sm text-foreground transition hover:bg-secondary"
-                onClick={() => setEditEmailOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setEditEmailOpen(false)}>
                 {emailChangeSent ? "Close" : "Cancel"}
-              </button>
+              </Button>
               {!emailChangeSent && (
-                <button
+                <Button
                   type="button"
-                  className="rounded-md bg-foreground px-4 py-2 text-sm text-background transition hover:bg-foreground/90 disabled:opacity-50"
                   disabled={emailChangeLoading || !newEmail.trim()}
                   onClick={handleChangeEmail}
                 >
+                  {emailChangeLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {emailChangeLoading ? "Sending..." : "Send Verification"}
-                </button>
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Account Dialog */}
+        <Dialog
+          open={deleteAccountOpen}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDeleteAccountOpen(false);
+              setDeletionError(null);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">
+                {hasPendingDeletion ? "Deletion Request Pending" : "Delete Account"}
+              </DialogTitle>
+              <DialogDescription>
+                {hasPendingDeletion
+                  ? "Your account deletion request is being processed. You can cancel it if you've changed your mind."
+                  : "This will permanently delete your account, all your graphs, and shared links. This action cannot be undone."}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {deletionSubmitted ? (
+                <div className="flex flex-col items-center gap-4 py-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                    <Trash2 className="h-6 w-6 text-red-600" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-medium text-foreground">Content Deleted</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      All your graphs and shared links have been permanently deleted. Your account
+                      will be fully removed within 30 days.
+                    </p>
+                  </div>
+                </div>
+              ) : hasPendingDeletion ? (
+                <div className="space-y-4">
+                  <div className="rounded-md bg-amber-50 p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
+                      <div className="text-sm text-amber-800">
+                        <p className="font-medium">Pending Deletion</p>
+                        <p className="mt-1">
+                          Your account is scheduled for deletion. All your data will be permanently
+                          removed once processed.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  {deletionError && <p className="text-sm text-red-600">{deletionError}</p>}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-md bg-red-50 p-4 dark:bg-red-950/50">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+                      <div className="text-sm text-red-800 dark:text-red-200">
+                        <p className="font-medium">This action is immediate and irreversible</p>
+                        <ul className="mt-2 list-inside list-disc space-y-1 text-red-700 dark:text-red-300">
+                          <li>All your graphs will be permanently deleted</li>
+                          <li>All shared links will stop working immediately</li>
+                          <li>Your account settings and preferences will be removed</li>
+                          <li>Your account will be fully removed within 30 days</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="deletion-reason">Why are you leaving? (optional)</Label>
+                    <Select value={deletionReason} onValueChange={setDeletionReason}>
+                      <SelectTrigger id="deletion-reason">
+                        <SelectValue placeholder="Select a reason" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DELETION_REASONS.map((reason) => (
+                          <SelectItem key={reason.value} value={reason.value}>
+                            {reason.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="deletion-feedback">Additional feedback (optional)</Label>
+                    <Textarea
+                      id="deletion-feedback"
+                      value={deletionFeedback}
+                      onChange={(e) => setDeletionFeedback(e.target.value)}
+                      placeholder="Help us improve by sharing more details about your experience..."
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* 2FA verification section */}
+                  {deletionRequires2FA && (
+                    <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-amber-600" />
+                        <Label
+                          htmlFor="deletion-totp"
+                          className="text-sm font-medium text-amber-800 dark:text-amber-200"
+                        >
+                          Two-Factor Authentication Required
+                        </Label>
+                      </div>
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
+                        Enter the 6-digit code from your authenticator app to confirm deletion.
+                      </p>
+                      <Input
+                        id="deletion-totp"
+                        value={deletionTotpCode}
+                        onChange={(e) =>
+                          setDeletionTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                        }
+                        placeholder="000000"
+                        className="text-center text-lg font-mono tracking-widest"
+                        maxLength={6}
+                        autoComplete="one-time-code"
+                        inputMode="numeric"
+                      />
+                    </div>
+                  )}
+
+                  {deletionError && <p className="text-sm text-red-600">{deletionError}</p>}
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              {deletionSubmitted ? (
+                <Button type="button" variant="outline" onClick={() => setDeleteAccountOpen(false)}>
+                  Close
+                </Button>
+              ) : hasPendingDeletion ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setDeleteAccountOpen(false)}
+                  >
+                    Close
+                  </Button>
+                  <Button type="button" disabled={deletionLoading} onClick={handleCancelDeletion}>
+                    {deletionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {deletionLoading ? "Cancelling..." : "Cancel Request"}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setDeleteAccountOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled={
+                      deletionLoading || (deletionRequires2FA && deletionTotpCode.length !== 6)
+                    }
+                    onClick={handleRequestDeletion}
+                  >
+                    {deletionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {deletionLoading
+                      ? "Deleting..."
+                      : deletionRequires2FA
+                        ? "Confirm Deletion"
+                        : "Delete My Account"}
+                  </Button>
+                </>
               )}
             </DialogFooter>
           </DialogContent>

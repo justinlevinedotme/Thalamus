@@ -166,3 +166,17 @@ export const emailPreferences = sqliteTable("email_preferences", {
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
+
+export const accountDeletionRequests = sqliteTable("account_deletion_requests", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => baUser.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  reason: text("reason"),
+  status: text("status").notNull().default("pending"), // pending, processed, cancelled
+  createdAt: timestamp("created_at").notNull(),
+  processedAt: integer("processed_at", { mode: "timestamp" }),
+});
