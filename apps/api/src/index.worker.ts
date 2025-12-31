@@ -30,9 +30,11 @@ export type Bindings = {
   ATLASSIAN_CLIENT_ID: string;
   ATLASSIAN_CLIENT_SECRET: string;
   TURNSTILE_SECRET_KEY: string;
+  ADMIN_API_KEY: string;
 };
 
 // Import routes
+import admin from "./routes/admin";
 import graphs from "./routes/graphs";
 import profile from "./routes/profile";
 import savedNodes from "./routes/saved-nodes";
@@ -79,6 +81,7 @@ app.all("/auth/*", async (c) => {
 });
 
 // Register routes
+app.route("/admin", admin);
 app.route("/graphs", graphs);
 app.route("/profile", profile);
 app.route("/saved-nodes", savedNodes);
