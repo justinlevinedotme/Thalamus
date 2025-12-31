@@ -28,6 +28,7 @@ import ResetPasswordRoute from "./routes/ResetPasswordRoute";
 import ShareRoute from "./routes/ShareRoute";
 import UnsubscribeRoute from "./routes/UnsubscribeRoute";
 import VerifyEmailRoute from "./routes/VerifyEmailRoute";
+import KitchenSinkRoute from "./routes/KitchenSinkRoute";
 import { useAuthStore } from "./store/authStore";
 
 export default function App() {
@@ -72,6 +73,9 @@ export default function App() {
       {/* /docs is now 404 (reserved for future documentation) */}
       <Route path="/docs" element={<NotFoundRoute />} />
       <Route path="/docs/*" element={<NotFoundRoute />} />
+
+      {/* Dev-only routes */}
+      {import.meta.env.DEV && <Route path="/dev/kitchen-sink" element={<KitchenSinkRoute />} />}
 
       {/* Auth routes */}
       <Route path="/login" element={<AuthRoute />} />
