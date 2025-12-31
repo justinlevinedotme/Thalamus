@@ -4,10 +4,12 @@
  * Shows authentication state and provides quick access to profile, documents, and logout.
  */
 
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FolderOpen, LogOut, Settings, Share2, User } from "lucide-react";
 
 import { ThalamusLogo } from "./ThalamusLogo";
+import { Badge } from "./ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useAuthStore } from "../store/authStore";
+import { apiFetch } from "../lib/apiClient";
 
 type HeaderProps = {
   children?: React.ReactNode;
@@ -23,8 +26,37 @@ type HeaderProps = {
   onShare?: () => void;
 };
 
+function getPlanBadge(plan: string | undefined) {
+  if (plan === "plus") {
+    return (
+      <Badge variant="plus" className="text-[10px] px-1.5 py-0">
+        PLUS
+      </Badge>
+    );
+  }
+  if (plan === "edu") {
+    return (
+      <Badge variant="edu" className="text-[10px] px-1.5 py-0">
+        EDU
+      </Badge>
+    );
+  }
+  return null;
+}
+
 export default function Header({ children, fullWidth = false, onShare }: HeaderProps) {
   const { user, signOut } = useAuthStore();
+  const [plan, setPlan] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (user) {
+      apiFetch<{ plan: string }>("/profile")
+        .then((data) => setPlan(data.plan))
+        .catch(() => setPlan(undefined));
+    } else {
+      setPlan(undefined);
+    }
+  }, [user]);
 
   return (
     <header className="bg-transparent px-4 py-4">
@@ -79,9 +111,12 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
                     </div>
                   )}
                   <div className="flex flex-col">
-                    {user.name && (
-                      <span className="text-sm font-medium text-foreground">{user.name}</span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      {user.name && (
+                        <span className="text-sm font-medium text-foreground">{user.name}</span>
+                      )}
+                      {getPlanBadge(plan)}
+                    </div>
                     <span className="text-sm text-muted-foreground">{user.email}</span>
                   </div>
                 </div>

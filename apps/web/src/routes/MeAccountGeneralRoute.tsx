@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { Camera, Check, Loader2, Mail, User } from "lucide-react";
 
+import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import {
   Dialog,
@@ -238,8 +239,41 @@ export default function MeAccountGeneralRoute() {
           </div>
           <div className="border-t border-border" />
           <div>
-            <p className="text-sm font-medium text-foreground">Plan</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-foreground">Plan</p>
+              {profile.plan === "plus" && (
+                <Badge variant="plus" className="text-[10px] px-1.5 py-0">
+                  PLUS
+                </Badge>
+              )}
+              {profile.plan === "edu" && (
+                <Badge variant="edu" className="text-[10px] px-1.5 py-0">
+                  EDU
+                </Badge>
+              )}
+            </div>
             <p className="text-sm capitalize text-muted-foreground">{profile.plan}</p>
+            <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+              <p>
+                <span className="font-medium text-foreground">{profile.maxGraphs}</span> graphs
+              </p>
+              <p>
+                <span className="font-medium text-foreground">
+                  {profile.plan === "plus" ? 50 : profile.plan === "edu" ? 30 : 20}
+                </span>{" "}
+                saved nodes
+              </p>
+              <p>
+                <span className="font-medium text-foreground">
+                  {profile.plan === "plus"
+                    ? "Unlimited"
+                    : profile.plan === "edu"
+                      ? "2 years"
+                      : `${profile.retentionDays} days`}
+                </span>{" "}
+                retention
+              </p>
+            </div>
           </div>
         </div>
       </section>
