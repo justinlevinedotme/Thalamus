@@ -20,16 +20,16 @@
     --accent-brand: 19 100% 50%; /* #FF4F00 */
     --accent: 0 0% 96%;
     --accent-foreground: 0 0% 9%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%; /* red-600: #dc2626 */
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 19 100% 50%; /* orange accent for focus rings */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --ring: 0 0% 64%; /* subtle neutral focus ring */
     --radius: 0.5rem;
   }
   .dark {
@@ -49,11 +49,11 @@
     --accent-brand: 19 100% 50%; /* #FF4F00 */
     --accent: 0 0% 15%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 63% 31%;
+    --destructive: 0 72% 51%; /* red-600: #dc2626 */
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 15%;
     --input: 0 0% 15%;
-    --ring: 19 100% 50%; /* orange accent for focus rings */
+    --ring: 0 0% 45%; /* subtle neutral focus ring */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -261,4 +261,35 @@
 }
 .animation-delay-500 {
   animation-delay: 500ms;
+}
+
+.interactive-lift {
+  transition:
+    transform 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+.interactive-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.interactive-lift:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.interactive-press {
+  transition: transform 120ms ease-out;
+}
+.interactive-press:active {
+  transform: scale(0.97);
+}
+
+.interactive-scale {
+  transition: transform 150ms ease-out;
+}
+.interactive-scale:hover {
+  transform: scale(1.02);
+}
+.interactive-scale:active {
+  transform: scale(0.98);
 }

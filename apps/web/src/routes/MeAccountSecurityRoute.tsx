@@ -8,6 +8,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, Loader2, Monitor, Shield, Smartphone, Trash2 } from "lucide-react";
 
 import { Button } from "../components/ui/button";
+import { VerifyButton } from "../components/ui/verify-button";
+import { HoldButton } from "../components/ui/hold-button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -206,24 +208,20 @@ export default function MeAccountSecurityRoute() {
     }
   };
 
-  const handleVerify2FA = async () => {
-    if (!verifyCode.trim()) return;
+  const handleVerify2FA = async (): Promise<boolean> => {
+    if (!verifyCode.trim()) return false;
     try {
-      setTwoFactorLoading(true);
       setTwoFactorError(null);
       const result = await twoFactor.verifyTotp({ code: verifyCode });
       if (result.error) {
         setTwoFactorError(result.error.message || "Invalid code");
-        return;
+        return false;
       }
       setTwoFactorEnabled(true);
-      setSetup2FAOpen(false);
-      setTotpUri(null);
-      setVerifyCode("");
+      return true;
     } catch (err) {
       setTwoFactorError(err instanceof Error ? err.message : "Verification failed");
-    } finally {
-      setTwoFactorLoading(false);
+      return false;
     }
   };
 
@@ -243,8 +241,11 @@ export default function MeAccountSecurityRoute() {
         return;
       }
       setTwoFactorEnabled(false);
-      setDisable2FAOpen(false);
-      setTwoFactorPassword("");
+      // Delay closing to show confirmation
+      setTimeout(() => {
+        setDisable2FAOpen(false);
+        setTwoFactorPassword("");
+      }, 1500);
     } catch (err) {
       setTwoFactorError(err instanceof Error ? err.message : "Failed to disable 2FA");
     } finally {
@@ -616,6 +617,7 @@ export default function MeAccountSecurityRoute() {
                     maxLength={6}
                     autoComplete="one-time-code"
                     inputMode="numeric"
+                    error={!!twoFactorError}
                   />
                 </div>
                 {twoFactorError && <p className="text-sm text-red-600">{twoFactorError}</p>}
@@ -631,6 +633,7 @@ export default function MeAccountSecurityRoute() {
                     placeholder="Enter your password"
                     className="mt-1"
                     autoFocus
+                    error={!!twoFactorError}
                   />
                 </div>
                 {twoFactorError && <p className="text-sm text-red-600">{twoFactorError}</p>}
@@ -642,14 +645,18 @@ export default function MeAccountSecurityRoute() {
               Cancel
             </Button>
             {totpUri ? (
-              <Button
-                type="button"
-                disabled={twoFactorLoading || verifyCode.length !== 6}
+              <VerifyButton
                 onClick={handleVerify2FA}
+                onSuccess={() => {
+                  setSetup2FAOpen(false);
+                  setTotpUri(null);
+                  setVerifyCode("");
+                }}
+                successText="Enabled"
+                disabled={verifyCode.length !== 6}
               >
-                {twoFactorLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {twoFactorLoading ? "Verifying..." : "Verify & Enable"}
-              </Button>
+                Verify & Enable
+              </VerifyButton>
             ) : (
               <Button
                 type="button"
@@ -693,22 +700,24 @@ export default function MeAccountSecurityRoute() {
                 placeholder="Enter your password"
                 className="mt-1"
                 autoFocus
+                error={!!twoFactorError}
               />
             </div>
             {twoFactorError && <p className="text-sm text-red-600">{twoFactorError}</p>}
           </div>
           <DialogFooter>
+            <HoldButton
+              onHoldComplete={handleDisable2FA}
+              holdDuration={1500}
+              holdingText="Hold to disable..."
+              processingText="Disabling..."
+              completeText="Disabled"
+              disabled={!twoFactorPassword.trim()}
+            >
+              Disable 2FA
+            </HoldButton>
             <Button type="button" variant="outline" onClick={() => setDisable2FAOpen(false)}>
               Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={twoFactorLoading || !twoFactorPassword.trim()}
-              onClick={handleDisable2FA}
-            >
-              {twoFactorLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {twoFactorLoading ? "Disabling..." : "Disable 2FA"}
             </Button>
           </DialogFooter>
         </DialogContent>

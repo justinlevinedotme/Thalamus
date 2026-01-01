@@ -35,6 +35,8 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { VerifyButton } from "../components/ui/verify-button";
+import { HoldButton } from "../components/ui/hold-button";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import {
@@ -276,24 +278,20 @@ export default function ProfileRoute() {
     }
   };
 
-  const handleVerify2FA = async () => {
-    if (!verifyCode.trim()) return;
+  const handleVerify2FA = async (): Promise<boolean> => {
+    if (!verifyCode.trim()) return false;
     try {
-      setTwoFactorLoading(true);
       setTwoFactorError(null);
       const result = await twoFactor.verifyTotp({ code: verifyCode });
       if (result.error) {
         setTwoFactorError(result.error.message || "Invalid code");
-        return;
+        return false;
       }
       setTwoFactorEnabled(true);
-      setSetup2FAOpen(false);
-      setTotpUri(null);
-      setVerifyCode("");
+      return true;
     } catch (err) {
       setTwoFactorError(err instanceof Error ? err.message : "Verification failed");
-    } finally {
-      setTwoFactorLoading(false);
+      return false;
     }
   };
 
@@ -313,8 +311,11 @@ export default function ProfileRoute() {
         return;
       }
       setTwoFactorEnabled(false);
-      setDisable2FAOpen(false);
-      setTwoFactorPassword("");
+      // Delay to show confirmation
+      setTimeout(() => {
+        setDisable2FAOpen(false);
+        setTwoFactorPassword("");
+      }, 1500);
     } catch (err) {
       setTwoFactorError(err instanceof Error ? err.message : "Failed to disable 2FA");
     } finally {
@@ -396,8 +397,11 @@ export default function ProfileRoute() {
         }),
       });
 
-      setDeletionSubmitted(true);
-      setHasPendingDeletion(true);
+      // Delay to show confirmation
+      setTimeout(() => {
+        setDeletionSubmitted(true);
+        setHasPendingDeletion(true);
+      }, 1500);
     } catch (err) {
       if (err instanceof ApiError && err.requires2FA) {
         setDeletionRequires2FA(true);
@@ -973,14 +977,18 @@ export default function ProfileRoute() {
                 Cancel
               </Button>
               {totpUri ? (
-                <Button
-                  type="button"
-                  disabled={twoFactorLoading || verifyCode.length !== 6}
+                <VerifyButton
                   onClick={handleVerify2FA}
+                  onSuccess={() => {
+                    setSetup2FAOpen(false);
+                    setTotpUri(null);
+                    setVerifyCode("");
+                  }}
+                  successText="Enabled"
+                  disabled={verifyCode.length !== 6}
                 >
-                  {twoFactorLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {twoFactorLoading ? "Verifying..." : "Verify & Enable"}
-                </Button>
+                  Verify & Enable
+                </VerifyButton>
               ) : (
                 <Button
                   type="button"
@@ -1029,17 +1037,18 @@ export default function ProfileRoute() {
               {twoFactorError && <p className="text-sm text-red-600">{twoFactorError}</p>}
             </div>
             <DialogFooter>
+              <HoldButton
+                onHoldComplete={handleDisable2FA}
+                holdDuration={1500}
+                holdingText="Hold to disable..."
+                processingText="Disabling..."
+                completeText="Disabled"
+                disabled={!twoFactorPassword.trim()}
+              >
+                Disable 2FA
+              </HoldButton>
               <Button type="button" variant="outline" onClick={() => setDisable2FAOpen(false)}>
                 Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                disabled={twoFactorLoading || !twoFactorPassword.trim()}
-                onClick={handleDisable2FA}
-              >
-                {twoFactorLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {twoFactorLoading ? "Disabling..." : "Disable 2FA"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1323,27 +1332,22 @@ export default function ProfileRoute() {
                 </>
               ) : (
                 <>
+                  <HoldButton
+                    onHoldComplete={handleRequestDeletion}
+                    holdDuration={2000}
+                    holdingText="Hold to delete..."
+                    processingText="Deleting..."
+                    completeText="Deleted"
+                    disabled={deletionRequires2FA && deletionTotpCode.length !== 6}
+                  >
+                    Delete My Account
+                  </HoldButton>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setDeleteAccountOpen(false)}
                   >
                     Cancel
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    disabled={
-                      deletionLoading || (deletionRequires2FA && deletionTotpCode.length !== 6)
-                    }
-                    onClick={handleRequestDeletion}
-                  >
-                    {deletionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {deletionLoading
-                      ? "Deleting..."
-                      : deletionRequires2FA
-                        ? "Confirm Deletion"
-                        : "Delete My Account"}
                   </Button>
                 </>
               )}

@@ -7,7 +7,9 @@
 import { useState } from "react";
 import { AlertTriangle, Download, Loader2, Shield, Trash2 } from "lucide-react";
 
+import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 import { Button } from "../components/ui/button";
+import { HoldButton } from "../components/ui/hold-button";
 import {
   Dialog,
   DialogContent,
@@ -104,8 +106,11 @@ export default function MeAccountPrivacyRoute() {
         }),
       });
 
-      setDeletionSubmitted(true);
-      setHasPendingDeletion(true);
+      // Delay state change to let HoldButton show "Deleted" confirmation
+      setTimeout(() => {
+        setDeletionSubmitted(true);
+        setHasPendingDeletion(true);
+      }, 1500);
     } catch (err) {
       if (err instanceof ApiError && err.requires2FA) {
         setDeletionRequires2FA(true);
@@ -201,7 +206,7 @@ export default function MeAccountPrivacyRoute() {
       <section className="rounded-lg border border-red-200 bg-card p-6 dark:border-red-800">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3">
-            <Trash2 className="mt-0.5 h-5 w-5 text-red-500" />
+            <Trash2 className="mt-0.5 h-5 w-5 text-red-600" />
             <div>
               <h2 className="text-lg font-medium text-foreground">Delete Account</h2>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -260,7 +265,7 @@ export default function MeAccountPrivacyRoute() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-red-600">
+            <DialogTitle>
               {hasPendingDeletion ? "Deletion Request Pending" : "Delete Account"}
             </DialogTitle>
             <DialogDescription>
@@ -285,36 +290,28 @@ export default function MeAccountPrivacyRoute() {
               </div>
             ) : hasPendingDeletion ? (
               <div className="space-y-4">
-                <div className="rounded-md bg-amber-50 p-4 dark:bg-amber-950/50">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
-                    <div className="text-sm text-amber-800 dark:text-amber-200">
-                      <p className="font-medium">Pending Deletion</p>
-                      <p className="mt-1">
-                        Your account is scheduled for deletion. All your data will be permanently
-                        removed once processed.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                {deletionError && <p className="text-sm text-red-600">{deletionError}</p>}
+                <Alert variant="warning">
+                  <AlertTitle>Pending Deletion</AlertTitle>
+                  <AlertDescription>
+                    Your account is scheduled for deletion. All your data will be permanently
+                    removed once processed.
+                  </AlertDescription>
+                </Alert>
+                {deletionError && <p className="text-sm text-destructive">{deletionError}</p>}
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="rounded-md bg-red-50 p-4 dark:bg-red-950/50">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-                    <div className="text-sm text-red-800 dark:text-red-200">
-                      <p className="font-medium">This action is immediate and irreversible</p>
-                      <ul className="mt-2 list-inside list-disc space-y-1 text-red-700 dark:text-red-300">
-                        <li>All your graphs will be permanently deleted</li>
-                        <li>All shared links will stop working immediately</li>
-                        <li>Your account settings and preferences will be removed</li>
-                        <li>Your account will be fully removed within 30 days</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
+                <Alert variant="destructive">
+                  <AlertTitle>This action is immediate and irreversible</AlertTitle>
+                  <AlertDescription>
+                    <ul className="mt-2 list-inside list-disc space-y-1">
+                      <li>All your graphs will be permanently deleted</li>
+                      <li>All shared links will stop working immediately</li>
+                      <li>Your account settings and preferences will be removed</li>
+                      <li>Your account will be fully removed within 30 days</li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
 
                 <div className="space-y-2">
                   <Label htmlFor="deletion-reason">Why are you leaving? (optional)</Label>
@@ -344,18 +341,18 @@ export default function MeAccountPrivacyRoute() {
                 </div>
 
                 {deletionRequires2FA && (
-                  <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
+                  <div className="space-y-3 rounded-md border border-border bg-muted/30 p-4">
                     <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-amber-600" />
+                      <Shield className="h-4 w-4 text-muted-foreground" />
                       <Label
                         htmlFor="deletion-totp"
-                        className="text-sm font-medium text-amber-800 dark:text-amber-200"
+                        className="text-sm font-medium text-foreground"
                       >
-                        Two-Factor Authentication Required
+                        Two-Factor Authentication
                       </Label>
                     </div>
-                    <p className="text-xs text-amber-700 dark:text-amber-300">
-                      Enter the 6-digit code from your authenticator app to confirm deletion.
+                    <p className="text-sm text-muted-foreground">
+                      Enter the 6-digit code from your authenticator app.
                     </p>
                     <Input
                       id="deletion-totp"
@@ -372,7 +369,7 @@ export default function MeAccountPrivacyRoute() {
                   </div>
                 )}
 
-                {deletionError && <p className="text-sm text-red-600">{deletionError}</p>}
+                {deletionError && <p className="text-sm text-destructive">{deletionError}</p>}
               </div>
             )}
           </div>
@@ -393,23 +390,18 @@ export default function MeAccountPrivacyRoute() {
               </>
             ) : (
               <>
+                <HoldButton
+                  onHoldComplete={handleRequestDeletion}
+                  holdDuration={2000}
+                  holdingText="Hold to delete..."
+                  processingText="Deleting..."
+                  completeText="Deleted"
+                  disabled={deletionRequires2FA && deletionTotpCode.length !== 6}
+                >
+                  Delete My Account
+                </HoldButton>
                 <Button type="button" variant="outline" onClick={() => setDeleteAccountOpen(false)}>
                   Cancel
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  disabled={
-                    deletionLoading || (deletionRequires2FA && deletionTotpCode.length !== 6)
-                  }
-                  onClick={handleRequestDeletion}
-                >
-                  {deletionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {deletionLoading
-                    ? "Deleting..."
-                    : deletionRequires2FA
-                      ? "Confirm Deletion"
-                      : "Delete My Account"}
                 </Button>
               </>
             )}

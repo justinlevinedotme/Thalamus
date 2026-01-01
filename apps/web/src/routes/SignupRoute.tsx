@@ -265,11 +265,8 @@ export default function SignupRoute() {
                     onBlur={() => setTouched((t) => ({ ...t, email: true }))}
                     required
                     autoComplete="email"
-                    className={`h-10 ${
-                      touched.email && !isEmailValid && email.length > 0
-                        ? "border-destructive focus-visible:ring-destructive"
-                        : ""
-                    }`}
+                    className="h-10"
+                    error={touched.email && !isEmailValid && email.length > 0}
                   />
                   {touched.email && !isEmailValid && email.length > 0 && (
                     <p className="text-xs text-destructive">Please enter a valid email address</p>
@@ -331,12 +328,13 @@ export default function SignupRoute() {
                       required
                       autoComplete="new-password"
                       className={`h-10 pr-10 ${
-                        touched.confirmPassword && confirmPassword.length > 0 && !passwordsMatch
-                          ? "border-destructive focus-visible:ring-destructive"
-                          : touched.confirmPassword && passwordsMatch
-                            ? "border-green-500 focus-visible:ring-green-500"
-                            : ""
+                        touched.confirmPassword && passwordsMatch
+                          ? "border-green-500 focus-visible:ring-green-500"
+                          : ""
                       }`}
+                      error={
+                        touched.confirmPassword && confirmPassword.length > 0 && !passwordsMatch
+                      }
                     />
                     <button
                       type="button"

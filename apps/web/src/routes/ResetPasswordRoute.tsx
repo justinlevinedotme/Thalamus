@@ -295,11 +295,8 @@ export default function ResetPasswordRoute() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       autoComplete="new-password"
-                      className={`h-10 pr-10 ${
-                        confirmPassword.length > 0 && !passwordsMatch
-                          ? "border-destructive focus-visible:ring-destructive"
-                          : ""
-                      }`}
+                      className="h-10 pr-10"
+                      error={confirmPassword.length > 0 && !passwordsMatch}
                     />
                     <button
                       type="button"
