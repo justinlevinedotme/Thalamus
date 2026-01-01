@@ -5,7 +5,20 @@
 
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { Sparkles, Zap, Share2, Layout, MousePointer2, Download } from "lucide-react";
+import {
+  Sparkles,
+  Zap,
+  Share2,
+  Layout,
+  MousePointer2,
+  Download,
+  Lightbulb,
+  GitBranch,
+  PenTool,
+  Cpu,
+  Brain,
+  BookOpen,
+} from "lucide-react";
 import { ShimmerButton } from "../components/ui/shimmer-button";
 import { motion } from "framer-motion";
 
@@ -33,18 +46,24 @@ function EditorPreview() {
   );
 }
 
-function FeatureCard({
+function BentoCard({
   icon: Icon,
   title,
   description,
   className,
+  gradient,
+  size = "default",
   delay = 0,
+  children,
 }: {
   icon: React.ElementType;
   title: string;
   description: string;
   className?: string;
+  gradient?: string;
+  size?: "default" | "large" | "wide";
   delay?: number;
+  children?: React.ReactNode;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -67,32 +86,79 @@ function FeatureCard({
     <div
       ref={ref}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm transition-all duration-500 hover:border-border hover:bg-card/80",
+        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-500",
+        "hover:border-accent-brand/30 hover:shadow-[0_0_40px_-12px] hover:shadow-accent-brand/20",
+        size === "large" && "md:col-span-2 md:row-span-2",
+        size === "wide" && "md:col-span-2",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
         className
       )}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <div className="relative z-10">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-all duration-300 group-hover:scale-110 group-hover:text-accent-brand">
-          <Icon className="size-6" strokeWidth={1.5} />
+      {gradient && (
+        <div
+          className="pointer-events-none absolute inset-0 opacity-50 transition-opacity duration-500 group-hover:opacity-70"
+          style={{ background: gradient }}
+        />
+      )}
+      <div className={cn("relative z-10 flex h-full flex-col", size === "large" ? "p-8" : "p-6")}>
+        <div
+          className={cn(
+            "mb-4 flex items-center justify-center rounded-xl bg-accent-brand/10 text-accent-brand transition-all duration-300 group-hover:scale-110 group-hover:bg-accent-brand/20",
+            size === "large" ? "size-16" : "size-12"
+          )}
+        >
+          <Icon className={size === "large" ? "size-8" : "size-6"} strokeWidth={1.5} />
         </div>
-        <h3 className="mb-2 text-lg font-semibold text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+        <h3
+          className={cn(
+            "mb-2 font-semibold text-foreground",
+            size === "large" ? "text-2xl" : "text-lg"
+          )}
+        >
+          {title}
+        </h3>
+        <p
+          className={cn(
+            "text-muted-foreground leading-relaxed",
+            size === "large" ? "text-base" : "text-sm"
+          )}
+        >
+          {description}
+        </p>
+        {children && <div className="mt-auto pt-6">{children}</div>}
       </div>
     </div>
   );
 }
 
+function KeyboardShortcut({ keys, label }: { keys: string[]; label: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1">
+        {keys.map((key, i) => (
+          <kbd
+            key={i}
+            className="inline-flex h-7 min-w-7 items-center justify-center rounded-md border border-border bg-muted/50 px-2 font-mono text-xs text-muted-foreground"
+          >
+            {key}
+          </kbd>
+        ))}
+      </div>
+      <span className="text-sm text-muted-foreground">{label}</span>
+    </div>
+  );
+}
+
 function UseCaseCard({
+  icon: Icon,
   title,
   description,
-  tags,
   delay = 0,
 }: {
+  icon: React.ElementType;
   title: string;
   description: string;
-  tags: string[];
   delay?: number;
 }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -116,22 +182,19 @@ function UseCaseCard({
     <div
       ref={ref}
       className={cn(
-        "group rounded-xl border border-border/50 bg-gradient-to-br from-card/80 to-card/40 p-5 backdrop-blur-sm transition-all duration-500 hover:border-border",
+        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/60 p-6 backdrop-blur-sm transition-all duration-500",
+        "hover:border-border hover:bg-card/80 hover:shadow-lg",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       )}
       style={{ transitionDelay: `${delay}ms` }}
     >
-      <h4 className="mb-2 font-semibold text-foreground">{title}</h4>
-      <p className="mb-3 text-sm text-muted-foreground">{description}</p>
-      <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            className="rounded-full bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground transition-colors group-hover:bg-muted"
-          >
-            {tag}
-          </span>
-        ))}
+      <div className="absolute -right-6 -top-6 size-24 rounded-full bg-accent-brand/5 transition-transform duration-500 group-hover:scale-150" />
+      <div className="relative z-10">
+        <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors duration-300 group-hover:text-accent-brand">
+          <Icon className="size-5" strokeWidth={1.5} />
+        </div>
+        <h4 className="mb-2 text-lg font-semibold text-foreground">{title}</h4>
+        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -256,9 +319,20 @@ export default function LandingRoute() {
           </section>
 
           {/* Features Section */}
-          <section className="px-6 py-20 md:py-32">
-            <div className="mx-auto max-w-6xl">
+          <section className="relative px-6 py-20 md:py-32">
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background: isDark
+                  ? "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,79,0,0.06), transparent)"
+                  : "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,79,0,0.04), transparent)",
+              }}
+            />
+            <div className="relative mx-auto max-w-6xl">
               <div className="mb-12 text-center md:mb-16">
+                <p className="mb-3 text-sm font-medium uppercase tracking-wider text-accent-brand">
+                  Features
+                </p>
                 <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
                   Built for how you think
                 </h2>
@@ -268,53 +342,66 @@ export default function LandingRoute() {
                 </p>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <FeatureCard
+              <div className="grid gap-4 md:grid-cols-3 md:grid-rows-2">
+                <BentoCard
                   icon={MousePointer2}
                   title="Intuitive editing"
-                  description="Double-click to create, drag to connect. Everything feels natural. Keyboard shortcuts for power users."
+                  description="Double-click to create, drag to connect. Everything feels natural. Keyboard shortcuts for power users who want speed."
+                  size="large"
+                  gradient="radial-gradient(ellipse at top left, rgba(255,79,0,0.08), transparent 60%)"
                   delay={0}
-                />
-                <FeatureCard
+                >
+                  <div className="flex flex-wrap gap-x-6 gap-y-3">
+                    <KeyboardShortcut keys={["⌥", "N"]} label="Add node" />
+                    <KeyboardShortcut keys={["⌥", "H"]} label="Heading" />
+                    <KeyboardShortcut keys={["⌥", "S"]} label="Shape" />
+                    <KeyboardShortcut keys={["⌘", "K"]} label="Search" />
+                  </div>
+                </BentoCard>
+                <BentoCard
                   icon={Layout}
                   title="Smart layouts"
-                  description="Auto-arrange your graph with multiple algorithms. Horizontal, vertical, radial — pick what fits."
+                  description="Auto-arrange with multiple algorithms. Horizontal, vertical, radial."
                   delay={100}
                 />
-                <FeatureCard
+                <BentoCard
                   icon={Zap}
                   title="Blazing fast"
-                  description="Handles hundreds of nodes without breaking a sweat. Smooth pan and zoom at any scale."
-                  delay={200}
+                  description="Handles hundreds of nodes. Smooth pan and zoom at any scale."
+                  delay={150}
                 />
-                <FeatureCard
+                <BentoCard
                   icon={Share2}
                   title="Share anywhere"
-                  description="Generate public links, embed in docs, or export as images. Collaboration made simple."
-                  delay={300}
+                  description="Generate public links, embed in docs, or export as images."
+                  delay={200}
                 />
-                <FeatureCard
-                  icon={Sparkles}
-                  title="Rich content"
-                  description="Add formatted text, links, and styles to your nodes. Make your graphs expressive."
-                  delay={400}
-                />
-                <FeatureCard
+                <BentoCard
                   icon={Download}
                   title="Your data, your way"
-                  description="Export to PNG for presentations, PDF for documents, or JSON to move your data anywhere."
-                  delay={500}
+                  description="Export to PNG, PDF, or JSON. Take your data anywhere."
+                  delay={250}
+                />
+                <BentoCard
+                  icon={Sparkles}
+                  title="Rich content"
+                  description="Formatted text, links, colors. Make your graphs expressive."
+                  delay={300}
                 />
               </div>
             </div>
           </section>
 
           {/* Use Cases Section */}
-          <section className="border-t border-border/50 bg-card/20 px-6 py-20 md:py-32">
-            <div className="mx-auto max-w-6xl">
+          <section className="relative border-t border-border/50 px-6 py-20 md:py-32">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-card/50 to-transparent" />
+            <div className="relative mx-auto max-w-6xl">
               <div className="mb-12 text-center md:mb-16">
+                <p className="mb-3 text-sm font-medium uppercase tracking-wider text-accent-brand">
+                  Use Cases
+                </p>
                 <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
-                  What will you map?
+                  What will you build?
                 </h2>
                 <p className="mx-auto max-w-2xl text-muted-foreground">
                   From personal projects to team brainstorms, Thalamus helps you see the big
@@ -324,48 +411,56 @@ export default function LandingRoute() {
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <UseCaseCard
+                  icon={BookOpen}
                   title="Research & Learning"
-                  description="Connect concepts, track sources, and build understanding as you learn."
-                  tags={["Students", "Researchers", "Self-learners"]}
+                  description="Connect concepts, track sources, and build understanding as you explore new topics."
                   delay={0}
                 />
                 <UseCaseCard
+                  icon={GitBranch}
                   title="Project Planning"
-                  description="Map dependencies, track milestones, and visualize your project structure."
-                  tags={["Product managers", "Developers", "Designers"]}
+                  description="Map dependencies, track milestones, and visualize your entire project structure."
+                  delay={50}
+                />
+                <UseCaseCard
+                  icon={Lightbulb}
+                  title="Brainstorming"
+                  description="Capture ideas as they flow, then organize and refine them into actionable plans."
                   delay={100}
                 />
                 <UseCaseCard
-                  title="Brainstorming"
-                  description="Capture ideas as they flow, then organize and refine them into plans."
-                  tags={["Teams", "Creatives", "Strategists"]}
+                  icon={PenTool}
+                  title="Writing & Content"
+                  description="Outline articles, plan narratives, and organize complex writing projects visually."
+                  delay={150}
+                />
+                <UseCaseCard
+                  icon={Cpu}
+                  title="System Design"
+                  description="Document architectures, map integrations, and communicate technical decisions."
                   delay={200}
                 />
                 <UseCaseCard
-                  title="Writing & Content"
-                  description="Outline articles, plan narratives, and organize complex writing projects."
-                  tags={["Writers", "Journalists", "Content creators"]}
-                  delay={300}
-                />
-                <UseCaseCard
-                  title="System Design"
-                  description="Document architectures, map integrations, and communicate technical decisions."
-                  tags={["Engineers", "Architects", "Technical leads"]}
-                  delay={400}
-                />
-                <UseCaseCard
+                  icon={Brain}
                   title="Personal Knowledge"
                   description="Build your second brain. Connect everything you learn and never lose an insight."
-                  tags={["PKM enthusiasts", "Note-takers", "Lifelong learners"]}
-                  delay={500}
+                  delay={250}
                 />
               </div>
             </div>
           </section>
 
           {/* Final CTA */}
-          <section className="px-6 py-20 md:py-32">
-            <div className="mx-auto max-w-3xl text-center">
+          <section className="relative px-6 py-20 md:py-32">
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background: isDark
+                  ? "radial-gradient(ellipse 50% 60% at 50% 100%, rgba(255,79,0,0.08), transparent)"
+                  : "radial-gradient(ellipse 50% 60% at 50% 100%, rgba(255,79,0,0.05), transparent)",
+              }}
+            />
+            <div className="relative mx-auto max-w-3xl text-center">
               <h2 className="mb-4 text-3xl font-bold text-foreground md:text-4xl">
                 Ready to start mapping?
               </h2>
@@ -374,7 +469,7 @@ export default function LandingRoute() {
               </p>
               <Link
                 to="/editor"
-                className="group inline-flex items-center gap-2 rounded-xl bg-accent-brand px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
+                className="group inline-flex items-center gap-2 rounded-xl bg-accent-brand px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-accent-brand/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent-brand/30"
               >
                 Open Editor
               </Link>
