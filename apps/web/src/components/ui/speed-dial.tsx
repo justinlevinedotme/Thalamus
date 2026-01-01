@@ -3,7 +3,7 @@
  * @description Speed dial floating action button component
  */
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 

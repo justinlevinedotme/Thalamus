@@ -120,13 +120,9 @@ export default function MeAccountGeneralRoute() {
     value: boolean
   ) => {
     setEmailPrefsLoading(true);
-    try {
-      await updateEmailPrefs(key, value);
-    } catch (err) {
-      // Error is already handled by the hook
-    } finally {
+    await updateEmailPrefs(key, value).finally(() => {
       setEmailPrefsLoading(false);
-    }
+    });
   };
 
   if (loading) {

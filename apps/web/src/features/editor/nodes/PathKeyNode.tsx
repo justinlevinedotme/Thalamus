@@ -4,7 +4,7 @@
  */
 
 import { Trash2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { NodeResizer, type Node, type NodeProps } from "@xyflow/react";
 
@@ -69,9 +69,12 @@ export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyNod
     ];
   })();
 
-  const saveEntries = (newEntries: PathKeyEntry[]) => {
-    updateNodeBody(id, JSON.stringify(newEntries));
-  };
+  const saveEntries = useCallback(
+    (newEntries: PathKeyEntry[]) => {
+      updateNodeBody(id, JSON.stringify(newEntries));
+    },
+    [id, updateNodeBody]
+  );
 
   const handleMouseDown = (event: React.MouseEvent) => {
     if (event.button !== 0 || event.shiftKey) {
@@ -126,7 +129,7 @@ export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyNod
     saveEntries(newEntries);
   };
 
-  const addEntry = () => {
+  const addEntry = useCallback(() => {
     const newEntry: PathKeyEntry = {
       id: crypto.randomUUID(),
       label: "New path",
@@ -135,7 +138,7 @@ export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyNod
       thickness: 2,
     };
     saveEntries([...entries, newEntry]);
-  };
+  }, [entries, saveEntries]);
 
   const removeEntry = (entryId: string) => {
     saveEntries(entries.filter((e) => e.id !== entryId));
@@ -162,7 +165,7 @@ export default function PathKeyNode({ id, data, selected }: NodeProps<PathKeyNod
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [selected, entries]);
+  }, [selected, entries, addEntry]);
 
   const borderWidth = data.style?.borderWidth ?? 1;
   const borderStyle = data.style?.borderStyle ?? "solid";

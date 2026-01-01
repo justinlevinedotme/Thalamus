@@ -1,4 +1,4 @@
-import { Hr, Section, Text } from "@react-email/components";
+import { Section, Text } from "@react-email/components";
 import * as React from "react";
 
 import { Layout } from "./components/Layout";
@@ -6,13 +6,11 @@ import { Button } from "./components/Button";
 import { heading, paragraph, mutedText, buttonContainer } from "./components/styles";
 
 interface WelcomeProps {
-  userName?: string;
   loginUrl?: string;
   unsubscribeUrl?: string;
 }
 
 export const Welcome = ({
-  userName,
   loginUrl = "https://thalamus.sh/login",
   unsubscribeUrl = "https://thalamus.sh/unsubscribe?token=example",
 }: WelcomeProps) => {
@@ -59,23 +57,5 @@ export const Welcome = ({
     </Layout>
   );
 };
-
-const featureList = {
-  margin: "24px 0",
-} as React.CSSProperties;
-
-const featureItem = {
-  color: "#334155",
-  fontSize: "15px",
-  lineHeight: "1.6",
-  margin: "8px 0",
-  paddingLeft: "8px",
-} as React.CSSProperties;
-
-const bullet = {
-  color: "#0f172a",
-  fontWeight: "600",
-  marginRight: "8px",
-} as React.CSSProperties;
 
 export default Welcome;

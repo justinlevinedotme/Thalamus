@@ -1,6 +1,7 @@
 {
   "name": "thalamus",
   "private": true,
+  "type": "module",
   "workspaces": [
     "apps/*",
     "packages/*"
@@ -14,6 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
     "email:dev": "turbo run email:dev"
   },
   "lint-staged": {

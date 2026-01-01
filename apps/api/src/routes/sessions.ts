@@ -163,7 +163,7 @@ sessions.delete("/", async (c) => {
   const db = getDb();
 
   try {
-    const result = await db
+    await db
       .delete(schema.baSession)
       .where(and(eq(schema.baSession.userId, user.id), ne(schema.baSession.id, currentSession.id)));
 
