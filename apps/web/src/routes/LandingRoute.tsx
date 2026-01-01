@@ -4,335 +4,31 @@
  */
 
 import { Link } from "react-router-dom";
-import { useEffect, useRef, useState, useMemo } from "react";
-import {
-  ArrowRight,
-  Sparkles,
-  Zap,
-  Share2,
-  Layout,
-  MousePointer2,
-  Command,
-  Download,
-} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Sparkles, Zap, Share2, Layout, MousePointer2, Download } from "lucide-react";
+import { ShimmerButton } from "../components/ui/shimmer-button";
 import { motion } from "framer-motion";
-import {
-  ReactFlow,
-  Background,
-  BackgroundVariant,
-  Handle,
-  Position,
-  type Node,
-  type Edge,
-} from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
 
 import Header from "../components/Header";
 import { useTheme } from "../lib/theme";
 import { cn } from "../lib/utils";
-import { BaseNode } from "../components/ui/base-node";
-
-function PreviewNode({ data }: { data: { label: string; color?: string } }) {
-  return (
-    <BaseNode className="px-4 py-2" style={{ backgroundColor: data.color }}>
-      <Handle type="target" position={Position.Left} className="!bg-transparent !border-0" />
-      <span className="text-sm font-medium">{data.label}</span>
-      <Handle type="source" position={Position.Right} className="!bg-transparent !border-0" />
-    </BaseNode>
-  );
-}
-
-const previewNodeTypes = {
-  preview: PreviewNode,
-};
-
-type DemoGraph = {
-  id: string;
-  title: string;
-  nodes: Node[];
-  edges: Edge[];
-};
-
-const demoGraphs: DemoGraph[] = [
-  {
-    id: "bracket",
-    title: "Tournament",
-    nodes: [
-      {
-        id: "t1",
-        type: "preview",
-        position: { x: 0, y: 0 },
-        data: { label: "🦁 Lions", color: "rgba(251, 191, 36, 0.2)" },
-      },
-      {
-        id: "t2",
-        type: "preview",
-        position: { x: 0, y: 70 },
-        data: { label: "🐻 Bears", color: "rgba(168, 85, 247, 0.2)" },
-      },
-      {
-        id: "t3",
-        type: "preview",
-        position: { x: 0, y: 160 },
-        data: { label: "🦅 Eagles", color: "rgba(34, 197, 94, 0.2)" },
-      },
-      {
-        id: "t4",
-        type: "preview",
-        position: { x: 0, y: 230 },
-        data: { label: "🐺 Wolves", color: "rgba(59, 130, 246, 0.2)" },
-      },
-      {
-        id: "s1",
-        type: "preview",
-        position: { x: 180, y: 35 },
-        data: { label: "🦁 Lions", color: "rgba(251, 191, 36, 0.3)" },
-      },
-      {
-        id: "s2",
-        type: "preview",
-        position: { x: 180, y: 195 },
-        data: { label: "🦅 Eagles", color: "rgba(34, 197, 94, 0.3)" },
-      },
-      {
-        id: "f1",
-        type: "preview",
-        position: { x: 360, y: 115 },
-        data: { label: "🏆 Champion", color: "rgba(255, 79, 0, 0.3)" },
-      },
-    ],
-    edges: [
-      { id: "e1", source: "t1", target: "s1", style: { stroke: "#fbbf24", strokeWidth: 2 } },
-      {
-        id: "e2",
-        source: "t2",
-        target: "s1",
-        style: { stroke: "#6b7280", strokeWidth: 1, strokeDasharray: "4 4" },
-      },
-      { id: "e3", source: "t3", target: "s2", style: { stroke: "#22c55e", strokeWidth: 2 } },
-      {
-        id: "e4",
-        source: "t4",
-        target: "s2",
-        style: { stroke: "#6b7280", strokeWidth: 1, strokeDasharray: "4 4" },
-      },
-      {
-        id: "e5",
-        source: "s1",
-        target: "f1",
-        animated: true,
-        style: { stroke: "#fbbf24", strokeWidth: 2 },
-      },
-      {
-        id: "e6",
-        source: "s2",
-        target: "f1",
-        style: { stroke: "#6b7280", strokeWidth: 1, strokeDasharray: "4 4" },
-      },
-    ],
-  },
-  {
-    id: "mindmap",
-    title: "Mind Map",
-    nodes: [
-      {
-        id: "c",
-        type: "preview",
-        position: { x: 200, y: 100 },
-        data: { label: "💡 Big Idea", color: "rgba(255, 79, 0, 0.25)" },
-      },
-      {
-        id: "1",
-        type: "preview",
-        position: { x: 50, y: 20 },
-        data: { label: "Research", color: "rgba(59, 130, 246, 0.2)" },
-      },
-      {
-        id: "2",
-        type: "preview",
-        position: { x: 350, y: 20 },
-        data: { label: "Design", color: "rgba(168, 85, 247, 0.2)" },
-      },
-      {
-        id: "3",
-        type: "preview",
-        position: { x: 400, y: 120 },
-        data: { label: "Prototype", color: "rgba(34, 197, 94, 0.2)" },
-      },
-      {
-        id: "4",
-        type: "preview",
-        position: { x: 350, y: 200 },
-        data: { label: "Test", color: "rgba(251, 191, 36, 0.2)" },
-      },
-      {
-        id: "5",
-        type: "preview",
-        position: { x: 50, y: 200 },
-        data: { label: "Launch", color: "rgba(244, 63, 94, 0.2)" },
-      },
-      {
-        id: "6",
-        type: "preview",
-        position: { x: 0, y: 120 },
-        data: { label: "Iterate", color: "rgba(6, 182, 212, 0.2)" },
-      },
-    ],
-    edges: [
-      { id: "ec1", source: "c", target: "1", type: "straight", style: { stroke: "#3b82f6" } },
-      { id: "ec2", source: "c", target: "2", type: "straight", style: { stroke: "#a855f7" } },
-      { id: "ec3", source: "c", target: "3", type: "straight", style: { stroke: "#22c55e" } },
-      { id: "ec4", source: "c", target: "4", type: "straight", style: { stroke: "#eab308" } },
-      { id: "ec5", source: "c", target: "5", type: "straight", style: { stroke: "#f43f5e" } },
-      { id: "ec6", source: "c", target: "6", type: "straight", style: { stroke: "#06b6d4" } },
-    ],
-  },
-  {
-    id: "flowchart",
-    title: "Flowchart",
-    nodes: [
-      {
-        id: "start",
-        type: "preview",
-        position: { x: 180, y: 0 },
-        data: { label: "▶ Start", color: "rgba(34, 197, 94, 0.25)" },
-      },
-      {
-        id: "input",
-        type: "preview",
-        position: { x: 180, y: 70 },
-        data: { label: "📥 Get Input", color: "rgba(59, 130, 246, 0.2)" },
-      },
-      {
-        id: "check",
-        type: "preview",
-        position: { x: 180, y: 140 },
-        data: { label: "❓ Valid?", color: "rgba(251, 191, 36, 0.25)" },
-      },
-      {
-        id: "process",
-        type: "preview",
-        position: { x: 50, y: 210 },
-        data: { label: "⚙️ Process", color: "rgba(168, 85, 247, 0.2)" },
-      },
-      {
-        id: "error",
-        type: "preview",
-        position: { x: 320, y: 210 },
-        data: { label: "⚠️ Error", color: "rgba(244, 63, 94, 0.25)" },
-      },
-      {
-        id: "end",
-        type: "preview",
-        position: { x: 50, y: 280 },
-        data: { label: "⏹ End", color: "rgba(107, 114, 128, 0.2)" },
-      },
-    ],
-    edges: [
-      { id: "e1", source: "start", target: "input", animated: true },
-      { id: "e2", source: "input", target: "check" },
-      { id: "e3", source: "check", target: "process", label: "Yes", style: { stroke: "#22c55e" } },
-      {
-        id: "e4",
-        source: "check",
-        target: "error",
-        label: "No",
-        style: { stroke: "#f43f5e", strokeDasharray: "5 5" },
-      },
-      { id: "e5", source: "process", target: "end" },
-      {
-        id: "e6",
-        source: "error",
-        target: "input",
-        style: { stroke: "#f43f5e", strokeDasharray: "5 5" },
-      },
-    ],
-  },
-];
 
 function EditorPreview() {
-  const { resolvedTheme } = useTheme();
-  const [activeTab, setActiveTab] = useState(0);
-  const activeGraph = demoGraphs[activeTab];
-
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-2xl"
-      style={{ height: "400px" }}
-    >
-      <div className="flex h-10 items-center gap-2 border-b border-border/50 bg-card/80 px-4">
+    <div className="relative w-full overflow-hidden rounded-xl border border-border/50 shadow-2xl">
+      <div className="flex h-8 items-center gap-2 border-b border-border/50 bg-[#1a1a1a] px-3">
         <div className="flex gap-1.5">
-          <div className="size-3 rounded-full bg-red-500/60" />
-          <div className="size-3 rounded-full bg-yellow-500/60" />
-          <div className="size-3 rounded-full bg-green-500/60" />
+          <div className="size-3 rounded-full bg-[#ff5f57]" />
+          <div className="size-3 rounded-full bg-[#febc2e]" />
+          <div className="size-3 rounded-full bg-[#28c840]" />
         </div>
-        <div className="ml-4 flex items-center gap-1">
-          {demoGraphs.map((graph, i) => (
-            <button
-              key={graph.id}
-              onClick={() => setActiveTab(i)}
-              className={cn(
-                "rounded-md px-3 py-1 text-xs font-medium transition-colors",
-                activeTab === i
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              )}
-            >
-              {graph.title}
-            </button>
-          ))}
-        </div>
+        <span className="ml-2 text-xs text-muted-foreground">Fantasy League Playoffs</span>
       </div>
-
-      <div className="absolute left-3 top-14 z-10 flex flex-col gap-1 rounded-lg border border-border/30 bg-card/60 p-1.5 backdrop-blur-sm">
-        {[MousePointer2, Layout, Sparkles].map((Icon, i) => (
-          <div
-            key={i}
-            className="flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/50"
-          >
-            <Icon className="size-3.5" />
-          </div>
-        ))}
-      </div>
-
-      <div style={{ height: "calc(100% - 40px)", width: "100%" }}>
-        <ReactFlow
-          key={activeGraph.id}
-          nodes={activeGraph.nodes}
-          edges={activeGraph.edges}
-          nodeTypes={previewNodeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.3, maxZoom: 1 }}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable={false}
-          panOnDrag={false}
-          zoomOnScroll={false}
-          zoomOnPinch={false}
-          zoomOnDoubleClick={false}
-          preventScrolling={false}
-          colorMode={resolvedTheme}
-          proOptions={{ hideAttribution: true }}
-          defaultEdgeOptions={{
-            style: { strokeWidth: 2 },
-            labelBgPadding: [6, 4],
-            labelBgBorderRadius: 4,
-            labelStyle: { fontSize: 10, fontWeight: 500 },
-          }}
-        >
-          <Background variant={BackgroundVariant.Dots} gap={16} size={1} className="opacity-50" />
-        </ReactFlow>
-      </div>
-
-      <motion.div
-        className="absolute bottom-4 right-4 z-10 flex items-center gap-2 rounded-full bg-card/80 px-3 py-1.5 text-xs text-muted-foreground backdrop-blur-sm"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5 }}
-      >
-        <Command className="size-3" />
-        <span>K to search</span>
-      </motion.div>
+      <img
+        src="/assets/demo-screenshot.png"
+        alt="Thalamus editor showing a fantasy league playoffs bracket"
+        className="w-full"
+      />
     </div>
   );
 }
@@ -371,20 +67,19 @@ function FeatureCard({
     <div
       ref={ref}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm transition-all duration-500 hover:border-accent-brand/30 hover:shadow-[0_0_40px_-10px_rgba(255,79,0,0.2)]",
+        "group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm transition-all duration-500 hover:border-border hover:bg-card/80",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
         className
       )}
       style={{ transitionDelay: `${delay}ms` }}
     >
       <div className="relative z-10">
-        <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-accent-brand/10 text-accent-brand transition-transform duration-300 group-hover:scale-110">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-all duration-300 group-hover:scale-110 group-hover:text-accent-brand">
           <Icon className="size-6" strokeWidth={1.5} />
         </div>
         <h3 className="mb-2 text-lg font-semibold text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
       </div>
-      <div className="absolute -right-8 -top-8 size-32 rounded-full bg-accent-brand/5 transition-transform duration-500 group-hover:scale-150" />
     </div>
   );
 }
@@ -421,7 +116,7 @@ function UseCaseCard({
     <div
       ref={ref}
       className={cn(
-        "rounded-xl border border-border/50 bg-gradient-to-br from-card/80 to-card/40 p-5 backdrop-blur-sm transition-all duration-500",
+        "group rounded-xl border border-border/50 bg-gradient-to-br from-card/80 to-card/40 p-5 backdrop-blur-sm transition-all duration-500 hover:border-border",
         isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       )}
       style={{ transitionDelay: `${delay}ms` }}
@@ -432,7 +127,7 @@ function UseCaseCard({
         {tags.map((tag) => (
           <span
             key={tag}
-            className="rounded-full bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground"
+            className="rounded-full bg-muted/50 px-2.5 py-0.5 text-xs text-muted-foreground transition-colors group-hover:bg-muted"
           >
             {tag}
           </span>
@@ -448,13 +143,12 @@ export default function LandingRoute() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Background gradient */}
       <div
         className="pointer-events-none fixed inset-0 z-0"
         style={{
           background: isDark
-            ? "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,79,0,0.15), transparent), radial-gradient(ellipse 60% 50% at 50% 120%, rgba(255,79,0,0.1), transparent)"
-            : "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,79,0,0.08), transparent), radial-gradient(ellipse 60% 50% at 50% 120%, rgba(255,79,0,0.05), transparent)",
+            ? "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,255,255,0.03), transparent)"
+            : "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,0,0,0.02), transparent)",
         }}
       />
 
@@ -470,10 +164,15 @@ export default function LandingRoute() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="mb-4 inline-flex items-center gap-2 rounded-full border border-accent-brand/20 bg-accent-brand/10 px-4 py-1.5 text-sm text-accent-brand"
+                  className="mb-4 inline-block"
                 >
-                  <Sparkles className="size-4" />
-                  <span>Free to use. No signup required.</span>
+                  <ShimmerButton
+                    background="hsl(var(--muted))"
+                    shimmerColor="hsl(var(--accent-brand))"
+                    className="px-4 py-1.5 text-sm !text-foreground"
+                  >
+                    Free to use. No signup required.
+                  </ShimmerButton>
                 </motion.div>
 
                 <motion.h1
@@ -482,15 +181,13 @@ export default function LandingRoute() {
                   transition={{ duration: 0.5, delay: 0.1 }}
                   className="mb-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl"
                 >
-                  Think in
-                  <span className="relative mx-3 inline-block">
-                    <span className="relative z-10 text-accent-brand">nodes</span>
-                    <span className="absolute -inset-1 -z-0 rounded-lg bg-accent-brand/10" />
-                  </span>
-                  and
-                  <span className="relative mx-3 inline-block">
-                    <span className="relative z-10 text-accent-brand">connections</span>
-                    <span className="absolute -inset-1 -z-0 rounded-lg bg-accent-brand/10" />
+                  Think in{" "}
+                  <span className="underline decoration-accent-brand decoration-2 underline-offset-4">
+                    nodes
+                  </span>{" "}
+                  and{" "}
+                  <span className="underline decoration-accent-brand decoration-2 underline-offset-4">
+                    connections
                   </span>
                 </motion.h1>
 
@@ -501,7 +198,7 @@ export default function LandingRoute() {
                   className="mx-auto mb-8 max-w-2xl text-lg text-muted-foreground"
                 >
                   Thalamus is a visual canvas for mapping ideas, connecting thoughts, and building
-                  knowledge graphs. See your thinking take shape.
+                  knowledge graphs. See your thinking take shape. Self-host or use in the cloud.
                 </motion.p>
 
                 <motion.div
@@ -512,10 +209,9 @@ export default function LandingRoute() {
                 >
                   <Link
                     to="/editor"
-                    className="group inline-flex items-center gap-2 rounded-xl bg-accent-brand px-8 py-4 text-base font-semibold text-white shadow-lg shadow-accent-brand/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent-brand/30"
+                    className="group inline-flex items-center gap-2 rounded-xl bg-accent-brand px-8 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
                   >
                     Open Editor
-                    <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
                   </Link>
                   <Link
                     to="/login"
@@ -526,36 +222,34 @@ export default function LandingRoute() {
                 </motion.div>
               </div>
 
-              {/* Product Preview */}
               <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.4 }}
                 className="relative"
               >
-                <div className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-accent-brand/20 via-purple-500/10 to-blue-500/20 blur-3xl" />
+                <div className="absolute -inset-px rounded-xl bg-gradient-to-b from-accent-brand/20 via-transparent to-transparent blur-sm" />
                 <EditorPreview />
               </motion.div>
             </div>
           </section>
 
-          {/* Trust bar */}
           <section className="border-y border-border/50 bg-card/30 px-6 py-6 backdrop-blur-sm">
             <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground md:gap-16">
               <div className="flex items-center gap-2">
-                <Zap className="size-4 text-accent-brand" />
+                <Zap className="size-4" />
                 <span>Instant start</span>
               </div>
               <div className="flex items-center gap-2">
-                <Download className="size-4 text-accent-brand" />
+                <Download className="size-4" />
                 <span>Export to PNG, PDF, JSON</span>
               </div>
               <div className="flex items-center gap-2">
-                <Share2 className="size-4 text-accent-brand" />
+                <Share2 className="size-4" />
                 <span>Shareable links</span>
               </div>
               <div className="flex items-center gap-2">
-                <Layout className="size-4 text-accent-brand" />
+                <Layout className="size-4" />
                 <span>Auto-layout</span>
               </div>
             </div>
@@ -680,10 +374,9 @@ export default function LandingRoute() {
               </p>
               <Link
                 to="/editor"
-                className="group inline-flex items-center gap-2 rounded-xl bg-accent-brand px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-accent-brand/25 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-accent-brand/30"
+                className="group inline-flex items-center gap-2 rounded-xl bg-accent-brand px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl"
               >
                 Open Editor
-                <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
               </Link>
               <p className="mt-6 text-sm text-muted-foreground">
                 Works in your browser. Nothing to install.
