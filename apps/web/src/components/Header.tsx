@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FolderOpen, LogOut, Settings, Share2, User } from "lucide-react";
+import { FolderOpen, LogOut, Moon, Settings, Share2, Sun, User } from "lucide-react";
 
 import { ThalamusLogo } from "./ThalamusLogo";
 import { Badge } from "./ui/badge";
@@ -19,6 +19,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useAuthStore } from "../store/authStore";
 import { apiFetch } from "../lib/apiClient";
+import { useTheme } from "../lib/theme";
 
 type HeaderProps = {
   children?: React.ReactNode;
@@ -46,6 +47,7 @@ function getPlanBadge(plan: string | undefined) {
 
 export default function Header({ children, fullWidth = false, onShare }: HeaderProps) {
   const { user, signOut } = useAuthStore();
+  const { resolvedTheme, setTheme } = useTheme();
   const [plan, setPlan] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -57,6 +59,10 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
       setPlan(undefined);
     }
   }, [user]);
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  };
 
   return (
     <header className="bg-transparent px-4 py-4">
@@ -156,6 +162,14 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
               </Link>
             </>
           )}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+            aria-label={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
         </div>
       </nav>
     </header>
