@@ -15,7 +15,7 @@
 - [x] Add features section with 6 feature cards
 - [x] Add use cases section with 6 use case cards
 - [x] Add final CTA section
-- [ ] Commit and push landing page changes
+- [x] Commit and push landing page changes
 - [ ] Test mobile responsiveness
 - [ ] Review and polish demo graph layouts
 
