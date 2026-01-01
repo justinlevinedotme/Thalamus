@@ -20,6 +20,7 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
+import { VerifyButton } from "../components/ui/verify-button";
 import { Label } from "../components/ui/label";
 import { Card, CardContent } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -221,21 +222,19 @@ export default function AuthRoute() {
   };
 
   // 2FA verification
-  const handleVerifyTotp = async () => {
+  const handleVerifyTotp = async (): Promise<boolean> => {
     if (totpCode.length !== 6) {
       setTwoFactorError("Please enter a 6-digit code");
-      return;
+      return false;
     }
 
-    setTwoFactorLoading(true);
     setTwoFactorError(null);
 
     try {
       const result = await twoFactor.verifyTotp({ code: totpCode });
       if (result.error) {
         setTwoFactorError(result.error.message || "Invalid code");
-        setTwoFactorLoading(false);
-        return;
+        return false;
       }
 
       const session = await authClient.getSession();
@@ -246,15 +245,14 @@ export default function AuthRoute() {
           name: session.data.user.name ?? null,
           image: session.data.user.image ?? null,
         });
-        setTwoFactorOpen(false);
-        navigate("/me/files");
+        return true;
       } else {
         setTwoFactorError("Failed to get session after verification");
+        return false;
       }
     } catch (err) {
       setTwoFactorError(err instanceof Error ? err.message : "Verification failed");
-    } finally {
-      setTwoFactorLoading(false);
+      return false;
     }
   };
 
@@ -671,21 +669,18 @@ export default function AuthRoute() {
             {twoFactorError && <p className="mt-2 text-sm text-destructive">{twoFactorError}</p>}
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setTwoFactorOpen(false)}
-              disabled={twoFactorLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
+            <VerifyButton
               onClick={handleVerifyTotp}
-              disabled={twoFactorLoading || totpCode.length !== 6}
+              onSuccess={() => {
+                setTwoFactorOpen(false);
+                navigate("/me/files");
+              }}
+              disabled={totpCode.length !== 6}
             >
-              {twoFactorLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {twoFactorLoading ? "Verifying..." : "Verify"}
+              Verify
+            </VerifyButton>
+            <Button type="button" variant="outline" onClick={() => setTwoFactorOpen(false)}>
+              Cancel
             </Button>
           </DialogFooter>
         </DialogContent>

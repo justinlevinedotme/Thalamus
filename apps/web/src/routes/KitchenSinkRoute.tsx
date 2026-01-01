@@ -9,7 +9,6 @@
 
 import { useState } from "react";
 import {
-  AlertTriangle,
   Check,
   CreditCard,
   Download,
@@ -23,6 +22,7 @@ import {
   Shield,
   Trash2,
   User,
+  AlertTriangle,
 } from "lucide-react";
 
 // UI Primitives
@@ -32,6 +32,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../components/ui/accordion";
+import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +45,8 @@ import {
 } from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { HoldButton } from "../components/ui/hold-button";
+import { VerifyButton } from "../components/ui/verify-button";
 import {
   Card,
   CardContent,
@@ -119,6 +122,33 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+function HoldButtonDemo() {
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-3">
+        <HoldButton onHoldComplete={() => console.log("Deleted!")} holdDuration={1200}>
+          Hold to Delete
+        </HoldButton>
+        <HoldButton
+          onHoldComplete={() => console.log("Account deleted!")}
+          holdDuration={1500}
+          holdingText="Are you sure?"
+          processingText="Deleting account..."
+          completeText="Account Deleted"
+        >
+          Delete Account
+        </HoldButton>
+        <HoldButton onHoldComplete={() => {}} disabled>
+          Disabled
+        </HoldButton>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Hold to confirm destructive actions. Progress fills as you hold; release early to cancel.
+      </p>
+    </div>
+  );
+}
+
 // Subsection wrapper
 function Subsection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -138,6 +168,10 @@ export default function KitchenSinkRoute() {
     "default" | "pending" | "submitted" | "2fa" | "error"
   >("default");
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [otpDialogOpen, setOtpDialogOpen] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
 
   // Form states
   const [checkboxChecked, setCheckboxChecked] = useState(false);
@@ -145,6 +179,22 @@ export default function KitchenSinkRoute() {
   const [selectValue, setSelectValue] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [textareaValue, setTextareaValue] = useState("");
+
+  // Validation demo states
+  const [validationEmail, setValidationEmail] = useState("");
+  const [validationEmailTouched, setValidationEmailTouched] = useState(false);
+  const [validationUsername, setValidationUsername] = useState("");
+  const [validationUsernameTouched, setValidationUsernameTouched] = useState(false);
+  const [validationDesc, setValidationDesc] = useState("");
+  const [validationDescTouched, setValidationDescTouched] = useState(false);
+  const [validation2fa, setValidation2fa] = useState("");
+  const [validation2faTouched, setValidation2faTouched] = useState(false);
+
+  // Validation helpers
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(validationEmail);
+  const isUsernameValid = validationUsername.length > 0;
+  const isDescValid = validationDesc.length >= 50;
+  const is2faValid = validation2fa.length === 6;
 
   return (
     <TooltipProvider>
@@ -164,7 +214,7 @@ export default function KitchenSinkRoute() {
           {/* ===== BUTTONS ===== */}
           <Section title="Buttons">
             <Subsection title="Variants">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 <Button variant="default">Default</Button>
                 <Button variant="secondary">Secondary</Button>
                 <Button variant="destructive">Destructive</Button>
@@ -174,7 +224,7 @@ export default function KitchenSinkRoute() {
               </div>
             </Subsection>
             <Subsection title="Sizes">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-3">
                 <Button size="sm">Small</Button>
                 <Button size="default">Default</Button>
                 <Button size="lg">Large</Button>
@@ -184,12 +234,54 @@ export default function KitchenSinkRoute() {
               </div>
             </Subsection>
             <Subsection title="States">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 <Button disabled>Disabled</Button>
                 <Button>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Loading
                 </Button>
+              </div>
+            </Subsection>
+            <Subsection title="Hold Button (for destructive actions)">
+              <div className="rounded-lg border border-border bg-card p-4">
+                <HoldButtonDemo />
+              </div>
+            </Subsection>
+            <Subsection title="Verify Button (for confirmation flows)">
+              <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+                <div className="flex flex-wrap gap-3">
+                  <VerifyButton
+                    onClick={async () => {
+                      await new Promise((r) => setTimeout(r, 800));
+                      return true;
+                    }}
+                  >
+                    Verify (Success)
+                  </VerifyButton>
+                  <VerifyButton
+                    onClick={async () => {
+                      await new Promise((r) => setTimeout(r, 800));
+                      return false;
+                    }}
+                  >
+                    Verify (Fail)
+                  </VerifyButton>
+                  <VerifyButton
+                    onClick={async () => {
+                      await new Promise((r) => setTimeout(r, 800));
+                      throw new Error("Network error");
+                    }}
+                  >
+                    Verify (Error)
+                  </VerifyButton>
+                  <VerifyButton onClick={() => {}} disabled>
+                    Disabled
+                  </VerifyButton>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Use for async confirmations. Shows loading → success/error with playful spring
+                  animations.
+                </p>
               </div>
             </Subsection>
           </Section>
@@ -261,6 +353,102 @@ export default function KitchenSinkRoute() {
             </div>
           </Section>
 
+          {/* ===== FORM VALIDATION STATES ===== */}
+          <Section title="Form Validation States">
+            <p className="text-sm text-muted-foreground mb-4">
+              Interactive validation demos. Type in the fields to see error states appear/disappear.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Subsection title="Email validation">
+                <div className="space-y-1.5">
+                  <Label htmlFor="input-error">Email address</Label>
+                  <Input
+                    id="input-error"
+                    placeholder="Enter email..."
+                    value={validationEmail}
+                    onChange={(e) => setValidationEmail(e.target.value)}
+                    onBlur={() => setValidationEmailTouched(true)}
+                    error={validationEmailTouched && validationEmail.length > 0 && !isEmailValid}
+                  />
+                  {validationEmailTouched && validationEmail.length > 0 && !isEmailValid && (
+                    <p className="text-sm text-red-500">Please enter a valid email address.</p>
+                  )}
+                  {validationEmailTouched && isEmailValid && (
+                    <p className="text-sm text-green-500 flex items-center gap-1">
+                      <Check className="h-3 w-3" /> Valid email
+                    </p>
+                  )}
+                </div>
+              </Subsection>
+              <Subsection title="Required field">
+                <div className="space-y-1.5">
+                  <Label htmlFor="input-required">
+                    Username <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="input-required"
+                    placeholder="Required field"
+                    value={validationUsername}
+                    onChange={(e) => setValidationUsername(e.target.value)}
+                    onBlur={() => setValidationUsernameTouched(true)}
+                    error={validationUsernameTouched && !isUsernameValid}
+                  />
+                  {validationUsernameTouched && !isUsernameValid && (
+                    <p className="text-sm text-red-500">This field is required.</p>
+                  )}
+                </div>
+              </Subsection>
+              <Subsection title="Min length validation">
+                <div className="space-y-1.5">
+                  <Label htmlFor="textarea-error">
+                    Description ({validationDesc.length}/50 min)
+                  </Label>
+                  <Textarea
+                    id="textarea-error"
+                    placeholder="Enter at least 50 characters..."
+                    value={validationDesc}
+                    onChange={(e) => setValidationDesc(e.target.value)}
+                    onBlur={() => setValidationDescTouched(true)}
+                    error={validationDescTouched && validationDesc.length > 0 && !isDescValid}
+                  />
+                  {validationDescTouched && validationDesc.length > 0 && !isDescValid && (
+                    <p className="text-sm text-red-500">
+                      Description must be at least 50 characters.
+                    </p>
+                  )}
+                  {isDescValid && (
+                    <p className="text-sm text-green-500 flex items-center gap-1">
+                      <Check className="h-3 w-3" /> Meets minimum length
+                    </p>
+                  )}
+                </div>
+              </Subsection>
+              <Subsection title="2FA code validation">
+                <div className="space-y-1.5">
+                  <Label htmlFor="otp-error">Authentication Code</Label>
+                  <Input
+                    id="otp-error"
+                    placeholder="000000"
+                    className="text-center font-mono text-lg tracking-widest"
+                    maxLength={6}
+                    value={validation2fa}
+                    onChange={(e) => setValidation2fa(e.target.value.replace(/\D/g, ""))}
+                    onBlur={() => setValidation2faTouched(true)}
+                    error={validation2faTouched && validation2fa.length > 0 && !is2faValid}
+                  />
+                  {validation2faTouched && validation2fa.length > 0 && !is2faValid && (
+                    <p className="text-sm text-red-500">Please enter all 6 digits.</p>
+                  )}
+                  {is2faValid && (
+                    <p className="text-sm text-green-500 flex items-center gap-1">
+                      <Check className="h-3 w-3" /> 6 digits entered
+                    </p>
+                  )}
+                </div>
+              </Subsection>
+            </div>
+          </Section>
+
           {/* ===== CARDS ===== */}
           <Section title="Cards">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -277,32 +465,14 @@ export default function KitchenSinkRoute() {
                 </CardFooter>
               </Card>
 
-              <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/50">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
-                    <CardTitle className="text-amber-800 dark:text-amber-200">
-                      Warning Card
-                    </CardTitle>
-                  </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Another Card</CardTitle>
+                  <CardDescription>Cards are neutral containers</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-amber-700 dark:text-amber-300">
-                    This is a warning message pattern used for billing notices, etc.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-red-600" />
-                    <CardTitle className="text-red-800 dark:text-red-200">Error Card</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-red-700 dark:text-red-300">
-                    This is an error/destructive message pattern.
+                  <p className="text-sm text-muted-foreground">
+                    Use Alert components for semantic messaging (warning, error, success).
                   </p>
                 </CardContent>
               </Card>
@@ -568,7 +738,7 @@ export default function KitchenSinkRoute() {
             <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle className="text-red-600">
+                  <DialogTitle>
                     {deleteDialogState === "pending"
                       ? "Deletion Request Pending"
                       : "Delete Account"}
@@ -582,8 +752,8 @@ export default function KitchenSinkRoute() {
                 <div className="py-4">
                   {deleteDialogState === "submitted" ? (
                     <div className="flex flex-col items-center gap-4 py-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/50">
-                        <Trash2 className="h-6 w-6 text-red-600" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                        <Trash2 className="h-6 w-6 text-muted-foreground" />
                       </div>
                       <div className="text-center">
                         <p className="font-medium text-foreground">Content Deleted</p>
@@ -595,35 +765,27 @@ export default function KitchenSinkRoute() {
                     </div>
                   ) : deleteDialogState === "pending" ? (
                     <div className="space-y-4">
-                      <div className="rounded-md bg-amber-50 p-4 dark:bg-amber-950/50">
-                        <div className="flex items-start gap-3">
-                          <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
-                          <div className="text-sm text-amber-800 dark:text-amber-200">
-                            <p className="font-medium">Pending Deletion</p>
-                            <p className="mt-1">
-                              Your account is scheduled for deletion. All your data will be
-                              permanently removed once processed.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
+                      <Alert variant="warning">
+                        <AlertTitle>Pending Deletion</AlertTitle>
+                        <AlertDescription>
+                          Your account is scheduled for deletion. All your data will be permanently
+                          removed once processed.
+                        </AlertDescription>
+                      </Alert>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      <div className="rounded-md bg-red-50 p-4 dark:bg-red-950/50">
-                        <div className="flex items-start gap-3">
-                          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-                          <div className="text-sm text-red-800 dark:text-red-200">
-                            <p className="font-medium">This action is immediate and irreversible</p>
-                            <ul className="mt-2 list-inside list-disc space-y-1 text-red-700 dark:text-red-300">
-                              <li>All your graphs will be permanently deleted</li>
-                              <li>All shared links will stop working immediately</li>
-                              <li>Your account settings and preferences will be removed</li>
-                              <li>Your account will be fully removed within 30 days</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                      <Alert variant="destructive">
+                        <AlertTitle>This action is immediate and irreversible</AlertTitle>
+                        <AlertDescription>
+                          <ul className="mt-2 list-inside list-disc space-y-1">
+                            <li>All your graphs will be permanently deleted</li>
+                            <li>All shared links will stop working immediately</li>
+                            <li>Your account settings and preferences will be removed</li>
+                            <li>Your account will be fully removed within 30 days</li>
+                          </ul>
+                        </AlertDescription>
+                      </Alert>
 
                       <div className="space-y-2">
                         <Label>Why are you leaving? (optional)</Label>
@@ -649,26 +811,26 @@ export default function KitchenSinkRoute() {
                       </div>
 
                       {deleteDialogState === "2fa" && (
-                        <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
+                        <div className="space-y-3 rounded-md border border-border bg-muted/30 p-4">
                           <div className="flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-amber-600" />
-                            <Label className="text-amber-800 dark:text-amber-200">
-                              Two-Factor Authentication Required
+                            <Shield className="h-4 w-4 text-muted-foreground" />
+                            <Label className="text-sm font-medium text-foreground">
+                              Two-Factor Authentication
                             </Label>
                           </div>
-                          <p className="text-xs text-amber-700 dark:text-amber-300">
-                            Enter the 6-digit code from your authenticator app to confirm deletion.
+                          <p className="text-sm text-muted-foreground">
+                            Enter the 6-digit code from your authenticator app.
                           </p>
                           <Input
                             placeholder="000000"
-                            className="text-center tracking-widest"
+                            className="text-center font-mono text-lg tracking-widest"
                             maxLength={6}
                           />
                         </div>
                       )}
 
                       {deleteDialogState === "error" && (
-                        <p className="text-sm text-red-600">
+                        <p className="text-sm text-destructive">
                           Failed to process deletion request. Please try again later.
                         </p>
                       )}
@@ -676,75 +838,193 @@ export default function KitchenSinkRoute() {
                   )}
                 </div>
                 <DialogFooter>
+                  {deleteDialogState !== "submitted" && deleteDialogState !== "pending" && (
+                    <HoldButton
+                      onHoldComplete={() => setDeleteDialogOpen(false)}
+                      holdDuration={2000}
+                      holdingText="Hold to delete..."
+                      processingText="Deleting..."
+                      completeText="Deleted"
+                    >
+                      Delete My Account
+                    </HoldButton>
+                  )}
+                  {deleteDialogState === "pending" && (
+                    <Button variant="destructive" onClick={() => setDeleteDialogOpen(false)}>
+                      Cancel Deletion
+                    </Button>
+                  )}
                   <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
                     {deleteDialogState === "submitted" ? "Close" : "Cancel"}
                   </Button>
-                  {deleteDialogState !== "submitted" && (
-                    <Button variant="destructive" onClick={() => setDeleteDialogOpen(false)}>
-                      {deleteDialogState === "pending" ? "Cancel Deletion" : "Confirm Deletion"}
-                    </Button>
-                  )}
                 </DialogFooter>
               </DialogContent>
             </Dialog>
           </Section>
 
-          {/* ===== WARNING/ALERT PATTERNS ===== */}
-          <Section title="Warning & Alert Patterns">
-            <div className="space-y-4">
-              {/* Billing Warning */}
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
-                  <div className="text-sm text-amber-800 dark:text-amber-200">
-                    <p className="font-medium">Billing is not yet available</p>
-                    <p className="mt-1 text-amber-700 dark:text-amber-300">
-                      This feature is coming soon. You're currently on the{" "}
-                      <span className="font-medium capitalize">{PLACEHOLDER_PROFILE.plan}</span>{" "}
-                      plan.
-                    </p>
-                  </div>
-                </div>
-              </div>
+          {/* ===== OTP DIALOG ===== */}
+          <Section title="OTP / Two-Factor Dialog">
+            <p className="text-sm text-muted-foreground mb-4">
+              Standalone 2FA verification dialog used during login.
+            </p>
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOtpCode("");
+                  setOtpError(null);
+                  setOtpLoading(false);
+                  setOtpDialogOpen(true);
+                }}
+              >
+                Open OTP Dialog
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOtpCode("123456");
+                  setOtpError(null);
+                  setOtpLoading(false);
+                  setOtpDialogOpen(true);
+                }}
+              >
+                With Code
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOtpCode("");
+                  setOtpError("Invalid code. Please try again.");
+                  setOtpLoading(false);
+                  setOtpDialogOpen(true);
+                }}
+              >
+                With Error
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOtpCode("123456");
+                  setOtpError(null);
+                  setOtpLoading(true);
+                  setOtpDialogOpen(true);
+                }}
+              >
+                Loading State
+              </Button>
+            </div>
 
-              {/* Info Banner */}
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/50">
-                <div className="flex items-start gap-3">
-                  <Info className="mt-0.5 h-5 w-5 text-blue-600" />
-                  <div className="text-sm text-blue-800 dark:text-blue-200">
-                    <p className="font-medium">Information</p>
-                    <p className="mt-1 text-blue-700 dark:text-blue-300">
-                      This is an informational banner for general notices.
-                    </p>
-                  </div>
+            <Dialog
+              open={otpDialogOpen}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setOtpDialogOpen(false);
+                  setOtpCode("");
+                  setOtpError(null);
+                  setOtpLoading(false);
+                }
+              }}
+            >
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Two-Factor Authentication</DialogTitle>
+                  <DialogDescription>
+                    Enter the 6-digit code from your authenticator app.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <Input
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+                      if (pasted) setOtpCode(pasted);
+                    }}
+                    placeholder="000000"
+                    className="text-center text-2xl tracking-[0.5em] font-mono"
+                    maxLength={6}
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
+                    autoFocus
+                    disabled={otpLoading}
+                    error={!!otpError}
+                  />
+                  {otpError && <p className="mt-2 text-sm text-destructive">{otpError}</p>}
                 </div>
-              </div>
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <VerifyButton
+                    onClick={async () => {
+                      // Simulate verification - returns true for success
+                      await new Promise((r) => setTimeout(r, 1000));
+                      return otpCode === "123456";
+                    }}
+                    onSuccess={() => setOtpDialogOpen(false)}
+                    disabled={otpCode.length !== 6}
+                  >
+                    Verify
+                  </VerifyButton>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOtpDialogOpen(false)}
+                    disabled={otpLoading}
+                  >
+                    Cancel
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </Section>
 
-              {/* Success Banner */}
-              <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950/50">
-                <div className="flex items-start gap-3">
-                  <Check className="mt-0.5 h-5 w-5 text-green-600" />
-                  <div className="text-sm text-green-800 dark:text-green-200">
-                    <p className="font-medium">Success</p>
-                    <p className="mt-1 text-green-700 dark:text-green-300">
-                      Your changes have been saved successfully.
-                    </p>
-                  </div>
-                </div>
-              </div>
+          {/* ===== ALERTS ===== */}
+          <Section title="Alerts">
+            <div className="space-y-4 max-w-2xl">
+              <Subsection title="Info (default for general notices)">
+                <Alert variant="info">
+                  <AlertTitle>Information</AlertTitle>
+                  <AlertDescription>
+                    This is an informational banner for general notices.
+                  </AlertDescription>
+                </Alert>
+              </Subsection>
 
-              {/* Error Banner */}
-              <div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/50">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="mt-0.5 h-5 w-5 text-red-600" />
-                  <div className="text-sm text-red-800 dark:text-red-200">
-                    <p className="font-medium">Error</p>
-                    <p className="mt-1 text-red-700 dark:text-red-300">
-                      Something went wrong. Please try again later.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <Subsection title="Warning (billing, pending states)">
+                <Alert variant="warning">
+                  <AlertTitle>Billing is not yet available</AlertTitle>
+                  <AlertDescription>
+                    This feature is coming soon. You're currently on the{" "}
+                    <span className="font-medium capitalize">{PLACEHOLDER_PROFILE.plan}</span> plan.
+                  </AlertDescription>
+                </Alert>
+              </Subsection>
+
+              <Subsection title="Success (confirmations)">
+                <Alert variant="success">
+                  <AlertTitle>Success</AlertTitle>
+                  <AlertDescription>Your changes have been saved successfully.</AlertDescription>
+                </Alert>
+              </Subsection>
+
+              <Subsection title="Destructive (errors, dangerous actions)">
+                <Alert variant="destructive">
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>Something went wrong. Please try again later.</AlertDescription>
+                </Alert>
+              </Subsection>
+
+              <Subsection title="Destructive with list content">
+                <Alert variant="destructive">
+                  <AlertTitle>This action is immediate and irreversible</AlertTitle>
+                  <AlertDescription>
+                    <ul className="mt-2 list-inside list-disc space-y-1">
+                      <li>All your graphs will be permanently deleted</li>
+                      <li>All shared links will stop working immediately</li>
+                      <li>Your account settings and preferences will be removed</li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              </Subsection>
             </div>
           </Section>
 
