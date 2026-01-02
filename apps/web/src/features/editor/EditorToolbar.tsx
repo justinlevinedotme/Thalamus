@@ -3,7 +3,7 @@
  * @description Main toolbar with graph title input, menubar (File/Edit/View/Help), save status, undo/redo, and export options
  */
 import { useState } from "react";
-import { Download, FileJson, Image, Redo2, Undo2 } from "lucide-react";
+import { Download, FileJson, Image, Redo2, Undo2, Upload } from "lucide-react";
 
 import Header from "../../components/Header";
 import { Input } from "../../components/ui/input";
@@ -31,6 +31,8 @@ type EditorToolbarProps = {
   canSave: boolean;
   onSave: () => Promise<void>;
   onShare: () => void;
+  onGenerateWithAI: () => void;
+  onImport: () => void;
   saveStatus?: "idle" | "saving" | "saved" | "error";
   lastSavedAt?: Date | null;
 };
@@ -56,6 +58,8 @@ export default function EditorToolbar({
   canSave,
   onSave,
   onShare,
+  onGenerateWithAI,
+  onImport,
   saveStatus = "idle",
   lastSavedAt,
 }: EditorToolbarProps) {
@@ -72,7 +76,7 @@ export default function EditorToolbar({
   return (
     <div className="border-b border-border bg-background">
       {/* Top nav bar - consistent with other pages */}
-      <Header fullWidth onShare={onShare}>
+      <Header fullWidth onShare={onShare} onGenerateWithAI={onGenerateWithAI}>
         <div className="ml-4 min-w-[200px] max-w-md flex-1">
           <Input
             value={graphTitle}
@@ -98,6 +102,7 @@ export default function EditorToolbar({
               <MenubarItem onClick={() => setExportDialogOpen(true)}>
                 Export as Image...
               </MenubarItem>
+              <MenubarItem onClick={onImport}>Import JSON...</MenubarItem>
               <MenubarSeparator />
               <MenubarItem onClick={onShare} disabled={!canSave}>
                 Share
@@ -196,6 +201,10 @@ export default function EditorToolbar({
                 <DropdownMenuItem onClick={() => setExportDialogOpen(true)}>
                   <Image className="mr-2 h-4 w-4" />
                   Export as Image...
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onImport}>
+                  <Upload className="mr-2 h-4 w-4" />
+                  Import JSON...
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
