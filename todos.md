@@ -19,6 +19,10 @@
 - [x] Test mobile responsiveness
 - [x] Review and polish demo graph layouts
 
+## Docs Site
+
+- [x] Add Docs link in main web header/footer pointing to docs.thalamus.sh
+
 ## Codebase Refactoring (Deep Cleanup)
 
 ### Phase 1: Split graphStore.ts (1,778 → 1,319 lines) ✅

@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- Docs link in web header/footer pointing to `https://docs.thalamus.sh`
 - **Test framework**: Vitest + @testing-library/react with 21 passing tests
   - graphStore tests: nodes, edges, history, selection (15 tests)
   - Button component tests (6 tests)
