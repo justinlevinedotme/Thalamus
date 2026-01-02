@@ -281,7 +281,7 @@ function getAllSimpleIconNames(): string[] {
   );
 }
 
-export function IconPicker({ value, onChange, children }: IconPickerProps) {
+export function IconPicker({ value: _value, onChange, children }: IconPickerProps) {
   const [lucideSearch, setLucideSearch] = useState("");
   const [simpleSearch, setSimpleSearch] = useState("");
   const [open, setOpen] = useState(false);

@@ -107,7 +107,7 @@ export default function TextNode({ id, data, selected }: NodeProps<TextNodeType>
   return (
     <div
       className={`relative px-2 py-1 font-semibold transition ${textSizeClass} ${
-        selected ? "ring-2 ring-muted-foreground ring-offset-2 rounded" : ""
+        selected ? "ring-2 ring-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.35)] rounded" : ""
       }`}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}

@@ -26,6 +26,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { PASSWORD_REQUIREMENTS } from "../components/auth";
 import { useAuthStore } from "../store/authStore";
 import { twoFactor, authClient } from "../lib/authClient";
 import { useTheme } from "../lib/theme";
@@ -104,14 +105,6 @@ const enabledProviders = OAUTH_PROVIDERS.filter((p) => ENABLED_OAUTH_PROVIDERS[p
 
 type OAuthProvider = (typeof OAUTH_PROVIDERS)[number]["id"];
 
-// Password validation requirements
-const PASSWORD_REQUIREMENTS = [
-  { id: "length", label: "At least 8 characters", test: (p: string) => p.length >= 8 },
-  { id: "uppercase", label: "One uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
-  { id: "lowercase", label: "One lowercase letter", test: (p: string) => /[a-z]/.test(p) },
-  { id: "number", label: "One number", test: (p: string) => /\d/.test(p) },
-];
-
 export default function AuthRoute() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -144,7 +137,7 @@ export default function AuthRoute() {
   // 2FA states
   const [twoFactorOpen, setTwoFactorOpen] = useState(false);
   const [totpCode, setTotpCode] = useState("");
-  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+  const [twoFactorLoading, _setTwoFactorLoading] = useState(false);
   const [twoFactorError, setTwoFactorError] = useState<string | null>(null);
 
   // Password validation

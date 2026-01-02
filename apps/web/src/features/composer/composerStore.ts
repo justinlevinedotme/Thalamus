@@ -49,10 +49,6 @@ interface ComposerState {
   isLoadingSavedTemplates: boolean;
   savedTemplatesError: string | null;
 
-  // Built-in templates (legacy, kept for backwards compat)
-  templates: NodeTemplate[];
-  isLoadingTemplates: boolean;
-
   // Modal actions
   openComposer: (mode: ComposerMode, nodeId?: string, layout?: ComposedNodeLayout) => void;
   openTemplateEditor: (templateId?: string) => void; // Open composer for template create/edit
@@ -106,10 +102,7 @@ interface ComposerState {
   ) => void;
   clearSelection: () => void;
 
-  // Template actions (legacy built-in templates)
-  loadTemplates: () => Promise<void>;
-  saveAsTemplate: (name: string, description?: string) => Promise<NodeTemplate | null>;
-  deleteTemplate: (templateId: string) => Promise<void>;
+  // Template actions
   applyTemplate: (template: NodeTemplate) => void;
 
   // Saved template actions (backend-stored user templates)
@@ -132,8 +125,6 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
   currentLayout: null,
   selectedRowId: null,
   selectedElementType: null,
-  templates: [],
-  isLoadingTemplates: false,
   savedTemplates: [],
   savedTemplatesQuota: null,
   isLoadingSavedTemplates: false,
@@ -462,47 +453,6 @@ export const useComposerStore = create<ComposerState>((set, get) => ({
       selectedRowId: null,
       selectedElementType: null,
     });
-  },
-
-  // Template actions (placeholders for future implementation)
-  loadTemplates: async () => {
-    set({ isLoadingTemplates: true });
-    // TODO: Implement API call
-    // const templates = await composerApi.listTemplates();
-    set({ templates: [], isLoadingTemplates: false });
-  },
-
-  saveAsTemplate: async (name, description) => {
-    const { currentLayout } = get();
-    if (!currentLayout) return null;
-
-    const template: NodeTemplate = {
-      ...currentLayout,
-      id: generateId(),
-      name,
-      description,
-      isTemplate: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    // TODO: Implement API call
-    // await composerApi.createTemplate(template);
-
-    set((state) => ({
-      templates: [...state.templates, template],
-    }));
-
-    return template;
-  },
-
-  deleteTemplate: async (templateId) => {
-    // TODO: Implement API call
-    // await composerApi.deleteTemplate(templateId);
-
-    set((state) => ({
-      templates: state.templates.filter((t) => t.id !== templateId),
-    }));
   },
 
   applyTemplate: (template) => {

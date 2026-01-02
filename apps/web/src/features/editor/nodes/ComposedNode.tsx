@@ -3,8 +3,8 @@
  * @description Node component for user-composed custom nodes with configurable layouts, headers, footers, rows, and dynamic handles
  */
 
-import { memo, useRef, useLayoutEffect, useState } from "react";
-import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
+import { memo, useRef, useLayoutEffect, useState, useEffect } from "react";
+import { Handle, Position, useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react";
 import { BaseNode } from "../../../components/ui/base-node";
 import { BlockRenderer } from "../../composer/components/blocks";
 import { NodeIconDisplay } from "../../../components/ui/icon-picker";
@@ -54,14 +54,19 @@ function RowContent({ row }: { row: ComposedRow }) {
   );
 }
 
-function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) {
+function ComposedNodeComponent({ id, data, selected }: NodeProps<ComposedNodeType>) {
   const { layout, runtimeValues, style: nodeStyle } = data;
   const nodeRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const [rowPositions, setRowPositions] = useState<Map<string, number>>(new Map());
+  const updateNodeInternals = useUpdateNodeInternals();
 
-  // Check if this node has any handles defined
   const hasAnyHandles = layout?.rows.some((row) => row.leftHandle || row.rightHandle) ?? false;
+  const handleCount = layout?.rows.filter((row) => row.leftHandle || row.rightHandle).length ?? 0;
+
+  useEffect(() => {
+    updateNodeInternals(id);
+  }, [id, handleCount, updateNodeInternals]);
 
   // Calculate row positions after render using offsetTop for more reliable positioning
   useLayoutEffect(() => {
@@ -112,7 +117,10 @@ function ComposedNodeComponent({ data, selected }: NodeProps<ComposedNodeType>) 
   return (
     <div
       ref={nodeRef}
-      className={cn("relative", selected && "ring-2 ring-primary ring-offset-1")}
+      className={cn(
+        "relative",
+        selected && "ring-2 ring-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.35)]"
+      )}
       style={{
         backgroundColor: style.backgroundColor,
         borderColor: style.borderColor,

@@ -5,8 +5,8 @@
  * tables (graphs, share_links, profiles, email_preferences) with their relations.
  */
 
-import { sqliteTable, text, integer, blob } from "drizzle-orm/sqlite-core";
-import { relations, sql } from "drizzle-orm";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
 
 // Helper for timestamps
 const timestamp = (name: string) =>

@@ -52,3 +52,4 @@ You are strictly required to follow these workflow rules for every task.
   2. Update `CHANGELOG.md`.
   3. Mark item in `todos.md` as `[x]`.
   4. Git add & commit.
+  5. If you create a PR, reference the relevant tasks from `todos.md` and update changelog accordingly when creating PR to main.

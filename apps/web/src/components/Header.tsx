@@ -6,7 +6,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FolderOpen, LogOut, Moon, Settings, Share2, Sun, User } from "lucide-react";
+import { FolderOpen, LogOut, Moon, Settings, Share2, Sparkles, Sun, User } from "lucide-react";
 
 import { ThalamusLogo } from "./ThalamusLogo";
 import { Badge } from "./ui/badge";
@@ -25,6 +25,7 @@ type HeaderProps = {
   children?: React.ReactNode;
   fullWidth?: boolean;
   onShare?: () => void;
+  onGenerateWithAI?: () => void;
 };
 
 function getPlanBadge(plan: string | undefined) {
@@ -45,7 +46,12 @@ function getPlanBadge(plan: string | undefined) {
   return null;
 }
 
-export default function Header({ children, fullWidth = false, onShare }: HeaderProps) {
+export default function Header({
+  children,
+  fullWidth = false,
+  onShare,
+  onGenerateWithAI,
+}: HeaderProps) {
   const { user, signOut } = useAuthStore();
   const { resolvedTheme, setTheme } = useTheme();
   const [plan, setPlan] = useState<string | undefined>(undefined);
@@ -73,7 +79,17 @@ export default function Header({ children, fullWidth = false, onShare }: HeaderP
           </Link>
           {children}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {onGenerateWithAI ? (
+            <button
+              className="flex items-center gap-1.5 rounded-lg border border-border bg-secondary/50 px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+              type="button"
+              onClick={onGenerateWithAI}
+            >
+              <Sparkles className="h-4 w-4" />
+              Generate with AI
+            </button>
+          ) : null}
           {onShare ? (
             <button
               className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"

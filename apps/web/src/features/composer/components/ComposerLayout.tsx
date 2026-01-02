@@ -15,8 +15,8 @@ import { ComponentPalette } from "./ComponentPalette";
 import { DropZone } from "./DropZone";
 import { ConfigPanel } from "./ConfigPanel";
 import { useComposerStore } from "../composerStore";
-import type { DragItem, ContentBlockType, HandleType, HandlePosition } from "../types";
-import { createBlockByType, createDefaultHandle, createDefaultRow } from "../types";
+import type { DragItem } from "../types";
+import { createBlockByType, createDefaultHandle } from "../types";
 
 export function ComposerLayout() {
   const [activeDragItem, setActiveDragItem] = useState<DragItem | null>(null);

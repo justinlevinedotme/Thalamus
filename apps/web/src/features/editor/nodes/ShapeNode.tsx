@@ -78,8 +78,8 @@ export default function ShapeNode({ data, selected }: NodeProps<ShapeNodeType>) 
       />
       <div
         className={`h-full w-full transition ${shapeClass} ${
-          selected && hasBorder ? "!border-muted-foreground" : ""
-        } ${selected && !hasBorder ? "ring-2 ring-muted-foreground ring-offset-0" : ""}`}
+          selected && hasBorder ? "!border-blue-500" : ""
+        } ${selected && !hasBorder ? "ring-2 ring-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.35)]" : ""}`}
         style={nodeStyle}
         aria-label="Shape container"
         onMouseDown={handleMouseDown}

@@ -177,6 +177,11 @@
   display: none !important;
 }
 
+/* Remove React Flow's default selection box-shadow on nodes */
+.react-flow__node.selected > div {
+  box-shadow: none !important;
+}
+
 /* React Flow dark mode overrides */
 .dark .react-flow__background {
   background-color: #000000;
@@ -296,6 +301,222 @@
 }
 .interactive-scale:active {
   transform: scale(0.98);
+}
+
+@property --gb-pos-x {
+  syntax: "<percentage>";
+  initial-value: 11.14%;
+  inherits: false;
+}
+
+@property --gb-pos-y {
+  syntax: "<percentage>";
+  initial-value: 140%;
+  inherits: false;
+}
+
+@property --gb-spread-x {
+  syntax: "<percentage>";
+  initial-value: 150%;
+  inherits: false;
+}
+
+@property --gb-spread-y {
+  syntax: "<percentage>";
+  initial-value: 180.06%;
+  inherits: false;
+}
+
+@property --gb-color-1 {
+  syntax: "<color>";
+  initial-value: #000;
+  inherits: false;
+}
+
+@property --gb-color-2 {
+  syntax: "<color>";
+  initial-value: #1a0800;
+  inherits: false;
+}
+
+@property --gb-color-3 {
+  syntax: "<color>";
+  initial-value: #3d1500;
+  inherits: false;
+}
+
+@property --gb-color-4 {
+  syntax: "<color>";
+  initial-value: #7a2e00;
+  inherits: false;
+}
+
+@property --gb-color-5 {
+  syntax: "<color>";
+  initial-value: #b34700;
+  inherits: false;
+}
+
+@property --gb-border-angle {
+  syntax: "<angle>";
+  initial-value: 20deg;
+  inherits: true;
+}
+
+@property --gb-border-color-1 {
+  syntax: "<color>";
+  initial-value: hsla(19, 100%, 60%, 0.2);
+  inherits: true;
+}
+
+@property --gb-border-color-2 {
+  syntax: "<color>";
+  initial-value: hsla(19, 100%, 50%, 0.75);
+  inherits: true;
+}
+
+@property --gb-stop-1 {
+  syntax: "<percentage>";
+  initial-value: 37.35%;
+  inherits: false;
+}
+
+@property --gb-stop-2 {
+  syntax: "<percentage>";
+  initial-value: 61.36%;
+  inherits: false;
+}
+
+@property --gb-stop-3 {
+  syntax: "<percentage>";
+  initial-value: 78.42%;
+  inherits: false;
+}
+
+@property --gb-stop-4 {
+  syntax: "<percentage>";
+  initial-value: 89.52%;
+  inherits: false;
+}
+
+@property --gb-stop-5 {
+  syntax: "<percentage>";
+  initial-value: 100%;
+  inherits: false;
+}
+
+.gradient-button {
+  position: relative;
+  cursor: pointer;
+  appearance: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.95);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: radial-gradient(
+    var(--gb-spread-x) var(--gb-spread-y) at var(--gb-pos-x) var(--gb-pos-y),
+    var(--gb-color-1) var(--gb-stop-1),
+    var(--gb-color-2) var(--gb-stop-2),
+    var(--gb-color-3) var(--gb-stop-3),
+    var(--gb-color-4) var(--gb-stop-4),
+    var(--gb-color-5) var(--gb-stop-5)
+  );
+  transition:
+    --gb-pos-x 0.5s,
+    --gb-pos-y 0.5s,
+    --gb-spread-x 0.5s,
+    --gb-spread-y 0.5s,
+    --gb-color-1 0.5s,
+    --gb-color-2 0.5s,
+    --gb-color-3 0.5s,
+    --gb-color-4 0.5s,
+    --gb-color-5 0.5s,
+    --gb-border-angle 0.5s,
+    --gb-border-color-1 0.5s,
+    --gb-border-color-2 0.5s,
+    --gb-stop-1 0.5s,
+    --gb-stop-2 0.5s,
+    --gb-stop-3 0.5s,
+    --gb-stop-4 0.5s,
+    --gb-stop-5 0.5s;
+}
+
+.gradient-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background-image: linear-gradient(
+    var(--gb-border-angle),
+    var(--gb-border-color-1),
+    var(--gb-border-color-2)
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.gradient-button:hover {
+  --gb-pos-x: 0%;
+  --gb-pos-y: 91.51%;
+  --gb-spread-x: 120.24%;
+  --gb-spread-y: 103.18%;
+  --gb-color-1: #ff6b2b;
+  --gb-color-2: #ff4f00;
+  --gb-color-3: #cc3d00;
+  --gb-color-4: #1a0800;
+  --gb-color-5: #000;
+  --gb-border-angle: 190deg;
+  --gb-border-color-1: hsla(19, 100%, 90%, 0.1);
+  --gb-border-color-2: hsla(19, 100%, 70%, 0.6);
+  --gb-stop-1: 0%;
+  --gb-stop-2: 8.8%;
+  --gb-stop-3: 21.44%;
+  --gb-stop-4: 71.34%;
+  --gb-stop-5: 85.76%;
+}
+
+.gradient-button-variant {
+  --gb-color-1: #000022;
+  --gb-color-2: #1f3f6d;
+  --gb-color-3: #469396;
+  --gb-color-4: #f1ffa5;
+  --gb-color-5: hsla(250, 80%, 2.5%, 1);
+  --gb-pos-x: 40%;
+  --gb-pos-y: 140%;
+  --gb-spread-x: 130%;
+  --gb-spread-y: 170.06%;
+  --gb-stop-1: 37.35%;
+  --gb-stop-2: 61.36%;
+  --gb-stop-3: 78.42%;
+  --gb-stop-4: 93.52%;
+  --gb-stop-5: 100%;
+  --gb-border-angle: 180deg;
+  --gb-border-color-1: hsla(320, 75%, 90%, 0.9);
+  --gb-border-color-2: hsla(320, 50%, 90%, 0.1);
+}
+
+.gradient-button-variant:hover {
+  --gb-pos-x: 0%;
+  --gb-pos-y: 120%;
+  --gb-spread-x: 110.24%;
+  --gb-spread-y: 110.2%;
+  --gb-color-1: #000020;
+  --gb-color-2: #f1ffa5;
+  --gb-color-3: #469396;
+  --gb-color-4: #1f3f6d;
+  --gb-stop-1: 0%;
+  --gb-stop-2: 10%;
+  --gb-stop-3: 35.44%;
+  --gb-stop-4: 71.34%;
+  --gb-stop-5: 150%;
+  --gb-border-angle: 190deg;
+  --gb-border-color-1: hsla(320, 75%, 90%, 0.1);
+  --gb-border-color-2: hsla(320, 50%, 90%, 0.35);
 }
 
 @theme inline {

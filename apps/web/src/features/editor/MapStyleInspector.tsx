@@ -9,7 +9,6 @@ import { SmoothStepIcon } from "../../components/icons/SmoothStepIcon";
 import { StraightIcon } from "../../components/icons/StraightIcon";
 
 import { ColorPicker, ColorSwatch } from "../../components/ui/color-picker";
-import { Input } from "../../components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
 import {
   Tooltip,

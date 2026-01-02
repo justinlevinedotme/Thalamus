@@ -31,10 +31,9 @@ export function BaseNode({ className, selected, shape, ...props }: BaseNodeProps
   return (
     <div
       className={cn(
-        "bg-card text-card-foreground relative shadow-sm transition",
+        "bg-card text-card-foreground relative shadow-sm transition-shadow outline-none",
         shapeClass,
-        // Selection styling
-        selected && "ring-2 ring-muted-foreground ring-offset-0",
+        selected && "ring-2 ring-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.35)]",
         className
       )}
       tabIndex={0}

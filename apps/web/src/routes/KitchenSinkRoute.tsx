@@ -126,11 +126,11 @@ function HoldButtonDemo() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap gap-3">
-        <HoldButton onHoldComplete={() => console.log("Deleted!")} holdDuration={1200}>
+        <HoldButton onHoldComplete={() => {}} holdDuration={1200}>
           Hold to Delete
         </HoldButton>
         <HoldButton
-          onHoldComplete={() => console.log("Account deleted!")}
+          onHoldComplete={() => {}}
           holdDuration={1500}
           holdingText="Are you sure?"
           processingText="Deleting account..."

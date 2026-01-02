@@ -73,11 +73,9 @@ export async function sendEmail({
 
     if (prefs.length > 0) {
       if (category === "marketing" && !prefs[0].marketingEmails) {
-        console.log(`User ${userId} has unsubscribed from marketing emails`);
         return;
       }
       if (category === "product_updates" && !prefs[0].productUpdates) {
-        console.log(`User ${userId} has unsubscribed from product updates`);
         return;
       }
     }

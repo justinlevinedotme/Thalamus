@@ -40,6 +40,8 @@ import RelationshipInspector from "../features/editor/RelationshipInspector";
 import NodeSearch from "../features/search/NodeSearch";
 import { getGraph, updateGraph, createGraph } from "../features/cloud/graphApi";
 import ShareDialog from "../features/share/ShareDialog";
+import GenerateWithAIDialog from "../features/editor/GenerateWithAIDialog";
+import ImportGraphDialog from "../features/editor/ImportGraphDialog";
 import { NodeComposerModal } from "../features/composer";
 import { useComposerStore } from "../features/composer/composerStore";
 import { useAuthStore } from "../store/authStore";
@@ -84,6 +86,8 @@ export default function EditorRoute() {
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
+  const [generateAIOpen, setGenerateAIOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
@@ -477,6 +481,15 @@ export default function EditorRoute() {
     setShareOpen(true);
   };
 
+  const handleImportData = useCallback(
+    (data: { title: string; nodes: unknown[]; edges: unknown[] }) => {
+      setGraphTitle(data.title);
+      setNodes(data.nodes as typeof nodes);
+      setEdges(data.edges as typeof edges);
+    },
+    [setGraphTitle, setNodes, setEdges]
+  );
+
   const isMac =
     typeof navigator !== "undefined" && navigator.platform.toUpperCase().indexOf("MAC") >= 0;
   const modKeyLabel = isMac ? "⌘" : "Ctrl";
@@ -495,6 +508,8 @@ export default function EditorRoute() {
             canSave={canSave}
             onSave={handleSave}
             onShare={handleShare}
+            onGenerateWithAI={() => setGenerateAIOpen(true)}
+            onImport={() => setImportDialogOpen(true)}
             saveStatus={saveStatus}
             lastSavedAt={lastSavedAt}
           />
@@ -505,7 +520,16 @@ export default function EditorRoute() {
           {showLeftPanel ? (
             <div className="flex items-start gap-2">
               <div className="rounded-lg border border-border bg-background p-2 shadow-sm">
-                <SpeedDial actions={speedDialActions} />
+                <SpeedDial
+                  actions={speedDialActions}
+                  onOpenChange={(open) => {
+                    if (open) {
+                      setMapStyleOpen(false);
+                      setLayoutOpen(false);
+                      setSettingsOpen(false);
+                    }
+                  }}
+                />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
@@ -736,6 +760,16 @@ export default function EditorRoute() {
         </div>
 
         <ShareDialog open={shareOpen} graphId={graphId} onClose={() => setShareOpen(false)} />
+        <GenerateWithAIDialog
+          open={generateAIOpen}
+          onClose={() => setGenerateAIOpen(false)}
+          onImport={handleImportData}
+        />
+        <ImportGraphDialog
+          open={importDialogOpen}
+          onClose={() => setImportDialogOpen(false)}
+          onImport={handleImportData}
+        />
 
         {/* Node Composer Modal */}
         <NodeComposerModal onApply={handleComposedNodeApply} />

@@ -4,7 +4,7 @@
  */
 
 import type { Node } from "@xyflow/react";
-import type { Box, HelperLine, HelperLineMatch, Orientation } from "./types";
+import type { Box, HelperLine, HelperLineMatch } from "./types";
 import { ANCHORS, SNAP_THRESHOLD } from "./config";
 
 /**

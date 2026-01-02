@@ -17,10 +17,16 @@ export interface SpeedDialAction {
 interface SpeedDialProps {
   actions: SpeedDialAction[];
   className?: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function SpeedDial({ actions, className }: SpeedDialProps) {
+export function SpeedDial({ actions, className, onOpenChange }: SpeedDialProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    onOpenChange?.(open);
+  };
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Close on click outside
@@ -109,14 +115,14 @@ export function SpeedDial({ actions, className }: SpeedDialProps) {
         className={cn(
           "flex h-10 w-10 items-center justify-center rounded-md transition-all duration-200",
           isOpen
-            ? "bg-foreground/80 text-background hover:bg-foreground/70 rotate-45"
+            ? "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
             : "bg-foreground text-background hover:bg-foreground/90"
         )}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => handleOpenChange(!isOpen)}
         aria-label={isOpen ? "Close menu" : "Add item"}
         aria-expanded={isOpen}
       >
-        <Plus className="h-5 w-5 transition-transform duration-200" />
+        {isOpen ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
       </button>
     </div>
   );
