@@ -520,7 +520,16 @@ export default function EditorRoute() {
           {showLeftPanel ? (
             <div className="flex items-start gap-2">
               <div className="rounded-lg border border-border bg-background p-2 shadow-sm">
-                <SpeedDial actions={speedDialActions} />
+                <SpeedDial
+                  actions={speedDialActions}
+                  onOpenChange={(open) => {
+                    if (open) {
+                      setMapStyleOpen(false);
+                      setLayoutOpen(false);
+                      setSettingsOpen(false);
+                    }
+                  }}
+                />
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
