@@ -10,6 +10,7 @@ import { FolderOpen, LogOut, Moon, Settings, Share2, Sparkles, Sun, User } from 
 
 import { ThalamusLogo } from "./ThalamusLogo";
 import { Badge } from "./ui/badge";
+import { GradientButton } from "./ui/gradient-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -81,14 +82,10 @@ export default function Header({
         </div>
         <div className="flex items-center gap-2">
           {onGenerateWithAI ? (
-            <button
-              className="flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition hover:bg-secondary"
-              type="button"
-              onClick={onGenerateWithAI}
-            >
-              <Sparkles className="h-4 w-4" />
+            <GradientButton size="sm" onClick={onGenerateWithAI}>
+              <Sparkles className="mr-1.5 h-4 w-4" />
               Generate with AI
-            </button>
+            </GradientButton>
           ) : null}
           {onShare ? (
             <button
