@@ -162,6 +162,9 @@ type GraphState = {
   cutSelectedNodes: () => void;
   pasteNodes: () => void;
   getSelectedGroupId: () => string | undefined;
+  copiedStyle: NodeStyle | null;
+  copyNodeStyle: () => void;
+  pasteNodeStyle: () => void;
 };
 
 let currentDataVersion = 0;
@@ -201,6 +204,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
   canRedo: false,
   dataVersion: 0,
   gridSettings: defaultGridSettings,
+  copiedStyle: null,
 
   setNodes: (nodes) =>
     set({
@@ -393,17 +397,59 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     set((state) => {
       const target = state.nodes.find((node) => node.id === nodeId);
       if (!target) return {};
+
+      const oldSourceHandles = target.data?.sourceHandles;
+      const oldTargetHandles = target.data?.targetHandles;
+      const oldSourceCount = oldSourceHandles?.length ?? 1;
+      const oldTargetCount = oldTargetHandles?.length ?? 1;
+
       const sourceHandles = Array.from({ length: sourceCount }, (_, i) => ({
         id: `${nodeId}-s-${i}`,
       }));
       const targetHandles = Array.from({ length: targetCount }, (_, i) => ({
         id: `${nodeId}-t-${i}`,
       }));
+
       const getHandles = (count: number, handles: NodeHandle[]) => {
         if (count === 0) return [];
         if (count === 1) return undefined;
         return handles;
       };
+
+      const migratedEdges = state.edges.map((edge) => {
+        let newEdge = edge;
+
+        if (edge.source === nodeId) {
+          const oldHandleId = edge.sourceHandle;
+          if (oldSourceCount === 1 && sourceCount > 1) {
+            newEdge = { ...newEdge, sourceHandle: `${nodeId}-s-0` };
+          } else if (oldSourceCount > 1 && sourceCount === 1) {
+            newEdge = { ...newEdge, sourceHandle: undefined };
+          } else if (sourceCount > 1 && oldHandleId) {
+            const handleIndex = parseInt(oldHandleId.split("-s-")[1] ?? "0", 10);
+            if (handleIndex >= sourceCount) {
+              newEdge = { ...newEdge, sourceHandle: `${nodeId}-s-${sourceCount - 1}` };
+            }
+          }
+        }
+
+        if (edge.target === nodeId) {
+          const oldHandleId = edge.targetHandle;
+          if (oldTargetCount === 1 && targetCount > 1) {
+            newEdge = { ...newEdge, targetHandle: `${nodeId}-t-0` };
+          } else if (oldTargetCount > 1 && targetCount === 1) {
+            newEdge = { ...newEdge, targetHandle: undefined };
+          } else if (targetCount > 1 && oldHandleId) {
+            const handleIndex = parseInt(oldHandleId.split("-t-")[1] ?? "0", 10);
+            if (handleIndex >= targetCount) {
+              newEdge = { ...newEdge, targetHandle: `${nodeId}-t-${targetCount - 1}` };
+            }
+          }
+        }
+
+        return newEdge;
+      });
+
       return {
         nodes: state.nodes.map((node) =>
           node.id === nodeId
@@ -417,6 +463,7 @@ export const useGraphStore = create<GraphState>((set, get) => ({
               }
             : node
         ),
+        edges: migratedEdges,
         ...setHistory(
           [
             ...state.historyPast,
@@ -1315,5 +1362,28 @@ export const useGraphStore = create<GraphState>((set, get) => ({
     const groupIds = new Set(selectedNodes.map((n) => n.data.groupId).filter(Boolean));
     if (groupIds.size === 1) return Array.from(groupIds)[0];
     return undefined;
+  },
+
+  copyNodeStyle: () => {
+    const state = get();
+    const selectedNode = state.nodes.find((n) => n.selected);
+    if (!selectedNode?.data?.style) return;
+    set({ copiedStyle: structuredClone(selectedNode.data.style) });
+  },
+
+  pasteNodeStyle: () => {
+    const state = get();
+    if (!state.copiedStyle) return;
+    const selectedNodes = state.nodes.filter((n) => n.selected);
+    if (selectedNodes.length === 0) return;
+
+    set((s) => ({
+      nodes: s.nodes.map((node) =>
+        node.selected
+          ? { ...node, data: { ...node.data, style: structuredClone(s.copiedStyle!) } }
+          : node
+      ),
+      ...setHistory([...s.historyPast, cloneGraph(s.nodes, s.edges, s.groups, s.gridSettings)], []),
+    }));
   },
 }));

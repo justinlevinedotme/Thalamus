@@ -177,6 +177,11 @@
   display: none !important;
 }
 
+/* Remove React Flow's default selection box-shadow on nodes */
+.react-flow__node.selected > div {
+  box-shadow: none !important;
+}
+
 /* React Flow dark mode overrides */
 .dark .react-flow__background {
   background-color: #000000;

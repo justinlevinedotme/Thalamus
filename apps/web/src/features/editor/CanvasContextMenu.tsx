@@ -19,6 +19,7 @@ import {
   Copy,
   Focus,
   Group,
+  Paintbrush,
   Palette,
   Pencil,
   Plus,
@@ -76,6 +77,9 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
     copySelectedNodes,
     cutSelectedNodes,
     pasteNodes,
+    copyNodeStyle,
+    pasteNodeStyle,
+    copiedStyle,
   } = useGraphStore();
   const menuRef = useRef<HTMLDivElement>(null);
   const [openSubMenu, setOpenSubMenu] = useState<SubMenuType>(null);
@@ -312,6 +316,16 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
     onClose();
   }, [pasteNodes, onClose]);
 
+  const handleCopyStyle = useCallback(() => {
+    copyNodeStyle();
+    onClose();
+  }, [copyNodeStyle, onClose]);
+
+  const handlePasteStyle = useCallback(() => {
+    pasteNodeStyle();
+    onClose();
+  }, [pasteNodeStyle, onClose]);
+
   if (!menu) {
     return null;
   }
@@ -367,6 +381,24 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
             <Scissors className="h-4 w-4" />
             Cut
             {renderKbd(`${modKeyLabel}+X`)}
+          </button>
+
+          <div className="my-1 h-px bg-border" />
+
+          <button className={menuItemClass} type="button" onClick={handleCopyStyle}>
+            <Paintbrush className="h-4 w-4" />
+            Copy Style
+            {renderKbd(`${modKeyLabel}+⇧+C`)}
+          </button>
+          <button
+            className={copiedStyle ? menuItemClass : disabledItemClass}
+            type="button"
+            onClick={copiedStyle ? handlePasteStyle : undefined}
+            disabled={!copiedStyle}
+          >
+            <Paintbrush className="h-4 w-4" />
+            Paste Style
+            {renderKbd(`${modKeyLabel}+⇧+V`)}
           </button>
 
           <div className="my-1 h-px bg-border" />
@@ -530,6 +562,24 @@ export default function CanvasContextMenu({ menu, onClose }: CanvasContextMenuPr
             <Scissors className="h-4 w-4" />
             Cut
             {renderKbd(`${modKeyLabel}+X`)}
+          </button>
+
+          <div className="my-1 h-px bg-border" />
+
+          <button className={menuItemClass} type="button" onClick={handleCopyStyle}>
+            <Paintbrush className="h-4 w-4" />
+            Copy Style
+            {renderKbd(`${modKeyLabel}+⇧+C`)}
+          </button>
+          <button
+            className={copiedStyle ? menuItemClass : disabledItemClass}
+            type="button"
+            onClick={copiedStyle ? handlePasteStyle : undefined}
+            disabled={!copiedStyle}
+          >
+            <Paintbrush className="h-4 w-4" />
+            Paste Style
+            {renderKbd(`${modKeyLabel}+⇧+V`)}
           </button>
 
           <div className="my-1 h-px bg-border" />

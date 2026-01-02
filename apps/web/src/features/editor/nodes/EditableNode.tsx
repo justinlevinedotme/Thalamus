@@ -41,10 +41,16 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
   const [isExpanded, setIsExpanded] = useState(Boolean(data.body));
   const [editingField, setEditingField] = useState<"title" | "body" | null>(null);
 
-  // Update node internals when edge padding changes so edges recalculate
+  // Update node internals when handles or edge padding change so edges recalculate
   useEffect(() => {
     updateNodeInternals(id);
-  }, [id, data.style?.edgePadding, updateNodeInternals]);
+  }, [
+    id,
+    data.sourceHandles?.length,
+    data.targetHandles?.length,
+    data.style?.edgePadding,
+    updateNodeInternals,
+  ]);
 
   useEffect(() => {
     setDraftLabel(data.label);
@@ -90,7 +96,10 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
   };
 
   const handleTitleTab = () => {
-    // Expand body if not already and move focus to it
+    const plainText = stripHtml(draftLabel);
+    const nextLabel = plainText.trim() ? draftLabel : "Untitled";
+    updateNodeLabel(id, nextLabel);
+
     if (!isExpanded) {
       setIsExpanded(true);
     }
@@ -147,7 +156,7 @@ export default function EditableNode({ id, data, selected }: NodeProps<EditableN
       selected={selected && !hasBorder}
       shape={data.style?.shape}
       className={`h-full w-full ${sizeClasses} ${
-        selected && hasBorder ? "!border-muted-foreground" : ""
+        selected && hasBorder ? "!border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.35)]" : ""
       } ${!hasBody ? "flex flex-col justify-center" : ""}`}
       onDoubleClick={handleDoubleClick}
       onKeyDown={handleFocusKeyDown}

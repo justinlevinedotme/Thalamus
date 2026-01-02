@@ -227,8 +227,8 @@ export default function NodeKeyNode({ id, data, selected }: NodeProps<NodeKeyNod
       <div
         ref={containerRef}
         className={`relative h-full w-full flex flex-col rounded-lg p-3 transition ${
-          selected && hasBorder ? "!border-muted-foreground" : ""
-        } ${selected && !hasBorder ? "ring-2 ring-muted-foreground ring-offset-0" : ""}`}
+          selected && hasBorder ? "!border-blue-500" : ""
+        } ${selected && !hasBorder ? "ring-2 ring-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.35)]" : ""}`}
         style={nodeStyle}
         onMouseDown={handleMouseDown}
         tabIndex={0}

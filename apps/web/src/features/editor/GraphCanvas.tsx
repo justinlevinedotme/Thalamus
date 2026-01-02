@@ -53,6 +53,8 @@ export default function GraphCanvas() {
     reconnectEdge,
     deleteSelectedNodes,
     gridSettings,
+    copyNodeStyle,
+    pasteNodeStyle,
   } = useGraphStore();
 
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance<
@@ -89,6 +91,8 @@ export default function GraphCanvas() {
     onDelete: deleteSelectedNodes,
     onUndo: undo,
     onRedo: redo,
+    onCopyStyle: copyNodeStyle,
+    onPasteStyle: pasteNodeStyle,
   });
 
   useEffect(() => {

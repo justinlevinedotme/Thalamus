@@ -5,6 +5,8 @@ type UseCanvasKeyboardOptions = {
   onDelete: () => void;
   onUndo: () => void;
   onRedo: () => void;
+  onCopyStyle: () => void;
+  onPasteStyle: () => void;
 };
 
 export function useCanvasKeyboard({
@@ -12,6 +14,8 @@ export function useCanvasKeyboard({
   onDelete,
   onUndo,
   onRedo,
+  onCopyStyle,
+  onPasteStyle,
 }: UseCanvasKeyboardOptions): void {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -32,17 +36,33 @@ export function useCanvasKeyboard({
       }
 
       if (!event.metaKey && !event.ctrlKey) return;
-      if (event.key.toLowerCase() !== "z") return;
 
-      event.preventDefault();
-      if (event.shiftKey) {
-        onRedo();
-      } else {
-        onUndo();
+      const key = event.key.toLowerCase();
+
+      if (key === "z") {
+        event.preventDefault();
+        if (event.shiftKey) {
+          onRedo();
+        } else {
+          onUndo();
+        }
+        return;
+      }
+
+      if (event.shiftKey && key === "c") {
+        event.preventDefault();
+        onCopyStyle();
+        return;
+      }
+
+      if (event.shiftKey && key === "v") {
+        event.preventDefault();
+        onPasteStyle();
+        return;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [editingNodeId, onDelete, onUndo, onRedo]);
+  }, [editingNodeId, onDelete, onUndo, onRedo, onCopyStyle, onPasteStyle]);
 }
