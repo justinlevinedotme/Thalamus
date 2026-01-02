@@ -3,7 +3,7 @@
  * @description Speed dial floating action button component
  */
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 
@@ -109,14 +109,14 @@ export function SpeedDial({ actions, className }: SpeedDialProps) {
         className={cn(
           "flex h-10 w-10 items-center justify-center rounded-md transition-all duration-200",
           isOpen
-            ? "bg-foreground/80 text-background hover:bg-foreground/70 rotate-45"
+            ? "bg-secondary text-foreground hover:bg-secondary/80 border border-border"
             : "bg-foreground text-background hover:bg-foreground/90"
         )}
         onClick={() => setIsOpen(!isOpen)}
         aria-label={isOpen ? "Close menu" : "Add item"}
         aria-expanded={isOpen}
       >
-        <Plus className="h-5 w-5 transition-transform duration-200" />
+        {isOpen ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
       </button>
     </div>
   );
