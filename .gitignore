@@ -20,3 +20,6 @@ supabase/.temp/
 
 # MCP config (may contain project refs)
 .mcp.json
+
+# Test coverage
+coverage/
