@@ -1,0 +1,13 @@
+{
+  "name": "@thalamus/assets",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Shared brand assets for Thalamus applications",
+  "exports": {
+    "./logo/*": "./logo/*"
+  },
+  "files": [
+    "logo"
+  ]
+}
