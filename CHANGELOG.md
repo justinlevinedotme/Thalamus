@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - GitHub Actions workflow for Cloudflare Pages deployment
   - Initial content: Introduction, Getting Started, API Reference, Guides
 - Docs link in web header/footer pointing to `https://docs.thalamus.sh`
+- **Navigation menu dropdown** for Docs in both web and docs app headers
+  - Grid layout with icons, titles, and descriptions for each doc section
+  - "Get Started" CTA button in docs navbar linking to main app
 - **Test framework**: Vitest + @testing-library/react with 21 passing tests
   - graphStore tests: nodes, edges, history, selection (15 tests)
   - Button component tests (6 tests)

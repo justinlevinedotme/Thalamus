@@ -29,6 +29,8 @@
 - [x] Add initial documentation content (Introduction, Getting Started, API, Guides)
 - [x] Create GitHub Actions workflow for Cloudflare Pages deployment
 - [x] Build and typecheck passing
+- [x] Add navigation menu dropdown for Docs in web and docs app headers
+- [x] Add "Get Started" CTA button in docs navbar
 
 ## Codebase Refactoring (Deep Cleanup)
 
