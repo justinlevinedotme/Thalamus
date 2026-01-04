@@ -6,19 +6,10 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Book,
-  FolderOpen,
-  LogOut,
-  Moon,
-  Settings,
-  Share2,
-  Sparkles,
-  Sun,
-  User,
-} from "lucide-react";
+import { FolderOpen, LogOut, Moon, Settings, Share2, Sparkles, Sun, User } from "lucide-react";
 
 import { ThalamusLogo } from "./ThalamusLogo";
+import { DocsNavigationMenu } from "./DocsNavigationMenu";
 import { Badge } from "./ui/badge";
 import {
   DropdownMenu,
@@ -87,15 +78,7 @@ export default function Header({
           <Link to="/" className="flex items-center">
             <ThalamusLogo size="md" />
           </Link>
-          <a
-            href="https://docs.thalamus.sh"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
-          >
-            <Book className="h-4 w-4" />
-            Docs
-          </a>
+          <DocsNavigationMenu />
           {children}
         </div>
         <div className="flex items-center gap-2">

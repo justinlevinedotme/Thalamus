@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { Book, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { ThalamusLogo } from "./ThalamusLogo";
+import { DocsNavigationMenu } from "./DocsNavigationMenu";
 import { useTheme } from "@/lib/theme";
 
 export function Header() {
@@ -17,20 +18,14 @@ export function Header() {
           <Link to="/" className="flex items-center">
             <ThalamusLogo size="md" />
           </Link>
-          <Link
-            to="/docs"
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition hover:text-foreground"
-          >
-            <Book className="h-4 w-4" />
-            Docs
-          </Link>
+          <DocsNavigationMenu />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <a
             href="https://thalamus.sh"
-            className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
           >
-            App
+            Get Started
           </a>
           <button
             type="button"
