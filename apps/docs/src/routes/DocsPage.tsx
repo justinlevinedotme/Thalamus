@@ -5,7 +5,6 @@ import { TableOfContents } from "@/components/TableOfContents";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -85,9 +84,9 @@ export function DocsPage() {
               <Fragment key={crumb.href}>
                 <BreadcrumbItem>
                   {index < breadcrumbs.length - 1 ? (
-                    <BreadcrumbLink asChild>
-                      <Link to={crumb.href}>{crumb.label}</Link>
-                    </BreadcrumbLink>
+                    <Link to={crumb.href} className="transition-colors hover:text-foreground">
+                      {crumb.label}
+                    </Link>
                   ) : (
                     <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                   )}
