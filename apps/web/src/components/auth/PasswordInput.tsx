@@ -6,7 +6,7 @@
 
 import { forwardRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { Input, type InputProps } from "../ui/input";
+import { Input, type InputProps } from "@thalamus/ui";
 import { cn } from "../../lib/utils";
 
 export interface PasswordInputProps extends Omit<InputProps, "type"> {

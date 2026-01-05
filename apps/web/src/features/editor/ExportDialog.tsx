@@ -6,22 +6,11 @@ import { useCallback, useEffect, useState } from "react";
 import { Download, Loader2, Moon, Sun } from "lucide-react";
 import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from "@xyflow/react";
 
-import { Button } from "../../components/ui/button";
-import { Checkbox } from "../../components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../../components/ui/dialog";
-import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../components/ui/tooltip";
+import { Button } from "@thalamus/ui";
+import { Checkbox } from "@thalamus/ui";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@thalamus/ui";
+import { ToggleGroup, ToggleGroupItem } from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thalamus/ui";
 import {
   exportGraphPdf,
   exportGraphPng,

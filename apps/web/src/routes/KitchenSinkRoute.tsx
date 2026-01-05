@@ -26,13 +26,8 @@ import {
 } from "lucide-react";
 
 // UI Primitives
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../components/ui/accordion";
-import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@thalamus/ui";
+import { Alert, AlertTitle, AlertDescription } from "@thalamus/ui";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,11 +37,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../components/ui/alert-dialog";
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
-import { HoldButton } from "../components/ui/hold-button";
-import { VerifyButton } from "../components/ui/verify-button";
+} from "@thalamus/ui";
+import { Badge } from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
+import { HoldButton } from "@thalamus/ui";
+import { VerifyButton } from "@thalamus/ui";
 import {
   Card,
   CardContent,
@@ -54,8 +49,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Checkbox } from "../components/ui/checkbox";
+} from "@thalamus/ui";
+import { Checkbox } from "@thalamus/ui";
 import {
   Dialog,
   DialogContent,
@@ -63,24 +58,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
+} from "@thalamus/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
+} from "@thalamus/ui";
+import { Input } from "@thalamus/ui";
+import { Label } from "@thalamus/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@thalamus/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@thalamus/ui";
 import {
   Sheet,
   SheetContent,
@@ -88,11 +77,11 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../components/ui/sheet";
-import { Switch } from "../components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { Textarea } from "../components/ui/textarea";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
+} from "@thalamus/ui";
+import { Switch } from "@thalamus/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@thalamus/ui";
+import { Textarea } from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thalamus/ui";
 
 // Custom Components
 import Header from "../components/Header";

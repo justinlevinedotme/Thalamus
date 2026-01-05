@@ -7,8 +7,8 @@
 import { useState } from "react";
 import { Camera, Check, Loader2, Mail, User } from "lucide-react";
 
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
+import { Badge } from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +16,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
-import { Input } from "../components/ui/input";
+} from "@thalamus/ui";
+import { Input } from "@thalamus/ui";
 import { useProfileData } from "../features/account/useProfileData";
 import { useAuthStore } from "../store/authStore";
 import { changeEmail } from "../lib/authClient";

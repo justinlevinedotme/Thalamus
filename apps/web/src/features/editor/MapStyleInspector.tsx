@@ -8,15 +8,10 @@ import { BezierIcon } from "../../components/icons/BezierIcon";
 import { SmoothStepIcon } from "../../components/icons/SmoothStepIcon";
 import { StraightIcon } from "../../components/icons/StraightIcon";
 
-import { ColorPicker, ColorSwatch } from "../../components/ui/color-picker";
-import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../components/ui/tooltip";
-import { Button } from "../../components/ui/button";
+import { ColorPicker, ColorSwatch } from "@thalamus/ui";
+import { ToggleGroup, ToggleGroupItem } from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
 import {
   type EdgeCurvature,
   type EdgeLineStyle,

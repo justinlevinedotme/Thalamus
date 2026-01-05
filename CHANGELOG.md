@@ -8,6 +8,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Shared UI package `@thalamus/ui`**: Extracted 28+ shadcn components from `apps/web` to `packages/ui`
+  - Components: button, card, dialog, input, dropdown-menu, tabs, popover, accordion, alert, badge, checkbox, context-menu, kbd, label, menubar, select, sheet, switch, textarea, toggle-group, tooltip, alert-dialog, color-picker, icon-picker, shimmer-button, gradient-button, hold-button, speed-dial, verify-button
+  - Shared `cn()` utility function
+  - Exported `NodeIcon` type for cross-app usage
+- **Fumadocs documentation site `@thalamus/docs`** at `apps/docs/`:
+  - Fumadocs v15.2.8 with Tailwind CSS v4
+  - Documentation pages: Introduction, Getting Started, Creating Diagrams guide
+  - Configured with fumadocs-mdx for MDX content processing
+  - Proper dark mode support via fumadocs-ui preset
+
+### Changed
+
+- Updated `apps/web` to import UI components from `@thalamus/ui` instead of local `components/ui/`
+- Updated `tailwind.config.ts` in web app to include `packages/ui/src/**/*.{ts,tsx}` in content
+- Added shadcn installation documentation to AGENTS.md (Section 5)
+- Updated turbo.json to include `.next/**` in build outputs for Next.js apps
+
+### Removed
+
+- Removed UI components from `apps/web/src/components/ui/` (moved to `packages/ui`)
+  - `base-node.tsx` remains in web app due to graphStore dependency
+
+### Technical Notes
+
+- fumadocs versions pinned to 15.2.8 (core, ui) and 11.5.2 (mdx) for compatibility
+- Tailwind CSS v4 used in docs app only; web app remains on v3.4.x
+
+---
+
 - **Test framework**: Vitest + @testing-library/react with 21 passing tests
   - graphStore tests: nodes, edges, history, selection (15 tests)
   - Button component tests (6 tests)

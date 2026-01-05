@@ -6,14 +6,9 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, LayoutGrid, Loader2 } from "lucide-react";
 
-import { Input } from "../../components/ui/input";
-import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../components/ui/tooltip";
+import { Input } from "@thalamus/ui";
+import { ToggleGroup, ToggleGroupItem } from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thalamus/ui";
 import {
   type LayoutAlgorithm,
   type LayoutDirection,

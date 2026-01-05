@@ -8,8 +8,8 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Loader2, CheckCircle2, XCircle, Check } from "lucide-react";
 
-import { Button } from "../components/ui/button";
-import { Label } from "../components/ui/label";
+import { Button } from "@thalamus/ui";
+import { Label } from "@thalamus/ui";
 import {
   Card,
   CardContent,
@@ -17,7 +17,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
+} from "@thalamus/ui";
 import {
   AuthPageLayout,
   PasswordInput,

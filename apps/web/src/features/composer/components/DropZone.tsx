@@ -10,7 +10,7 @@ import { useComposerStore } from "../composerStore";
 import type { ComposedRow, ComposedHandle, ContentBlock } from "../types";
 import { BlockRenderer } from "./blocks";
 import { ChevronUp, ChevronDown, Plus, Trash2, Copy } from "lucide-react";
-import { NodeIconDisplay } from "../../../components/ui/icon-picker";
+import { NodeIconDisplay } from "@thalamus/ui";
 import { cn } from "../../../lib/utils";
 import { BORDER_RADIUS, SHADOWS } from "../constants";
 

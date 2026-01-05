@@ -5,7 +5,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Input } from "../../components/ui/input";
+import { Input } from "@thalamus/ui";
 import { createShareLink } from "./shareApi";
 
 type ShareDialogProps = {

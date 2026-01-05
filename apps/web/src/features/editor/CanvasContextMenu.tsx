@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Kbd } from "../../components/ui/kbd";
+import { Kbd } from "@thalamus/ui";
 import { useGraphStore } from "../../store/graphStore";
 import { useComposerStore } from "../composer/composerStore";
 

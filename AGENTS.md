@@ -53,3 +53,57 @@ You are strictly required to follow these workflow rules for every task.
   3. Mark item in `todos.md` as `[x]`.
   4. Git add & commit.
   5. If you create a PR, reference the relevant tasks from `todos.md` and update changelog accordingly when creating PR to main.
+
+## 5. Adding shadcn/ui Components
+
+This monorepo uses a shared UI package at `packages/ui` for all shadcn components.
+
+### Installing New Components
+
+```bash
+cd packages/ui
+npx shadcn@latest add <component-name>
+```
+
+The component will be installed to `packages/ui/src/components/` and automatically available via `@thalamus/ui`.
+
+### Importing Components
+
+All apps should import from `@thalamus/ui`:
+
+```tsx
+import { Button, Card, Dialog } from "@thalamus/ui";
+import { cn } from "@thalamus/ui";
+```
+
+### Tailwind Configuration
+
+Each app consuming `@thalamus/ui` must include the package in its tailwind content config:
+
+```ts
+content: [
+  "./src/**/*.{ts,tsx}",
+  "../../packages/ui/src/**/*.{ts,tsx}",
+],
+```
+
+### Package Structure
+
+```
+packages/ui/
+├── components.json       # shadcn CLI config
+├── package.json
+├── tsconfig.json
+└── src/
+    ├── index.ts          # Barrel exports
+    ├── lib/
+    │   └── utils.ts      # cn() utility
+    └── components/
+        ├── button.tsx
+        ├── card.tsx
+        └── ...
+```
+
+### App-Specific Components
+
+Components with app-specific dependencies (e.g., importing from app stores) should remain in the app's `src/components/ui/` directory, not in the shared package.

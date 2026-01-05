@@ -19,7 +19,7 @@ import {
   Brain,
   BookOpen,
 } from "lucide-react";
-import { ShimmerButton } from "../components/ui/shimmer-button";
+import { ShimmerButton } from "@thalamus/ui";
 import { motion } from "framer-motion";
 
 import Header from "../components/Header";

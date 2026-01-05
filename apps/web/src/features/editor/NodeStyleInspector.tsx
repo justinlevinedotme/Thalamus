@@ -4,21 +4,11 @@
  */
 import { useMemo, type ReactNode } from "react";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../../components/ui/accordion";
-import { ColorPicker, ColorSwatch } from "../../components/ui/color-picker";
-import { IconPicker, NodeIconDisplay } from "../../components/ui/icon-picker";
-import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../components/ui/tooltip";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@thalamus/ui";
+import { ColorPicker, ColorSwatch } from "@thalamus/ui";
+import { IconPicker, NodeIconDisplay } from "@thalamus/ui";
+import { ToggleGroup, ToggleGroupItem } from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thalamus/ui";
 import { Plus, Smile, Trash2 } from "lucide-react";
 import {
   type EdgePadding,

@@ -16,8 +16,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../components/ui/alert-dialog";
-import { Button } from "../components/ui/button";
+} from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
 import { useProfileData, providerLabels } from "../features/account/useProfileData";
 import { authClient } from "../lib/authClient";
 import { apiFetch } from "../lib/apiClient";

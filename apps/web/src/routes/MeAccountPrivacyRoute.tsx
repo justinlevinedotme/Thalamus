@@ -7,9 +7,9 @@
 import { useState } from "react";
 import { AlertTriangle, Download, Loader2, Shield, Trash2 } from "lucide-react";
 
-import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
-import { Button } from "../components/ui/button";
-import { HoldButton } from "../components/ui/hold-button";
+import { Alert, AlertTitle, AlertDescription } from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
+import { HoldButton } from "@thalamus/ui";
 import {
   Dialog,
   DialogContent,
@@ -17,17 +17,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
+} from "@thalamus/ui";
+import { Input } from "@thalamus/ui";
+import { Label } from "@thalamus/ui";
+import { Textarea } from "@thalamus/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@thalamus/ui";
 import { useProfileData } from "../features/account/useProfileData";
 import { apiFetch, ApiError } from "../lib/apiClient";
 

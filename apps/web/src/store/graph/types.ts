@@ -38,10 +38,8 @@ export type GridSettings = {
   gridStyle: GridStyle;
 };
 
-export type NodeIcon =
-  | { type: "emoji"; value: string }
-  | { type: "lucide"; value: string }
-  | { type: "simple"; value: string };
+import type { NodeIcon } from "@thalamus/ui";
+export type { NodeIcon };
 
 export type NodeGroup = {
   id: string;

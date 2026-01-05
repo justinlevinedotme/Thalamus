@@ -6,13 +6,13 @@ import { useState } from "react";
 import { Download, FileJson, Image, Redo2, Undo2, Upload } from "lucide-react";
 
 import Header from "../../components/Header";
-import { Input } from "../../components/ui/input";
+import { Input } from "@thalamus/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
+} from "@thalamus/ui";
 import {
   Menubar,
   MenubarContent,
@@ -21,8 +21,8 @@ import {
   MenubarSeparator,
   MenubarShortcut,
   MenubarTrigger,
-} from "../../components/ui/menubar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
+} from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@thalamus/ui";
 import { exportGraphJson } from "../../lib/exportJson";
 import { useGraphStore } from "../../store/graphStore";
 import ExportDialog from "./ExportDialog";

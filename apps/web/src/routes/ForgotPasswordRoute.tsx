@@ -8,9 +8,9 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Loader2, Mail, CheckCircle2 } from "lucide-react";
 
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
+import { Button } from "@thalamus/ui";
+import { Input } from "@thalamus/ui";
+import { Label } from "@thalamus/ui";
 import {
   Card,
   CardContent,
@@ -18,7 +18,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
+} from "@thalamus/ui";
 import { AuthPageLayout } from "../components/auth";
 import { requestPasswordReset } from "../lib/authClient";
 

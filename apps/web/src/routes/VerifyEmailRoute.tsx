@@ -15,8 +15,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
+} from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { authClient } from "../lib/authClient";

@@ -9,9 +9,9 @@ import { flushSync } from "react-dom";
 import { NodeResizer, type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
-import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
-import { NodeIconDisplay } from "../../../components/ui/icon-picker";
-import { Kbd } from "../../../components/ui/kbd";
+import { ColorPicker, ColorSwatch } from "@thalamus/ui";
+import { NodeIconDisplay } from "@thalamus/ui";
+import { Kbd } from "@thalamus/ui";
 import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
 // Strip HTML tags for plain text comparison

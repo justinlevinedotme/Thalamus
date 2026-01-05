@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
-import { AlertCircle, Check, Copy, ExternalLink, Sparkles } from "lucide-react";
+import { AlertCircle, Check, Copy, Sparkles } from "lucide-react";
 
-import { Button } from "../../components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs";
-import { Textarea } from "../../components/ui/textarea";
+import { Button } from "@thalamus/ui";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@thalamus/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@thalamus/ui";
+import { Textarea } from "@thalamus/ui";
 
 type GenerateWithAIDialogProps = {
   open: boolean;

@@ -8,7 +8,7 @@ import { flushSync } from "react-dom";
 import { type Node, type NodeProps } from "@xyflow/react";
 
 import RichTextEditor from "../../../components/RichTextEditor";
-import { NodeIconDisplay } from "../../../components/ui/icon-picker";
+import { NodeIconDisplay } from "@thalamus/ui";
 import { type NodeKind, type NodeStyle, useGraphStore } from "../../../store/graphStore";
 
 type TextNodeData = {

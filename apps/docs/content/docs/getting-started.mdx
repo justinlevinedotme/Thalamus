@@ -1,0 +1,50 @@
+---
+title: Getting Started
+description: Set up your development environment
+---
+
+# Getting Started
+
+This guide will help you set up Thalamus for local development.
+
+## Prerequisites
+
+- Node.js 20+
+- npm 9+
+
+## Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/justinlevinedotme/Thalamus.git
+cd Thalamus
+
+# Install dependencies
+npm install
+
+# Apply migrations to local D1 database
+cd apps/api
+npx wrangler d1 migrations apply thalamus-auth --local --env dev
+cd ../..
+
+# Start development servers
+npm run dev
+```
+
+This starts:
+
+- **Frontend**: http://localhost:5173
+- **API**: http://localhost:8787
+
+## Project Structure
+
+```
+Thalamus/
+├── apps/
+│   ├── api/          # Cloudflare Workers API
+│   ├── docs/         # Documentation (you are here)
+│   └── web/          # React frontend
+├── packages/
+│   └── ui/           # Shared UI components
+└── turbo.json        # Turborepo config
+```

@@ -9,14 +9,14 @@ import { Link } from "react-router-dom";
 import { FolderOpen, LogOut, Moon, Settings, Share2, Sparkles, Sun, User } from "lucide-react";
 
 import { ThalamusLogo } from "./ThalamusLogo";
-import { Badge } from "./ui/badge";
+import { Badge } from "@thalamus/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "@thalamus/ui";
 import { useAuthStore } from "../store/authStore";
 import { apiFetch } from "../lib/apiClient";
 import { useTheme } from "../lib/theme";

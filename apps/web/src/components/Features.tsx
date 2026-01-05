@@ -7,7 +7,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@thalamus/ui";
 import { GitBranch, Github, Layout, MousePointer2, Share2, Sparkles, Zap } from "lucide-react";
 
 export function Features() {

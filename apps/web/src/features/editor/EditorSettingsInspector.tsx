@@ -3,15 +3,9 @@
  * @description Inspector for editor settings including helper lines, connection suggestions, grid snapping, and grid visibility
  */
 import { Grid3X3 } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Switch } from "../../components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
+import { Button } from "@thalamus/ui";
+import { Switch } from "@thalamus/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@thalamus/ui";
 import { useEditorSettingsStore } from "../../store/editorSettingsStore";
 import { useGraphStore, type GridSize, type GridStyle } from "../../store/graphStore";
 

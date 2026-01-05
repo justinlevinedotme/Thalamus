@@ -7,9 +7,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { Check, Copy, Loader2, Monitor, Shield, Smartphone, Trash2 } from "lucide-react";
 
-import { Button } from "../components/ui/button";
-import { VerifyButton } from "../components/ui/verify-button";
-import { HoldButton } from "../components/ui/hold-button";
+import { Button } from "@thalamus/ui";
+import { VerifyButton } from "@thalamus/ui";
+import { HoldButton } from "@thalamus/ui";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +19,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../components/ui/alert-dialog";
+} from "@thalamus/ui";
 import {
   Dialog,
   DialogContent,
@@ -27,8 +27,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
-import { Input } from "../components/ui/input";
+} from "@thalamus/ui";
+import { Input } from "@thalamus/ui";
 import { useProfileData } from "../features/account/useProfileData";
 import { apiFetch } from "../lib/apiClient";
 import { twoFactor, requestPasswordReset } from "../lib/authClient";

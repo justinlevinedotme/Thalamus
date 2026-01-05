@@ -7,7 +7,7 @@ import { memo, useRef, useLayoutEffect, useState, useEffect } from "react";
 import { Handle, Position, useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react";
 import { BaseNode } from "../../../components/ui/base-node";
 import { BlockRenderer } from "../../composer/components/blocks";
-import { NodeIconDisplay } from "../../../components/ui/icon-picker";
+import { NodeIconDisplay } from "@thalamus/ui";
 import type { ComposedNodeLayout, ComposedRow, EdgePadding } from "../../composer/types";
 import { BORDER_RADIUS, SHADOWS, ROW_PADDING } from "../../composer/constants";
 import { cn } from "../../../lib/utils";

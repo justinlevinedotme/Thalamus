@@ -23,3 +23,6 @@ supabase/.temp/
 
 # Test coverage
 coverage/
+apps/docs/.next/
+apps/docs/.source/
+apps/docs/next-env.d.ts

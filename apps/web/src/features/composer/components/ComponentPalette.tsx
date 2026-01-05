@@ -5,12 +5,7 @@
 
 import { useEffect } from "react";
 import { useDraggable } from "@dnd-kit/core";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../../../components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@thalamus/ui";
 import { PALETTE_CATEGORIES, BUILT_IN_TEMPLATES } from "../constants";
 import type { PaletteItemDefinition, DragItem, NodeTemplate } from "../types";
 import { useComposerStore } from "../composerStore";

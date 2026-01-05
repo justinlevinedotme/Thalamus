@@ -9,7 +9,7 @@ import { Home } from "lucide-react";
 
 import Footer from "../components/Footer";
 import Header from "../components/Header";
-import { Button } from "../components/ui/button";
+import { Button } from "@thalamus/ui";
 
 export default function NotFoundRoute() {
   return (

@@ -8,8 +8,7 @@ import { useUpdateNodeInternals, type Node, type NodeProps } from "@xyflow/react
 
 import RichTextEditor from "../../../components/RichTextEditor";
 import { BaseNode } from "../../../components/ui/base-node";
-import { NodeIconDisplay } from "../../../components/ui/icon-picker";
-import { Kbd } from "../../../components/ui/kbd";
+import { NodeIconDisplay, Kbd } from "@thalamus/ui";
 import {
   type NodeHandle,
   type NodeKind,

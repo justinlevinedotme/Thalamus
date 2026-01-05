@@ -18,7 +18,7 @@ import type {
   SpacerBlock,
 } from "../../types";
 import { BADGE_VARIANTS, STATUS_COLORS, FONT_SIZES, SPACER_HEIGHTS } from "../../constants";
-import { NodeIconDisplay } from "../../../../components/ui/icon-picker";
+import { NodeIconDisplay } from "@thalamus/ui";
 import { cn } from "../../../../lib/utils";
 import { codeToHtml } from "shiki";
 

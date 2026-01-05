@@ -12,8 +12,8 @@ import { Menu } from "lucide-react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import MeSidebar from "../components/MeSidebar";
-import { Button } from "../components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../components/ui/sheet";
+import { Button } from "@thalamus/ui";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@thalamus/ui";
 import { useAuthStore } from "../store/authStore";
 
 export default function MeLayoutRoute() {

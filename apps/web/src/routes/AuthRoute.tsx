@@ -17,13 +17,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
-import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
-import { VerifyButton } from "../components/ui/verify-button";
-import { Label } from "../components/ui/label";
-import { Card, CardContent } from "../components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+} from "@thalamus/ui";
+import { Input } from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
+import { VerifyButton } from "@thalamus/ui";
+import { Label } from "@thalamus/ui";
+import { Card, CardContent } from "@thalamus/ui";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@thalamus/ui";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { PASSWORD_REQUIREMENTS } from "../components/auth";

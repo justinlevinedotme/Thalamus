@@ -3,15 +3,10 @@
  * @description Inspector for composed node properties with layout information, edge padding controls, and node composer edit button
  */
 import { Puzzle } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../components/ui/tooltip";
+import { Button } from "@thalamus/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@thalamus/ui";
+import { ToggleGroup, ToggleGroupItem } from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thalamus/ui";
 import { useComposerStore } from "../composer/composerStore";
 import { type EdgePadding, useGraphStore } from "../../store/graphStore";
 import type { ComposedNodeLayout } from "../composer/types";

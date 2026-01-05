@@ -9,21 +9,11 @@ import { BezierIcon } from "../../components/icons/BezierIcon";
 import { SmoothStepIcon } from "../../components/icons/SmoothStepIcon";
 import { StraightIcon } from "../../components/icons/StraightIcon";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../../components/ui/accordion";
-import { ColorPicker, ColorSwatch } from "../../components/ui/color-picker";
-import { Input } from "../../components/ui/input";
-import { ToggleGroup, ToggleGroupItem } from "../../components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../../components/ui/tooltip";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@thalamus/ui";
+import { ColorPicker, ColorSwatch } from "@thalamus/ui";
+import { Input } from "@thalamus/ui";
+import { ToggleGroup, ToggleGroupItem } from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thalamus/ui";
 import {
   type EdgeCurvature,
   type EdgeLabelStyle,

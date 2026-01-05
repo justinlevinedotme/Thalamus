@@ -11,8 +11,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "../../../components/ui/dialog";
-import { Button } from "../../../components/ui/button";
+} from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
 import { useComposerStore } from "../composerStore";
 import { ComposerLayout } from "./ComposerLayout";
 

@@ -24,11 +24,11 @@ import {
   X,
 } from "lucide-react";
 
-import { Card } from "../components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
-import { Kbd } from "../components/ui/kbd";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
-import { SpeedDial, type SpeedDialAction } from "../components/ui/speed-dial";
+import { Card } from "@thalamus/ui";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@thalamus/ui";
+import { Kbd } from "@thalamus/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@thalamus/ui";
+import { SpeedDial, type SpeedDialAction } from "@thalamus/ui";
 import ComposedNodeInspector from "../features/editor/ComposedNodeInspector";
 import EditorSettingsInspector from "../features/editor/EditorSettingsInspector";
 import EditorToolbar from "../features/editor/EditorToolbar";

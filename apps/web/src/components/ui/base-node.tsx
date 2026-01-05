@@ -4,7 +4,7 @@
  */
 import type { ComponentProps } from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@thalamus/ui";
 import type { NodeShape } from "../../store/graphStore";
 
 // Shape class mappings

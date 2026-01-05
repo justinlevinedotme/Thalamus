@@ -5,14 +5,14 @@
 
 import React from "react";
 import { useComposerStore } from "../composerStore";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
-import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
-import { Button } from "../../../components/ui/button";
-import { ColorPicker, ColorSwatch } from "../../../components/ui/color-picker";
-import { ToggleGroup, ToggleGroupItem } from "../../../components/ui/toggle-group";
-import { Switch } from "../../../components/ui/switch";
-import { IconPicker, NodeIconDisplay } from "../../../components/ui/icon-picker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@thalamus/ui";
+import { Input } from "@thalamus/ui";
+import { Textarea } from "@thalamus/ui";
+import { Button } from "@thalamus/ui";
+import { ColorPicker, ColorSwatch } from "@thalamus/ui";
+import { ToggleGroup, ToggleGroupItem } from "@thalamus/ui";
+import { Switch } from "@thalamus/ui";
+import { IconPicker, NodeIconDisplay } from "@thalamus/ui";
 import { X, Plus, Trash2 } from "lucide-react";
 import { BACKGROUND_COLOR_PRESETS, BORDER_COLOR_PRESETS, TEXT_COLOR_PRESETS } from "../constants";
 import type {
