@@ -19,6 +19,19 @@
 - [x] Test mobile responsiveness
 - [x] Review and polish demo graph layouts
 
+## Docs Site
+
+- [x] Add Docs link in main web header/footer pointing to docs.thalamus.sh
+- [x] Create Fumadocs-based documentation site at apps/docs
+- [x] Set up Vite + React + MDX with @mdx-js/rollup
+- [x] Create custom docs layout with sidebar navigation
+- [x] Match Thalamus brand styling (pure black/white, orange accent)
+- [x] Add initial documentation content (Introduction, Getting Started, API, Guides)
+- [x] Create GitHub Actions workflow for Cloudflare Pages deployment
+- [x] Build and typecheck passing
+- [x] Add navigation menu dropdown for Docs in web and docs app headers
+- [x] Add "Get Started" CTA button in docs navbar
+
 ## Codebase Refactoring (Deep Cleanup)
 
 ### Phase 1: Split graphStore.ts (1,778 → 1,319 lines) ✅
