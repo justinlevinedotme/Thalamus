@@ -186,10 +186,9 @@ export default function Header({
           ) : (
             <Link
               to="/login"
-              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-background text-muted-foreground transition hover:bg-secondary"
-              aria-label="Sign in"
+              className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary"
             >
-              <User className="h-4 w-4" />
+              Sign in
             </Link>
           )}
         </div>
