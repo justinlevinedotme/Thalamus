@@ -27,6 +27,7 @@ type HeaderProps = {
   fullWidth?: boolean;
   onShare?: () => void;
   onGenerateWithAI?: () => void;
+  hideEditorButton?: boolean;
 };
 
 function getPlanBadge(plan: string | undefined) {
@@ -52,6 +53,7 @@ export default function Header({
   fullWidth = false,
   onShare,
   onGenerateWithAI,
+  hideEditorButton = false,
 }: HeaderProps) {
   const { user, signOut } = useAuthStore();
   const { resolvedTheme, setTheme } = useTheme();
@@ -102,12 +104,14 @@ export default function Header({
               Share
             </button>
           ) : null}
-          <Link
-            to="/editor"
-            className="rounded-lg bg-[hsl(19,100%,50%)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[hsl(19,100%,45%)]"
-          >
-            Editor
-          </Link>
+          {!hideEditorButton && (
+            <Link
+              to="/editor"
+              className="rounded-lg bg-[hsl(19,100%,50%)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[hsl(19,100%,45%)]"
+            >
+              Editor
+            </Link>
+          )}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

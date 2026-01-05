@@ -76,7 +76,7 @@ export default function EditorToolbar({
   return (
     <div className="border-b border-border bg-background">
       {/* Top nav bar - consistent with other pages */}
-      <Header fullWidth onShare={onShare} onGenerateWithAI={onGenerateWithAI}>
+      <Header fullWidth onShare={onShare} onGenerateWithAI={onGenerateWithAI} hideEditorButton>
         <div className="ml-4 min-w-[200px] max-w-md flex-1">
           <Input
             value={graphTitle}
