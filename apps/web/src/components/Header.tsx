@@ -81,7 +81,7 @@ export default function Header({
           <DocsNavigationMenu />
           {children}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {onGenerateWithAI ? (
             <button
               className="flex items-center gap-1.5 rounded-lg border border-border bg-secondary/50 px-3 py-1.5 text-sm font-medium text-muted-foreground transition hover:bg-secondary hover:text-foreground"
@@ -94,7 +94,7 @@ export default function Header({
           ) : null}
           {onShare ? (
             <button
-              className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+              className="flex items-center gap-1.5 rounded-lg bg-[hsl(19,100%,50%)] px-3 py-1.5 text-sm font-medium text-white transition hover:bg-[hsl(19,100%,45%)]"
               type="button"
               onClick={onShare}
             >
@@ -102,11 +102,17 @@ export default function Header({
               Share
             </button>
           ) : null}
+          <Link
+            to="/editor"
+            className="rounded-lg bg-[hsl(19,100%,50%)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[hsl(19,100%,45%)]"
+          >
+            Editor
+          </Link>
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-secondary text-muted-foreground transition hover:bg-secondary/80"
+                  className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-background text-muted-foreground transition hover:bg-secondary"
                   type="button"
                   aria-label="Profile menu"
                 >
@@ -158,6 +164,15 @@ export default function Header({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={toggleTheme}>
+                  {resolvedTheme === "dark" ? (
+                    <Sun className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Moon className="mr-2 h-4 w-4" />
+                  )}
+                  {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign out
@@ -165,29 +180,14 @@ export default function Header({
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <>
-              <Link
-                to="/login"
-                className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/signup"
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-              >
-                Get Started
-              </Link>
-            </>
+            <Link
+              to="/login"
+              className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-background text-muted-foreground transition hover:bg-secondary"
+              aria-label="Sign in"
+            >
+              <User className="h-4 w-4" />
+            </Link>
           )}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-            aria-label={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          </button>
         </div>
       </nav>
     </header>

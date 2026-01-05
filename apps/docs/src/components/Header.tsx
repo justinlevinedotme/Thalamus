@@ -22,15 +22,15 @@ export function Header() {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href="https://thalamus.sh"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+            href="https://thalamus.sh/editor"
+            className="rounded-lg bg-[hsl(19,100%,50%)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[hsl(19,100%,45%)]"
           >
-            Get Started
+            Editor
           </a>
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+            className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-background text-muted-foreground transition hover:bg-secondary"
             aria-label={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           >
             {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

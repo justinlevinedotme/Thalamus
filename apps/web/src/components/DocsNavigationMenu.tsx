@@ -3,7 +3,7 @@
  * @description Documentation navigation menu dropdown with grid layout showing doc sections
  */
 
-import { Book, BookOpen, Code, Compass, FileText } from "lucide-react";
+import { BookOpen, Code, Compass, FileText } from "lucide-react";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -84,8 +84,7 @@ export function DocsNavigationMenu() {
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger className="bg-transparent hover:bg-accent data-[state=open]:bg-accent/50">
-            <Book className="mr-1.5 h-4 w-4" />
-            Docs
+            Documentation
           </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
